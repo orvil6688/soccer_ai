@@ -1,0 +1,16 @@
+# === 機密 ===
+.env
+
+# === 資料隔離與追蹤（規格書 v2.0 §1.2 逐字契約）===
+data/test/
+!data/prod/
+data/prod/*.tmp
+
+# === Python ===
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# === 雜項 ===
+*.log

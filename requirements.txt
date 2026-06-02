@@ -1,0 +1,4 @@
+requests
+google-generativeai
+python-dotenv
+# 後期 Phase 再加：scrapling（爬蟲實驗）、xG 數據源 SDK
