@@ -116,7 +116,7 @@
 | **§3.2 快照** | **整段重寫**為上方「六錨點 + 三條規則」 |
 | §3.3 API 契約 | **整塊換掉**：base `api.oddspapi.io/v4`、`?apiKey=`、sportId 10、tournamentId 16、市場名 `Asian Handicap`/`Over Under Full Time`、bookmaker slug `pinnacle`/`1xbet`、250/月、request_count 監控 |
 | §3.5 選注/AI | edge 0.25、字數預算 **不動**；盤口輸入結構描述改 |
-| §3.6 CLV | 收盤=序列開賽前最後一筆（確定性）；CLV 比對用錨點實際時間戳；標注 OddsPapi 原生 `/clv` 待驗 v4 |
+| §3.6 CLV | **自算（v4 無 /clv，總司令 2026-06-04 定）**：CLV =（收盤錨點的線）對比（推薦產出時記錄的線）；收盤錨點沿用六錨點的「收盤」（序列開賽前最後一筆）；時序防呆：推薦產出時間 ≥ 收盤抓取時間 → 該筆標「無 CLV」 |
 | §4 Phase 計畫 | 重排（見 §9）；Phase 4 BDL → 改「Pinnacle vs 1xBet 對盤」 |
 
 ---
@@ -142,10 +142,10 @@
 
 ## 8. 施工特別指令（總司令 2026-06-04）
 
-**A. `/clv` 與 `/settlement` 的 v4 路徑驗證（施工第一步）**：
-這兩個端點目前**只在 v5 docs 見過，v4 未實打**。施工第一步先實打驗證。
-**若 v4 根本沒有這兩個端點 → 立即停工回報總司令，不得自行改方向硬湊。**
-（備案方向由總司令裁示，例如 settlement 改用 fixtures 的 statusName/score、CLV 純由 historical 收盤計算——但須回報後才做。）
+**A. `/clv` 與 `/settlement` 的 v4 路徑驗證（施工第一步）—— 已完成（2026-06-04 實打）**：
+- **`/v4/settlements?fixtureId=…` ✅ 存在**（HTTP 200，回 `{fixtureId, markets:{<marketId>:{outcomes:{<outcomeId>:{players:{0:{result}}}}}}}`；未開打場次 result=`UNDECIDED`）。Phase 2 賽果回填照用。
+- **`/clv` ❌ v4 無此端點**（7 候選路徑全回 404 `The requested endpoint does not exist`）。
+- 裁示：**CLV 自算**（見 §3.6 / §5），不用原生端點。settlement 用 `/v4/settlements` 按 market/outcome 取 result。
 
 **B. CLAUDE.md 事件庫須記一筆**：
 ```
