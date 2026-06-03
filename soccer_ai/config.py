@@ -1,12 +1,10 @@
-"""板塊共用：路徑 / 金鑰 / 常數 / league id / 盤口契約的唯一真實來源。
+"""板塊共用：路徑 / 金鑰 / 常數 / OddsPapi 契約的唯一真實來源。
 
-規格書 v2.0 §3.3「環境、時區與 API 缺口鎖定」逐字落地。
+架構 A（規格書 v2.0 修訂，總司令 2026-06-04）：主資料源 = OddsPapi v4。
 ⚠️ 絕對不動清單：本檔金鑰讀取邏輯。修改需規格書明文解禁。
 
-雙軌金鑰：
-  - 本機：讀取 .env（python-dotenv）
-  - CI（GitHub Actions）：讀 GitHub Secrets 注入的環境變數（不存在 .env）
-金鑰命名以 API_FOOTBALL_KEY 為準（本機 .env 與 CI Secrets 同名）。
+雙軌金鑰：本機讀 .env；CI 讀 GitHub Secrets（同名環境變數）。
+主金鑰命名以 ODDSPAPI_API_KEY 為準。
 """
 from __future__ import annotations
 
@@ -14,55 +12,54 @@ import os
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-# --- .env 載入（CI 無 .env 檔時靜默略過，改讀真實環境變數）---
 try:
     from dotenv import load_dotenv
 
     load_dotenv()
-except ImportError:  # 具名攔截，禁止裸 except
-    # 部署環境未裝 python-dotenv 時不致命，環境變數仍可由 CI 注入
+except ImportError:  # 具名攔截，禁止裸 except；CI 無 dotenv 時改讀真實環境變數
     pass
 
 
 # =========================================================================
-# 一、時區（§3.3 時區轉換陷阱：GH Cron 為 UTC，程式邏輯一律 UTC+8）
+# 一、時區（GH Cron 為 UTC，程式邏輯一律 UTC+8）
 # =========================================================================
 TZ_UTC = timezone.utc
 TZ_LOCAL = timezone(timedelta(hours=8))  # UTC+8 唯一時區基準
 
 
 def now_local() -> datetime:
-    """系統當下時間，一律以 UTC+8 表示（排程比對、壓碼皆用此）。"""
     return datetime.now(TZ_LOCAL)
 
 
 def to_local(dt: datetime) -> datetime:
-    """將任意 datetime 轉為 UTC+8。naive 視為 UTC（API 回傳多為 UTC ISO）。"""
+    """轉 UTC+8。naive 視為 UTC（OddsPapi 回傳多為 UTC ISO）。"""
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=TZ_UTC)
     return dt.astimezone(TZ_LOCAL)
 
 
 def to_utc(dt: datetime) -> datetime:
-    """將任意 datetime 轉為 UTC。naive 視為 UTC+8（本系統內部基準）。"""
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=TZ_LOCAL)
     return dt.astimezone(TZ_UTC)
 
 
+def parse_iso(s: str) -> datetime:
+    """解析 ISO 字串（含 Z 結尾）為帶時區 datetime。"""
+    return datetime.fromisoformat(s.replace("Z", "+00:00"))
+
+
 # =========================================================================
-# 二、金鑰（雙軌，§3.3）
+# 二、金鑰（雙軌）
 # =========================================================================
-API_FOOTBALL_KEY = os.getenv("API_FOOTBALL_KEY", "")
-BALLDONTLIE_API_KEY = os.getenv("BALLDONTLIE_API_KEY", "")
+ODDSPAPI_API_KEY = os.getenv("ODDSPAPI_API_KEY", "")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL", "")
-# 測試模式專用推播頻道（§3.4 推播分流，可空 → 測試模式略過推播）
 DISCORD_TEST_WEBHOOK_URL = os.getenv("DISCORD_TEST_WEBHOOK_URL", "")
 
 
 def require_key(name: str) -> str:
-    """致命前置檢查：金鑰缺失即拋錯中斷（§失敗分流：致命）。"""
+    """致命前置檢查：金鑰缺失即拋錯中斷。"""
     value = os.getenv(name, "")
     if not value:
         raise RuntimeError(f"致命：環境變數 {name} 未設定（本機檢查 .env / CI 檢查 Secrets）")
@@ -70,83 +67,80 @@ def require_key(name: str) -> str:
 
 
 # =========================================================================
-# 三、API-Football 契約（§3.3）
+# 三、OddsPapi v4 契約（實打驗證，見 docs/oddspapi_findings.md）
 # =========================================================================
-API_FOOTBALL_BASE = "https://v3.football.api-sports.io"
-API_FOOTBALL_HOST = "v3.football.api-sports.io"
+ODDSPAPI_BASE = "https://api.oddspapi.io/v4"
+ODDSPAPI_LANG = "en"
 
-WORLD_CUP_LEAGUE_ID = 1  # 世界盃 League ID（API-Football）
-WORLD_CUP_SEASON = 2026  # 2026 世界盃
+SPORT_ID_SOCCER = 10
+WORLD_CUP_TOURNAMENT_ID = 16  # 2026 世界盃正盤（非資格賽/虛擬/青年盃）
 
-# 盤口 Bet ID
-BET_ID_ASIAN_HANDICAP = 4  # 亞洲讓分盤
-BET_ID_OVER_UNDER = 5      # 大小球
+# 市場名稱（對照 /markets 分類；period 取 fulltime）
+MARKET_ASIAN_HANDICAP = "Asian Handicap"   # marketType=spreads，outcome "1"=主 "2"=客
+MARKET_OVER_UNDER = "Over Under Full Time"  # marketType=totals，outcome Over/Under
+MARKET_PERIOD = "fulltime"
 
-# Bookmaker 優先序：Pinnacle, Bet365, 1xBet
-BOOKMAKER_PRIORITY = [4, 8, 41]
-BOOKMAKER_PINNACLE = 4
-BOOKMAKER_1XBET = 41
+# Bookmaker slug（主 + 交叉驗證）
+BOOKMAKER_PRIMARY = "pinnacle"
+BOOKMAKER_SECONDARY = "1xbet"
+BOOKMAKERS = [BOOKMAKER_PRIMARY, BOOKMAKER_SECONDARY]
 
-# 結算口徑：嚴格 90 分鐘（含補時），不含延長賽/PK
+# 結算口徑：嚴格 90 分鐘（fulltime），不含延長/PK
 SETTLEMENT_MINUTES = 90
 
 # =========================================================================
-# 四、Rate Limit 與 API 生存法則（§3.2 / §3.3）
+# 四、額度（OddsPapi 免費層；以 /v4/account 的 request_count 監控）
 # =========================================================================
-API_DAILY_LIMIT = 100          # API-Football 免費層上限 100 次/日
-API_ALERT_THRESHOLD = 95       # 達 95 次：Discord 告警並中止當次執行
-API_SURVIVAL_THRESHOLD = 15    # 剩餘 <= 15 次：生存模式，僅允許收盤窗抓取
+# ⚠️ 假設：historical-odds 不計入此額度（實測觀察，未經官方確認）。
+#    退場條件見 CLAUDE.md 事件庫；若失效須退回 odds-by-tournaments。
+MONTHLY_REQUEST_LIMIT = 250
+REQUEST_ALERT_REMAINING = 25  # 剩餘 <= 此值 → Discord 告警
 
-# =========================================================================
-# 五、三大快照時間窗口（§3.2，以「開賽前剩餘時間」界定）
-# =========================================================================
-# 初盤 (initial)：首次發現賽事擁有盤口即抓，無時間窗（由 storage 狀態判定是否已抓）
-WINDOW_INITIAL = "initial"
-WINDOW_MID = "mid"
-WINDOW_CLOSING = "closing"
-
-# 中段 (mid)：開賽前 T-13h ~ T-11h
-MID_WINDOW_OPEN = timedelta(hours=13)
-MID_WINDOW_CLOSE = timedelta(hours=11)
-
-# 收盤 (closing)：開賽前 T-90m ~ T-45m
-CLOSING_WINDOW_OPEN = timedelta(minutes=90)
-CLOSING_WINDOW_CLOSE = timedelta(minutes=45)
-
-# 初盤掃描地平線（實作層額度防呆，非規格書業務契約；可調）：
-# 僅對「開賽前 <= 此時長」的賽事嘗試抓初盤，避免每跑都掃數週外賽事爆額度。
-INITIAL_SCAN_HORIZON = timedelta(days=14)
+# heavy 端點節流：間隔 + 429 退避
+MIN_REQUEST_INTERVAL_SEC = 1.5
+MAX_RETRY_ON_429 = 3
 
 # =========================================================================
-# 六、選注與 AI 契約（§3.5）
+# 五、六錨點（規格書 §3.2 寫死；不存原始/降採樣序列）
 # =========================================================================
-EDGE_THRESHOLD = 0.25  # Edge 出手門檻（球）
+# initial / closing 由序列位置定義；以下四個為「開賽前 Nh」目標時刻錨點。
+ANCHOR_INITIAL = "initial"
+ANCHOR_CLOSING = "closing"
+ANCHOR_OFFSETS = {  # 錨點名 → kickoff 前的時長（目標時刻 = kickoff - offset）
+    "t24h": timedelta(hours=24),
+    "t12h": timedelta(hours=12),
+    "t6h": timedelta(hours=6),
+    "t1h": timedelta(hours=1),
+}
+# 錨點輸出順序（含位置型）
+ANCHOR_ORDER = [ANCHOR_INITIAL, "t24h", "t12h", "t6h", "t1h", ANCHOR_CLOSING]
 
-# Gemini 文字字數預算（各自獨立截斷，超出以 ... 替換，§3.5）
+# =========================================================================
+# 六、選注與 AI 契約（沿用）
+# =========================================================================
+EDGE_THRESHOLD = 0.25
+
 WORD_BUDGET = {
     "confidence_reasoning": 50,
     "injury_impact": 100,
     "market_reading": 150,
 }
-
-AI_TAG = "🤖 AI 推論"  # 強制壓上於所有 Gemini 產出
+AI_TAG = "🤖 AI 推論"
 
 # =========================================================================
-# 七、路徑與 TEST_MODE 隔離（§3.4）
+# 七、路徑與 TEST_MODE 隔離（沿用）
 # =========================================================================
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = Path(os.getenv("DATA_DIR", str(_PROJECT_ROOT / "data")))
 
 PROD_SUBDIR = "prod"
 TEST_SUBDIR = "test"
-TEST_TAG = "🧪"  # 測試產出視覺標記
+TEST_TAG = "🧪"
 
-# TEST_MODE 由 .env 決定預設值，可由 main.py 的 --test 旗標於執行期覆寫
 _test_mode = os.getenv("TEST_MODE", "true").strip().lower() in ("1", "true", "yes")
 
 
 def set_test_mode(enabled: bool) -> None:
-    """執行期覆寫測試模式（main.py 解析 --test 旗標後呼叫）。"""
     global _test_mode
     _test_mode = bool(enabled)
 
@@ -156,12 +150,7 @@ def is_test_mode() -> bool:
 
 
 def data_dir() -> Path:
-    """依當前 TEST_MODE 回傳資料根目錄。
-
-    test → data/test/（完全 Git 忽略）
-    prod → data/prod/（git commit 追蹤）
-    每次呼叫即時反映 set_test_mode，故讀寫一律經此函式取得路徑。
-    """
+    """依當前 TEST_MODE 回傳資料根目錄（test→data/test、prod→data/prod）。"""
     sub = TEST_SUBDIR if _test_mode else PROD_SUBDIR
     path = DATA_DIR / sub
     path.mkdir(parents=True, exist_ok=True)
