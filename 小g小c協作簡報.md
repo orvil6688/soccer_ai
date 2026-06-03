@@ -1,6 +1,6 @@
-# 小 g / 小 c 協作簡報 — 世界盃足球盤口分析系統（專案專屬版 v2.0-phase1）
+# 小 g / 小 c 協作簡報 — 世界盃足球盤口分析系統（專案專屬版 v2.0-phase1A）
 
-> ✅ **規格書 v2.0 終極定案，Phase 1 已由小cc 完工**：原「🔜 待規格書回填」項已落地（見下）。
+> ✅ **架構 A（OddsPapi 主源）已由小cc 完工**：主源從 API-Football 改 OddsPapi v4、三窗口改六錨點。實測存證 `docs/oddspapi_findings.md`、修訂 `docs/arch_A_proposal.md`。
 > 🔗 **同步紀律**：本檔與 `CLAUDE.md` 為一組記憶中樞。**任一更新，另一份必須同步檢查**，否則兩份會講不一樣的話。CLAUDE.md 更新時由小cc 一併更新本檔。
 > 開小g / 小c 對話時整份貼上以恢復系統記憶與協作紀律。
 
@@ -47,19 +47,21 @@
 
 **世界盃足球盤口分析系統**：掃世界盃賽事 → 賽前三錨點抓讓分/大小球「初盤→收盤」快照 → 找與莊家的定價歧見 → AI 出精選推薦 → 存歷史 → 隔日回填賽果回測。本質是「找莊家定價歧見」的博弈系統，非預測比分。
 
+> 架構 A（2026-06-04）：主源改 OddsPapi，三錨點 → **六錨點**，三窗口排程 → historical 賽前即時走勢。
+
 ```
-板塊一：核心抓取   api_client.py（API-Football 主）/ bdl_client.py（BALLDONTLIE 備）
-板塊二：資料處理   odds_parser.py / snapshot.py（三錨點·核心）/ storage.py
+板塊一：核心抓取   oddspapi_client.py（OddsPapi v4 主）｜_legacy/（API-Football/BDL 封存）
+板塊二：資料處理   odds_parser.py（market_map+主盤線）/ movement.py（六錨點·核心）/ storage.py
 板塊三：分析輸出   selector.py（選注引擎）/ analyzer.py（Gemini）/ notifier.py（DC 推播）/ web_builder.py（靜態網頁）
-板塊四：流程編排   backtest.py（賽果回填）/ main.py
-排程/部署          .github/workflows/（Actions）/ docs/（GitHub Pages）
+板塊四：流程編排   backtest.py（settlements 回填）/ main.py
+排程/部署          .github/workflows/（Actions 每小時）/ docs/（GitHub Pages）
 後期實驗          scrapers/titan007.py
 ```
 
-失敗分流：致命（金鑰缺/額度盡）→發警報→中斷；部分（單場錯/BDL 對不上/推播失敗）→發警報→不阻斷。
+失敗分流：致命（金鑰缺）→中斷；部分（單場錯/盤口對不上/推播失敗）→發警報→不阻斷。
 
-- **GitHub**：🔜 待建 repo 後填
-- **部署**：GitHub Actions（排程）+ GitHub Pages（靜態網頁查看）+ Discord（推播）
+- **GitHub**：https://github.com/orvil6688/soccer_ai
+- **部署**：GitHub Actions（每小時排程）+ GitHub Pages（靜態網頁查看）+ Discord（推播）
 
 ---
 
@@ -79,20 +81,22 @@ edge_threshold = 0.25 球（起點，待回測）
 ### 結算口徑（絕對紀律）
 所有讓分/大小球一律 90 分鐘（含傷停）結算，延長賽與 PK 不計。
 
-### 其他契約（v2.0 定案）
-- 主鍵：✅ 數字 `fixture_id`（API-Football 原生，禁用隊名縮寫）
-- League ID=1 / Season=2026；Bet ID 讓分=4 大小球=5；Bookmaker 優先序 [4,8,41]
-- Rate Limit 100/日（達 95 告警中止）；生存法則：剩餘 ≤15 僅抓收盤
-- 三窗口：初盤(首見即抓)／中段 T-13h~11h／收盤 T-90m~45m
+### 其他契約（v2.0 架構 A）
+- 主鍵：✅ 字串 `fixtureId`（OddsPapi 原生，禁用隊名縮寫）
+- OddsPapi v4：sportId=10 / tournamentId=16；市場 `Asian Handicap`/`Over Under Full Time`(fulltime)；bookmaker slug `pinnacle`/`1xbet`
+- 額度 250/月，`/v4/account` request_count 監控（不計額度）；剩餘 ≤25 告警。⚠️ historical 不計額度為未確認假設，失效退回 odds-by-tournaments
+- **六錨點**：initial／t24h／t12h／t6h／t1h／closing；三規則：取最接近+存時間戳／收盤≠t1h／區間外標 null
+- CLV 自算（v4 無 /clv）：收盤錨點線 vs 推薦產出線；產出時間≥收盤抓取→無 CLV
 - 字數預算：confidence_reasoning 50／injury_impact 100／market_reading 150（各自獨立截斷）
-- 防呆：讀 API 陣列前 isinstance；賠率欄位回傳固定 (str, float)
+- 防呆：讀外部陣列/字典前 isinstance；賠率/線回傳固定 float
 
 ---
 
 ## 七、環境變數
 
 本機 `.env`（gitignored）／CI 用 GitHub Secrets，雙軌：
-`API_FOOTBALL_KEY`、`BALLDONTLIE_API_KEY`、`GEMINI_API_KEY`、`DISCORD_WEBHOOK_URL`、`DATA_DIR`、`TEST_MODE`。
+`ODDSPAPI_API_KEY`、`GEMINI_API_KEY`、`DISCORD_WEBHOOK_URL`、`DATA_DIR`、`TEST_MODE`。
+（API-Football / BALLDONTLIE 金鑰已停用。）
 
 > ⚠️ 原 Colab 版金鑰已外洩，總司令須重置作廢。
 
@@ -114,24 +118,26 @@ edge_threshold = 0.25 球（起點，待回測）
 
 1. **原 Colab 路徑不一致**：建 A 資料夾寫 B → crash。教訓：路徑常數集中 config，建立與寫入共用同一變數。
 2. **原 Colab Gemini 從未呼叫**：prompt 組好漏 generate_content → AI 空轉。教訓：規格須明列每模組「實際呼叫點」。
-3. **GitHub Actions 排程不可信賴**：延遲/跳過/無告警 → 天真排精確時間點抓收盤會報廢。教訓：高頻檢查 + 窗口容錯，不依賴準時。
+3. **GitHub Actions 排程不可信賴**：延遲/跳過/無告警 → 天真排精確時間點抓收盤會報廢。教訓：高頻檢查 + 容錯，不依賴準時。
+4. **API-Football 免費層拿不到 2026 賽季**（僅 2022–2024）→ 🔒#5 改 OddsPapi、🔒#6（BDL 無世界盃）作廢。教訓：資料源對「目標賽季/賽事」實打驗證，別只看文件。
+5. **OddsPapi historical 不計額度為未確認假設**：架構 A 依賴之；失效須退回 odds-by-tournaments。教訓：未確認的有利觀察當支柱時須明列假設與退場路徑。
 
 ---
 
 ## 十、目前狀態
 
-- **最新版本**：v2.0-phase1（2026-06-02，Phase 1 完工 + 契約回填）
-- **核心架構**：API-Football 主 + BALLDONTLIE 備，三窗口快照 → 選注 → 回測，Actions + Pages + DC
-- **Phase 1 完成**：git init / config / api_client / odds_parser / snapshot / storage / main / main_pipeline.yml，離線煙霧測試全綠
-- **下一步**：Phase 2 — backtest 賽果回填 + CLV 防呆 + 命中率
-- **待總司令**：建 GitHub remote 推送、repo Secrets 設 API_FOOTBALL_KEY（舊金鑰作廢）
+- **最新版本**：v2.0-phase1A（2026-06-04，架構 A：OddsPapi 主源 + 六錨點，Phase 1 重作完工）
+- **核心架構**：OddsPapi v4 主源，historical 賽前即時走勢 → 六錨點 → 選注 → settlements 回測，Actions(每小時) + Pages + DC
+- **Phase 1A 完成**（5 commit）：封存舊模組 / config / oddspapi_client / odds_parser / movement / storage / main / yml；離線+真打 E2E 全綠（真抓 104 場、初盤→收盤走勢正確）
+- **下一步**：Phase 2 — backtest `/v4/settlements` 賽果回填 + CLV 自算 + 命中率
+- **待總司令**：repo Secrets 設 `ODDSPAPI_API_KEY`；（建議）寄信 OddsPapi 確認 historical 不計額度
 
 ---
 
 ## 十一、絕對不動清單（除非規格書明文解禁）
 
-`config.py` 金鑰讀取、`storage.py` 歷史檔寫入格式、已上線快照排程錨點邏輯、`.env`、`.gitattributes`。
+`config.py` 金鑰讀取、`storage.py` 寫入格式（prod 上線後即契約；現未上線可改）、已上線走勢/錨點邏輯、`.env`、`.gitattributes`。
 
 ---
 
-**本檔版本**：v2.0-phase1｜由通用範本 v1.0 轉本專案專屬｜建立 2026-06-02｜Phase 1 完工同步
+**本檔版本**：v2.0-phase1A｜由通用範本 v1.0 轉本專案專屬｜建立 2026-06-02｜架構 A 改版同步 2026-06-04
