@@ -1,180 +1,191 @@
-"""板塊二：盤口解析。
+"""板塊二：OddsPapi 盤口解析（架構 A）。
 
-職責：把 API-Football /odds 原始 JSON 解析成「型別固定」的乾淨結構。
-契約 D（isinstance 防禦）：讀任何外部 API 陣列前一律 isinstance 檢查。
-回傳型固定：盤口線與賠率一律 float，名稱一律 str；無法取得回 None。
+職責：
+  1. 把 /markets 原始清單壓成精簡對照表（marketId → 名稱/讓分線/型別/outcome 對映），
+     僅留 Asian Handicap 與 Over Under Full Time 的 fulltime 市場。
+  2. 把「單一時間點」的盤口（current 或 historical 切片）解析成型別固定的主盤線結構。
 
-API-Football /odds 結構（節錄）：
-  response[].bookmakers[].bets[].values[] = {"value": "Home -0.5", "odd": "1.90"}
+契約 D：讀外部陣列/字典前一律 isinstance。回傳型固定：線值與賠率 float、無則 None。
+盤口模型：AH(spreads) outcome "1"=主 "2"=客；OU(totals) outcome Over/Under。
 """
 from __future__ import annotations
 
-from typing import Optional
+from datetime import datetime
+from typing import Callable, Optional
 
 from . import config
 
+# 單一 outcome → (price, timestamp_iso)。current 與 historical 各自提供不同實作。
+PriceFn = Callable[[dict], "tuple[Optional[float], Optional[str]]"]
 
-def _to_float(raw: object) -> Optional[float]:
-    """安全轉 float；支援亞洲盤分盤線 '-0.25/-0.5'（取平均）。失敗回 None。"""
-    if isinstance(raw, (int, float)):
-        return float(raw)
-    if not isinstance(raw, str):
-        return None
-    s = raw.strip()
-    if not s:
-        return None
-    if "/" in s:  # 分盤線（split line）
-        parts = s.split("/")
-        nums = []
-        for p in parts:
+
+# =========================================================================
+# 市場對照表
+# =========================================================================
+def build_market_map(raw_markets: list) -> dict:
+    """raw /markets → {marketId(int): {name,handicap,type,period,outcomes:{outcomeId:name}}}。
+
+    僅保留 Asian Handicap / Over Under Full Time 的 fulltime 市場。
+    """
+    out: dict[int, dict] = {}
+    if not isinstance(raw_markets, list):
+        return out
+    keep = {config.MARKET_ASIAN_HANDICAP, config.MARKET_OVER_UNDER}
+    for m in raw_markets:
+        if not isinstance(m, dict):
+            continue
+        name = m.get("marketName")
+        if name not in keep or m.get("period") != config.MARKET_PERIOD:
+            continue
+        mid = m.get("marketId")
+        handicap = m.get("handicap")
+        if not isinstance(mid, int) or not isinstance(handicap, (int, float)):
+            continue
+        outcomes = {}
+        for o in m.get("outcomes", []) if isinstance(m.get("outcomes"), list) else []:
+            if isinstance(o, dict) and isinstance(o.get("outcomeId"), int):
+                # outcome 鍵一律存字串：JSON 往返後鍵必為字串，統一避免 int/str 查找不一致
+                outcomes[str(o["outcomeId"])] = str(o.get("outcomeName", ""))
+        out[mid] = {
+            "name": name,
+            "handicap": float(handicap),
+            "type": m.get("marketType"),  # "spreads" | "totals"
+            "period": m.get("period"),
+            "outcomes": outcomes,
+        }
+    return out
+
+
+# =========================================================================
+# PriceFn 實作
+# =========================================================================
+def current_price_fn(outcome: dict) -> "tuple[Optional[float], Optional[str]]":
+    """odds-by-tournaments：單一現值。"""
+    p = outcome.get("players", {}).get("0") if isinstance(outcome.get("players"), dict) else None
+    if not isinstance(p, dict):
+        return (None, None)
+    price = p.get("price")
+    ts = p.get("changedAt") or p.get("bookmakerChangedAt")
+    return (float(price) if isinstance(price, (int, float)) else None, ts)
+
+
+def make_historical_price_fn(target: datetime) -> PriceFn:
+    """historical：在 outcome 的時間序列中取「最接近 target」的一筆（§3.2 規則 1）。"""
+
+    def fn(outcome: dict) -> "tuple[Optional[float], Optional[str]]":
+        series = outcome.get("players", {}).get("0") if isinstance(outcome.get("players"), dict) else None
+        if not isinstance(series, list):
+            return (None, None)
+        best: Optional[tuple[float, str]] = None
+        best_diff: Optional[float] = None
+        for pt in series:
+            if not isinstance(pt, dict):
+                continue
+            price, cts = pt.get("price"), pt.get("createdAt")
+            if not isinstance(price, (int, float)) or not isinstance(cts, str):
+                continue
             try:
-                nums.append(float(p.strip()))
+                diff = abs((config.parse_iso(cts) - target).total_seconds())
             except ValueError:
-                return None
-        return sum(nums) / len(nums) if nums else None
-    try:
-        return float(s)
-    except ValueError:
-        return None
+                continue
+            if best_diff is None or diff < best_diff:
+                best_diff, best = diff, (float(price), cts)
+        return best if best else (None, None)
+
+    return fn
 
 
-def _select_bookmaker(bookmakers: object, priority: list[int]) -> Optional[dict]:
-    """依優先序挑第一個存在的 bookmaker。"""
-    if not isinstance(bookmakers, list):
-        return None
-    by_id: dict[int, dict] = {}
-    for bm in bookmakers:
-        if isinstance(bm, dict) and isinstance(bm.get("id"), int):
-            by_id[bm["id"]] = bm
-    for pref in priority:
-        if pref in by_id:
-            return by_id[pref]
-    return None
+# =========================================================================
+# 時間跨度（供 movement 判定 initial/closing/null）
+# =========================================================================
+def collect_timestamps(markets: dict, market_map: dict) -> list[datetime]:
+    """蒐集 AH/OU fulltime outcome 的所有 historical 時間點（排序）。"""
+    out: list[datetime] = []
+    if not isinstance(markets, dict):
+        return out
+    for mid_str, mobj in markets.items():
+        meta = market_map.get(_to_int(mid_str))
+        if not meta or not isinstance(mobj, dict):
+            continue
+        outcomes = mobj.get("outcomes")
+        if not isinstance(outcomes, dict):
+            continue
+        for oobj in outcomes.values():
+            series = oobj.get("players", {}).get("0") if isinstance(oobj, dict) and isinstance(oobj.get("players"), dict) else None
+            if not isinstance(series, list):
+                continue
+            for pt in series:
+                if isinstance(pt, dict) and isinstance(pt.get("createdAt"), str):
+                    try:
+                        out.append(config.parse_iso(pt["createdAt"]))
+                    except ValueError:
+                        pass
+    out.sort()
+    return out
 
 
-def _find_bet(bookmaker: dict, bet_id: int) -> Optional[dict]:
-    bets = bookmaker.get("bets")
-    if not isinstance(bets, list):
-        return None
-    for bet in bets:
-        if isinstance(bet, dict) and bet.get("id") == bet_id:
-            return bet
-    return None
+# =========================================================================
+# 解析單一時間點 → 主盤線
+# =========================================================================
+def parse_point(markets: dict, market_map: dict, price_fn: PriceFn) -> dict:
+    """回 {'handicap':{line,home_odd,away_odd,captured_ts}|None, 'over_under':{line,over_odd,under_odd,captured_ts}|None}。
 
-
-def _iter_values(bet: dict):
-    values = bet.get("values")
-    if not isinstance(values, list):
-        return
-    for v in values:
-        if isinstance(v, dict):
-            yield v
-
-
-def parse_handicap(bookmaker: dict) -> Optional[dict]:
-    """解析亞洲讓分盤（bet id 4）→ 主盤線（home/away 賠率最接近者）。
-
-    回傳 {"line": float, "home_odd": float, "away_odd": float} 或 None。
-    line 以 Home 視角（負值=主隊讓盤）。
+    主盤線 = home/away（或 over/under）賠率最接近者（莊家主推線）。
     """
-    bet = _find_bet(bookmaker, config.BET_ID_ASIAN_HANDICAP)
-    if bet is None:
-        return None
+    ah: dict[float, dict] = {}
+    ou: dict[float, dict] = {}
+    if not isinstance(markets, dict):
+        return {"handicap": None, "over_under": None}
 
-    # line(以 Home 視角) → {"home": odd, "away": odd}
-    lines: dict[float, dict] = {}
-    for v in _iter_values(bet):
-        value_str = v.get("value")
-        odd = _to_float(v.get("odd"))
-        if not isinstance(value_str, str) or odd is None:
+    for mid_str, mobj in markets.items():
+        meta = market_map.get(_to_int(mid_str))
+        if not meta or not isinstance(mobj, dict):
             continue
-        tokens = value_str.split()
-        if len(tokens) < 2:
+        outcomes = mobj.get("outcomes")
+        if not isinstance(outcomes, dict):
             continue
-        side = tokens[0].lower()
-        line_val = _to_float(tokens[-1])
-        if line_val is None:
-            continue
-        # 統一成 Home 視角的盤口線
-        home_line = line_val if side.startswith("home") else -line_val
-        slot = lines.setdefault(home_line, {})
-        slot["home" if side.startswith("home") else "away"] = odd
+        for oid_str, oobj in outcomes.items():
+            if not isinstance(oobj, dict):
+                continue
+            side = meta["outcomes"].get(str(oid_str))  # outcomes 鍵為字串
+            if side is None:
+                continue
+            price, ts = price_fn(oobj)
+            if price is None:
+                continue
+            line = meta["handicap"]
+            if meta["type"] == "spreads":
+                slot = ah.setdefault(line, {})
+                if side == "1":
+                    slot["home"] = (price, ts)
+                elif side == "2":
+                    slot["away"] = (price, ts)
+            elif meta["type"] == "totals":
+                slot = ou.setdefault(line, {})
+                if side.lower() == "over":
+                    slot["over"] = (price, ts)
+                elif side.lower() == "under":
+                    slot["under"] = (price, ts)
 
-    candidates = [
-        (ln, d["home"], d["away"])
-        for ln, d in lines.items()
-        if "home" in d and "away" in d
-    ]
-    if not candidates:
-        return None
-    # 主盤線：home/away 賠率最接近（莊家主推線）
-    line, home_odd, away_odd = min(candidates, key=lambda c: abs(c[1] - c[2]))
-    return {"line": float(line), "home_odd": float(home_odd), "away_odd": float(away_odd)}
-
-
-def parse_over_under(bookmaker: dict) -> Optional[dict]:
-    """解析大小球（bet id 5）→ 主盤線（over/under 賠率最接近者）。
-
-    回傳 {"line": float, "over_odd": float, "under_odd": float} 或 None。
-    """
-    bet = _find_bet(bookmaker, config.BET_ID_OVER_UNDER)
-    if bet is None:
-        return None
-
-    lines: dict[float, dict] = {}
-    for v in _iter_values(bet):
-        value_str = v.get("value")
-        odd = _to_float(v.get("odd"))
-        if not isinstance(value_str, str) or odd is None:
-            continue
-        tokens = value_str.split()
-        if len(tokens) < 2:
-            continue
-        side = tokens[0].lower()
-        line_val = _to_float(tokens[-1])
-        if line_val is None:
-            continue
-        slot = lines.setdefault(line_val, {})
-        if side.startswith("over"):
-            slot["over"] = odd
-        elif side.startswith("under"):
-            slot["under"] = odd
-
-    candidates = [
-        (ln, d["over"], d["under"])
-        for ln, d in lines.items()
-        if "over" in d and "under" in d
-    ]
-    if not candidates:
-        return None
-    line, over_odd, under_odd = min(candidates, key=lambda c: abs(c[1] - c[2]))
-    return {"line": float(line), "over_odd": float(over_odd), "under_odd": float(under_odd)}
-
-
-def parse_odds_snapshot(odds_response: object, captured_at_local: str) -> Optional[dict]:
-    """把單場 /odds 回應解析為一筆窗口快照 payload。
-
-    odds_response：API-Football /odds 的 response 陣列（單場通常 1 元素）。
-    回傳：
-      {"captured_at_local": str, "source_bookmaker": int,
-       "source_bookmaker_name": str, "handicap": {...}|None, "over_under": {...}|None}
-    若連 bookmaker 都取不到，回 None（視為本窗無有效盤口）。
-    """
-    if not isinstance(odds_response, list) or not odds_response:
-        return None
-    first = odds_response[0]
-    if not isinstance(first, dict):
-        return None
-
-    bookmaker = _select_bookmaker(first.get("bookmakers"), config.BOOKMAKER_PRIORITY)
-    if bookmaker is None:
-        return None
-
-    name = bookmaker.get("name")
     return {
-        "captured_at_local": captured_at_local,
-        "source_bookmaker": int(bookmaker.get("id")),
-        "source_bookmaker_name": str(name) if isinstance(name, str) else "",
-        "handicap": parse_handicap(bookmaker),
-        "over_under": parse_over_under(bookmaker),
+        "handicap": _select_balanced(ah, "home", "away", "home_odd", "away_odd"),
+        "over_under": _select_balanced(ou, "over", "under", "over_odd", "under_odd"),
     }
+
+
+def _select_balanced(lines: dict, k1: str, k2: str, out1: str, out2: str) -> Optional[dict]:
+    cands = [
+        (ln, d[k1], d[k2]) for ln, d in lines.items() if k1 in d and k2 in d
+    ]
+    if not cands:
+        return None
+    line, a, b = min(cands, key=lambda c: abs(c[1][0] - c[2][0]))  # 賠率最接近
+    ts = max(t for t in (a[1], b[1]) if t) if (a[1] or b[1]) else None
+    return {"line": float(line), out1: float(a[0]), out2: float(b[0]), "captured_ts": ts}
+
+
+def _to_int(x) -> Optional[int]:
+    try:
+        return int(x)
+    except (TypeError, ValueError):
+        return None
