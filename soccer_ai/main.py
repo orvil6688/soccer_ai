@@ -1,12 +1,11 @@
-"""板塊四：主流程編排 + 失敗分流。
+"""板塊四：主流程編排 + 失敗分流（架構 A：OddsPapi 主源）。
 
-失敗分流雙軌（§1.2 / CLAUDE.md）：
-  - 致命失敗（金鑰缺 / 額度盡）→ 記錄後中斷（exit 1）。
-  - 部分失敗（單場錯 / 盤口對不上）→ 已於下游 log，不阻斷。
+失敗分流雙軌：
+  - 致命（金鑰缺）→ 記錄後中斷（exit 1）。
+  - 部分（單場錯/盤口對不上）→ 下游 log，不阻斷。
 
-Phase 1 範圍：三窗口快照掃描。
-Phase 2：D+1 賽果回填（backtest）。Phase 3：selector/analyzer/Discord 推播。
-（下列分支以明確 TODO 標記預留，禁止裸 pass 吞掉流程。）
+Phase 1（架構 A）：走勢拉取 + 六錨點推導。
+Phase 2：D+1 賽果回填（/v4/settlements）+ CLV 自算。Phase 3：selector/analyzer/Discord。
 """
 from __future__ import annotations
 
@@ -14,7 +13,7 @@ import argparse
 import logging
 import sys
 
-from . import api_client, config, snapshot
+from . import config, movement, oddspapi_client
 
 
 def _setup_logging() -> None:
@@ -27,14 +26,15 @@ def _setup_logging() -> None:
 
 
 def _parse_args(argv=None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="世界盃盤口分析系統 主流程")
+    parser = argparse.ArgumentParser(description="世界盃盤口分析系統 主流程（OddsPapi）")
+    parser.add_argument("--test", action="store_true", help="測試模式：讀寫 data/test/、產出壓 🧪")
     parser.add_argument(
-        "--test", action="store_true",
-        help="測試模式：讀寫重定向至 data/test/，產出壓 🧪 標記",
+        "--mode", choices=["movement", "backtest"], default="movement",
+        help="movement=走勢拉取+六錨點（Phase 1）；backtest=賽果回填+CLV（Phase 2）",
     )
     parser.add_argument(
-        "--mode", choices=["snapshot", "backtest"], default="snapshot",
-        help="snapshot=三窗口快照掃描（Phase 1）；backtest=D+1 賽果回填（Phase 2）",
+        "--bookmaker", default=config.BOOKMAKER_PRIMARY,
+        help=f"主抓 bookmaker（預設 {config.BOOKMAKER_PRIMARY}）",
     )
     return parser.parse_args(argv)
 
@@ -49,26 +49,26 @@ def main(argv=None) -> int:
 
     # --- 致命前置：金鑰缺失即中斷 ---
     try:
-        config.require_key("API_FOOTBALL_KEY")
+        config.require_key("ODDSPAPI_API_KEY")
     except RuntimeError as e:
         log.error("致命中斷：%s", e)
         return 1
 
-    # --- 取當前額度（供生存法則判定）---
-    status = api_client.get_status()
-    if status is None:
-        log.warning("無法取得 API 用量狀態，依回應標頭動態判定額度")
+    # --- 額度狀態（不計額度的 /account）---
+    acct = oddspapi_client.get_account()
+    if acct is None:
+        log.warning("無法取得 OddsPapi 用量狀態")
     else:
-        log.info("API 用量：已用 %d / 上限 %d（剩餘 %d）", status["used"], status["limit"], status["remaining"])
-        if api_client.quota_exhausted():
-            log.error("致命中斷：API 額度已達告警門檻（剩餘 %d）", status["remaining"])
-            return 1
+        log.info("OddsPapi 用量：已用 %d / 上限 %d（剩餘 %d, plan=%s）",
+                 acct["request_count"], acct["request_limit"], acct["remaining"], acct["plan"])
+        if acct["remaining"] <= config.REQUEST_ALERT_REMAINING:
+            log.warning("額度告急：剩餘 %d（門檻 %d）", acct["remaining"], config.REQUEST_ALERT_REMAINING)
 
-    if args.mode == "snapshot":
-        stats = snapshot.run_snapshot_scan()
-        log.info("快照完成：%s", {k: v for k, v in stats.items() if k != "details"})
+    if args.mode == "movement":
+        stats = movement.scan(bookmaker=args.bookmaker)
+        log.info("走勢完成：%s", stats)
     elif args.mode == "backtest":
-        # TODO(Phase 2): 接 backtest.run_backfill() — D+1 抓前日 90min 賽果 + CLV 命中率
+        # TODO(Phase 2): backtest.run_backfill() — /v4/settlements 取賽果 + CLV 自算
         log.error("backtest 模式尚未實作（Phase 2），本次不執行")
         return 1
 

@@ -1,25 +1,26 @@
 name: main_pipeline
 
-# §3.2 GitHub Actions Cron 每 15 分鐘（接受 GitHub 延遲特性）；內部為 UTC，
-# 程式邏輯一律轉 UTC+8。跑完將 data/prod/ 變更 commit & push 回 Repo（狀態持久化）。
+# 架構 A（OddsPapi）：historical 為賽前即時走勢，不需 15 分搶窗。
+# Cron 每小時（接受 GitHub 延遲）；內部 UTC，程式邏輯轉 UTC+8。
+# 跑完將 data/prod/ 變更 commit & push 回 Repo（狀態持久化）。
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "0 * * * *"
   workflow_dispatch: {}   # 允許手動觸發
 
 permissions:
-  contents: write          # 需寫回 repo（commit & push 快照）
+  contents: write          # 需寫回 repo（commit & push 走勢/錨點）
 
 concurrency:
   group: main_pipeline     # 避免兩次排程同時 push 衝突
   cancel-in-progress: false
 
 jobs:
-  snapshot:
+  movement:
     runs-on: ubuntu-latest
     env:
       # 雙軌金鑰：CI 讀 GitHub Secrets（命名與本機 .env 同名）
-      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+      ODDSPAPI_API_KEY: ${{ secrets.ODDSPAPI_API_KEY }}
       DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
       TEST_MODE: "false"   # CI 為正式環境，寫 data/prod/
     steps:
@@ -34,17 +35,17 @@ jobs:
       - name: Install deps
         run: pip install -r requirements.txt
 
-      - name: Run snapshot scan
-        run: python -m soccer_ai.main --mode snapshot
+      - name: Run movement scan
+        run: python -m soccer_ai.main --mode movement
 
-      - name: Commit & push snapshots
+      - name: Commit & push movements
         run: |
           git config user.name  "soccer-ai-bot"
           git config user.email "soccer-ai-bot@users.noreply.github.com"
           git add data/prod/
           if git diff --cached --quiet; then
-            echo "無快照變更，略過 commit"
+            echo "無走勢變更，略過 commit"
           else
-            git commit -m "data(snapshot): auto-capture $(date -u +'%Y-%m-%dT%H:%MZ')"
+            git commit -m "data(movement): auto-capture $(date -u +'%Y-%m-%dT%H:%MZ')"
             git push
           fi
