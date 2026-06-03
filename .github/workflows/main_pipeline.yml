@@ -24,10 +24,10 @@ jobs:
       TEST_MODE: "false"   # CI 為正式環境，寫 data/prod/
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6   # node24（GitHub 自 2026/6/16 起強制）
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
