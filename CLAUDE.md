@@ -80,13 +80,15 @@
 ## 四、環境變數
 
 `.env`（gitignored，已建 `.env.example`）：
-- `API_FOOTBALL_KEY` — 主資料源
-- `BALLDONTLIE_API_KEY` — 備援交叉驗證
+- `ODDSPAPI_API_KEY` — 主資料源（OddsPapi v4）
 - `GEMINI_API_KEY` — AI 分析
+- `DISCORD_WEBHOOK_URL` / `DISCORD_TEST_WEBHOOK_URL` — 推播
 - `DATA_DIR` — 資料輸出目錄
 - `TEST_MODE` — 測試隔離開關
 
 > ⚠️ 原 Colab 版金鑰已外洩，總司令須至各後台重置作廢。
+> 架構 A：`API_FOOTBALL_KEY` / `BALLDONTLIE_API_KEY` 已停用（舊實作見 `soccer_ai/_legacy/`）。
+> CI Secret 名稱須與此一致＝`ODDSPAPI_API_KEY`。
 
 ---
 
