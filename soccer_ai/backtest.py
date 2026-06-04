@@ -14,9 +14,10 @@
 from __future__ import annotations
 
 import logging
+from datetime import timedelta
 from typing import Optional
 
-from . import config, oddspapi_client
+from . import config, movement, oddspapi_client, storage
 
 logger = logging.getLogger(__name__)
 
@@ -179,6 +180,67 @@ def compute_clv(rec: dict, market_map: dict, bookmaker: str = config.BOOKMAKER_P
         "clv_pct": None if no_clv else round(prod_odds / close_odds - 1.0, 4),
         "no_clv": no_clv,
     }
+
+
+# =========================================================================
+# 命中率 / 單位損益 / CLV 彙總
+# =========================================================================
+_DECIDED = ("WIN", "HALFWIN", "PUSH", "HALFLOSS", "LOSE")
+_WIN_WEIGHT = {"WIN": 1.0, "HALFWIN": 0.5}
+_LOSE_WEIGHT = {"LOSE": 1.0, "HALFLOSS": 0.5}
+
+
+def compute_metrics(recs: list) -> dict:
+    """彙總命中率、單位損益、ROI、CLV 統計。命中率 PUSH 不計入分母，半贏半輸計 0.5。"""
+    decided = [r for r in recs if r.get("settled") and r.get("result") in _DECIDED]
+    w = sum(_WIN_WEIGHT.get(r["result"], 0.0) for r in decided)
+    l = sum(_LOSE_WEIGHT.get(r["result"], 0.0) for r in decided)
+    staked = sum(float(r.get("stake_units", 1)) for r in decided)
+    units = sum(float(r.get("pnl_units", 0.0)) for r in decided)
+    clvs = [
+        r["clv"]["clv_pct"] for r in recs
+        if isinstance(r.get("clv"), dict) and r["clv"].get("clv_pct") is not None
+    ]
+    return {
+        "total": len(recs),
+        "decided": len(decided),
+        "hit_rate": round(w / (w + l), 4) if (w + l) > 0 else None,
+        "units": round(units, 4),
+        "roi": round(units / staked, 4) if staked > 0 else None,
+        "avg_clv_pct": round(sum(clvs) / len(clvs), 4) if clvs else None,
+        "beat_close_rate": round(sum(1 for c in clvs if c > 0) / len(clvs), 4) if clvs else None,
+        "breakdown": {res: sum(1 for r in decided if r["result"] == res) for res in _DECIDED},
+    }
+
+
+def run_backfill(date_local: Optional[str] = None, bookmaker: str = config.BOOKMAKER_PRIMARY) -> dict:
+    """回填某日推薦的賽果 + CLV，存回並回彙總。預設前一日（UTC+8，§回測隔日回填）。"""
+    if date_local is None:
+        date_local = (config.now_local() - timedelta(days=1)).strftime("%Y-%m-%d")
+    recs = storage.load_recommendations(date_local)
+    if not recs:
+        logger.info("回測：%s 無推薦記錄", date_local)
+        return {"date": date_local, "total": 0}
+
+    market_map = movement.ensure_market_map()
+    if not market_map:
+        logger.error("回測：市場對照表為空，無法結算")
+        return {"date": date_local, "total": len(recs), "error": "no_market_map"}
+
+    for r in recs:
+        settle_recommendation(r, market_map)
+        clv = compute_clv(r, market_map, bookmaker)
+        r["clv"] = clv if clv is not None else "無 CLV（資料不足）"
+    storage.save_recommendations(recs, date_local)
+
+    m = compute_metrics(recs)
+    m["date"] = date_local
+    logger.info(
+        "回測 %s：命中率 %s / 單位 %s / ROI %s / 平均CLV %s / 擊敗收盤率 %s（已結算 %d/%d）",
+        date_local, m["hit_rate"], m["units"], m["roi"], m["avg_clv_pct"],
+        m["beat_close_rate"], m["decided"], m["total"],
+    )
+    return m
 
 
 def _to_int(x) -> Optional[int]:

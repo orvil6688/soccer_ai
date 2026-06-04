@@ -13,7 +13,7 @@ import argparse
 import logging
 import sys
 
-from . import config, movement, oddspapi_client
+from . import backtest, config, movement, oddspapi_client
 
 
 def _setup_logging() -> None:
@@ -35,6 +35,10 @@ def _parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument(
         "--bookmaker", default=config.BOOKMAKER_PRIMARY,
         help=f"主抓 bookmaker（預設 {config.BOOKMAKER_PRIMARY}）",
+    )
+    parser.add_argument(
+        "--date", default=None,
+        help="backtest 回填日期 YYYY-MM-DD（UTC+8；預設前一日）",
     )
     return parser.parse_args(argv)
 
@@ -68,9 +72,8 @@ def main(argv=None) -> int:
         stats = movement.scan(bookmaker=args.bookmaker)
         log.info("走勢完成：%s", stats)
     elif args.mode == "backtest":
-        # TODO(Phase 2): backtest.run_backfill() — /v4/settlements 取賽果 + CLV 自算
-        log.error("backtest 模式尚未實作（Phase 2），本次不執行")
-        return 1
+        m = backtest.run_backfill(date_local=args.date, bookmaker=args.bookmaker)
+        log.info("回測完成：%s", {k: v for k, v in m.items() if k != "breakdown"})
 
     return 0
 
