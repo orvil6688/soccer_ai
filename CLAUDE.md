@@ -103,7 +103,7 @@
 - **sportId = 10**（Soccer）；**tournamentId = 16**（2026 世界盃正盤，104 場）。
 - 市場名：**`Asian Handicap`**（spreads，outcome "1"=主/"2"=客）、**`Over Under Full Time`**（totals，Over/Under）；period 取 `fulltime`。
 - Bookmaker slug：主 `pinnacle`、交叉驗證 `1xbet`。
-- **結算**：`/v4/settlements?fixtureId=` 按 market/outcome 取 result；嚴格 90 分鐘（fulltime）。
+- **結算**：`/v4/settlements?fixtureId=` 按 market/outcome 取 result；嚴格 90 分鐘（fulltime）。result 列舉（實測）：`WIN/LOSE/HALFWIN/HALFLOSS/PUSH/UNDECIDED`（不提供比分，result 直接給）。
 - **額度**：免費層 250/月，以 `/v4/account` 的 `request_count` 監控（不計額度）；剩餘 ≤25 告警。
 - ⚠️ **`/clv` v4 不存在**（已實打），CLV 自算（見 5.5）。
 
@@ -140,7 +140,9 @@
   錨點 A：`{"target_ts": ISO, "handicap": H|null, "over_under": O|null}`；
   `H = {line, home_odd, away_odd, captured_ts, [offset_sec]}`、`O = {line, over_odd, under_odd, captured_ts, [offset_sec]}`。
 - **歷史推薦檔**：`data/{prod|test}/recommendations/{YYYY-MM-DD}.json`（list，以 `fixtureId` upsert）。
-- **CLV 自算**（v4 無 /clv）：CLV =（收盤錨點的線）對比（推薦產出時記錄的線）；收盤=六錨點的 `closing`；時序防呆：推薦產出時間 ≥ 收盤抓取時間 → 該筆標「無 CLV」。
+  推薦 schema（Phase 3 selector 產出、backtest 消費）：`{fixtureId, produced_at_local, kickoff_utc, market:"handicap"|"over_under", side:"home"|"away"|"over"|"under", line, odds, stake_units}`；backtest 回填 `result/pnl_units/settled/clv`。
+- **CLV 自算**（v4 無 /clv）：CLV% =（推薦產出賠率 / 收盤賠率 − 1），收盤＝重抓 historical 取「該確切線/邊」開賽前最後一筆；時序防呆：推薦產出時間 ≥ 收盤抓取時間 → 該筆 `no_clv`（標「無 CLV」）。
+- **單位損益**：WIN→+stake×(odds−1)、HALFWIN→半、PUSH→0、HALFLOSS→−stake/2、LOSE→−stake。命中率 PUSH 不計分母、半贏半輸計 0.5。
 - **原子寫入**：tmp → `os.replace`；`.gitignore` 已排除 `data/prod/*.tmp`。
 
 ---
@@ -202,10 +204,11 @@
 
 ## 九、目前狀態
 
-- **最新版本**：v2.0-phase1A（2026-06-04，架構 A：OddsPapi 主源 + 六錨點，Phase 1 重作完工）
+- **最新版本**：v2.0-phase2（2026-06-04，架構 A；Phase 1A 走勢 + Phase 2 回測閉環完工）
 - **核心架構**：OddsPapi v4 主源；`historical-odds` 賽前即時走勢 → 推導六錨點 → 選注 → settlement 回測；交叉驗證 Pinnacle vs 1xBet
-- **Phase 1A 已完成**（5 commit）：封存 API-Football 舊模組(`_legacy/`)；`config.py`(OddsPapi 契約)；`oddspapi_client.py`(429 退避+額度)；`odds_parser.py`(market_map+主盤線)；`movement.py`(六錨點+三規則)；`storage.py`(字串主鍵+市場表快取)；`main.py`/`main_pipeline.yml`(每小時+移除生存法則)。離線+真打 E2E 測試全綠（真抓 104 場、初盤→收盤走勢正確）。
-- **下一步**：Phase 2 — `backtest.py` `/v4/settlements` 賽果回填 + CLV 自算 + 命中率。
+- **Phase 1A 已完成**（5 commit）：封存 API-Football 舊模組(`_legacy/`)；`config.py`(OddsPapi 契約)；`oddspapi_client.py`(429 退避+額度)；`odds_parser.py`(market_map+主盤線)；`movement.py`(六錨點+三規則+48h 篩選+placeholder)；`storage.py`；`main.py`/`main_pipeline.yml`(每小時 8s 節流)。GitHub Actions 實機驗證：bot auto commit + `data/prod/movements/` 72 場、六錨點正確、持久化命脈通。
+- **Phase 2 已完成**（3 commit）：`backtest.py` — `/v4/settlements` 賽果回填(result→單位損益)、CLV 自算(§3.6 時序防呆)、命中率/ROI/CLV 彙總 + `run_backfill` + `main --mode backtest --date`。以真實 MLS 完賽場驗證全綠。
+- **下一步**：Phase 3 — `selector.py` 選注引擎(edge≥0.25/誘盤過濾/動機) + `analyzer.py`(Gemini GEM 人設) + Discord 推播 + GH Pages。**選注產出推薦＝backtest 閉環的輸入**（目前 recommendations 尚無資料）。
 - **待總司令動作**：①於 repo Secrets 設 `ODDSPAPI_API_KEY`；②（建議）寄信 OddsPapi 確認 historical 不計額度（見 §8 退場條件）。
 
 ---
@@ -219,4 +222,4 @@
 
 ---
 
-**本檔版本**：v2.0-phase1A｜格式來源：總司令通用範本 v1.0｜建立 2026-06-02｜架構 A 改版回填 2026-06-04
+**本檔版本**：v2.0-phase2｜格式來源：總司令通用範本 v1.0｜建立 2026-06-02｜Phase 2 回測閉環回填 2026-06-04
