@@ -242,9 +242,10 @@ def _filter_and_stake(c: dict, rec: Optional[dict]) -> dict:
         reason = f"盤太甜(線差>{config.TRAP_EDGE_GOALS_MAX})"
     elif c["edge_pct"] is not None and c["edge_pct"] > config.TRAP_EDGE_PCT_MAX:
         reason = f"盤太甜(EV>{config.TRAP_EDGE_PCT_MAX})"
-    # 盤口失效/暫停 → 剔除
-    elif not c.get("xbet_active", True) or c.get("xbet_suspended", False):
-        reason = "1xBet 盤口失效/暫停"
+    # 盤口暫停 → 剔除。注意：1xBet 賽前 bookmakerIsActive 恆為 False（指 live 連線
+    # 狀態、非賽前盤有效性，實測 69/69 皆 False），不可當失效訊號；以 suspended 為準。
+    elif c.get("xbet_suspended", False):
+        reason = "1xBet 盤口暫停"
     # 關鍵數字：edge 靠跨關鍵數字成立且邊際不足 → 剔除（門檻待校準＝2×主閘）
     elif key_cross and c["edge_source"] == "line" and c["edge_goals"] < config.EDGE_THRESHOLD * 2:
         reason = "關鍵數字邊際不足"
