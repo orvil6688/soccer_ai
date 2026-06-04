@@ -1,4 +1,5 @@
 {
+  "schema_version": 2,
   "fixtureId": "id1000001666456910",
   "tournamentId": 16,
   "sportId": 10,
@@ -6,43 +7,129 @@
   "away": "South Africa",
   "kickoff_utc": "2026-06-18T16:00:00+00:00",
   "kickoff_local": "2026-06-19T00:00:00+08:00",
-  "bookmaker": "pinnacle",
-  "anchors": {
-    "initial": {
-      "target_ts": "2026-05-11T05:40:49.621000+00:00",
+  "books": [
+    "pinnacle"
+  ],
+  "trajectory": {
+    "pinnacle": {
       "handicap": {
-        "line": -0.5,
-        "home_odd": 2.06,
-        "away_odd": 1.781,
-        "captured_ts": "2026-05-11T05:40:55.227Z"
+        "anchors": {
+          "initial": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": -0.5,
+            "home_odd": 2.06,
+            "away_odd": 1.781,
+            "captured_ts": "2026-05-11T05:40:55.227Z"
+          },
+          "t72h": null,
+          "t24h": null,
+          "t12h": null,
+          "t6h": null,
+          "t1h": null,
+          "t30m": null,
+          "closing": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": -0.5,
+            "home_odd": 1.952,
+            "away_odd": 1.847,
+            "captured_ts": "2026-06-04T15:49:55.943Z"
+          }
+        },
+        "segments": [
+          {
+            "from": "t72h",
+            "to": "t24h",
+            "present": false
+          },
+          {
+            "from": "t24h",
+            "to": "t12h",
+            "present": false
+          },
+          {
+            "from": "t12h",
+            "to": "t6h",
+            "present": false
+          },
+          {
+            "from": "t6h",
+            "to": "t1h",
+            "present": false
+          },
+          {
+            "from": "t1h",
+            "to": "t30m",
+            "present": false
+          }
+        ],
+        "summary": {
+          "present_anchors": 0,
+          "shape": "insufficient",
+          "tag": null
+        }
       },
       "over_under": {
-        "line": 2.25,
-        "over_odd": 2.009,
-        "under_odd": 1.8,
-        "captured_ts": "2026-05-11T05:40:55.227Z"
-      }
-    },
-    "t24h": null,
-    "t12h": null,
-    "t6h": null,
-    "t1h": null,
-    "closing": {
-      "target_ts": "2026-06-03T13:13:16.492000+00:00",
-      "handicap": {
-        "line": -0.5,
-        "home_odd": 1.97,
-        "away_odd": 1.833,
-        "captured_ts": "2026-06-03T13:13:16.491Z"
-      },
-      "over_under": {
-        "line": 2.25,
-        "over_odd": 1.99,
-        "under_odd": 1.806,
-        "captured_ts": "2026-06-03T13:13:16.491Z"
+        "anchors": {
+          "initial": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": 2.25,
+            "over_odd": 2.009,
+            "under_odd": 1.8,
+            "captured_ts": "2026-05-11T05:40:55.227Z"
+          },
+          "t72h": null,
+          "t24h": null,
+          "t12h": null,
+          "t6h": null,
+          "t1h": null,
+          "t30m": null,
+          "closing": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": 2.25,
+            "over_odd": 1.99,
+            "under_odd": 1.806,
+            "captured_ts": "2026-06-04T15:49:55.943Z"
+          }
+        },
+        "segments": [
+          {
+            "from": "t72h",
+            "to": "t24h",
+            "present": false
+          },
+          {
+            "from": "t24h",
+            "to": "t12h",
+            "present": false
+          },
+          {
+            "from": "t12h",
+            "to": "t6h",
+            "present": false
+          },
+          {
+            "from": "t6h",
+            "to": "t1h",
+            "present": false
+          },
+          {
+            "from": "t1h",
+            "to": "t30m",
+            "present": false
+          }
+        ],
+        "summary": {
+          "present_anchors": 0,
+          "shape": "insufficient",
+          "tag": null
+        }
       }
     }
   },
   "closing_settled": false,
-  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+  "pulled_at_local": "2026-06-05T04:07:13.083831+08:00"
 }

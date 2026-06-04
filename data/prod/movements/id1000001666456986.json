@@ -1,4 +1,5 @@
 {
+  "schema_version": 2,
   "fixtureId": "id1000001666456986",
   "tournamentId": 16,
   "sportId": 10,
@@ -6,43 +7,248 @@
   "away": "IR Iran",
   "kickoff_utc": "2026-06-21T19:00:00+00:00",
   "kickoff_local": "2026-06-22T03:00:00+08:00",
-  "bookmaker": "pinnacle",
-  "anchors": {
-    "initial": {
-      "target_ts": "2026-05-11T05:45:43.706000+00:00",
+  "books": [
+    "pinnacle",
+    "singbet"
+  ],
+  "trajectory": {
+    "pinnacle": {
       "handicap": {
-        "line": -1.0,
-        "home_odd": 1.787,
-        "away_odd": 2.05,
-        "captured_ts": "2026-05-11T05:45:43.706Z"
+        "anchors": {
+          "initial": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": -1.0,
+            "home_odd": 1.787,
+            "away_odd": 2.05,
+            "captured_ts": "2026-05-11T05:45:43.706Z"
+          },
+          "t72h": null,
+          "t24h": null,
+          "t12h": null,
+          "t6h": null,
+          "t1h": null,
+          "t30m": null,
+          "closing": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": -1.25,
+            "home_odd": 1.917,
+            "away_odd": 1.884,
+            "captured_ts": "2026-06-04T13:13:35.548Z"
+          }
+        },
+        "segments": [
+          {
+            "from": "t72h",
+            "to": "t24h",
+            "present": false
+          },
+          {
+            "from": "t24h",
+            "to": "t12h",
+            "present": false
+          },
+          {
+            "from": "t12h",
+            "to": "t6h",
+            "present": false
+          },
+          {
+            "from": "t6h",
+            "to": "t1h",
+            "present": false
+          },
+          {
+            "from": "t1h",
+            "to": "t30m",
+            "present": false
+          }
+        ],
+        "summary": {
+          "present_anchors": 0,
+          "shape": "insufficient",
+          "tag": null
+        }
       },
       "over_under": {
-        "line": 2.5,
-        "over_odd": 1.9,
-        "under_odd": 1.9,
-        "captured_ts": "2026-05-11T05:45:48.674Z"
+        "anchors": {
+          "initial": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": 2.5,
+            "over_odd": 1.9,
+            "under_odd": 1.9,
+            "captured_ts": "2026-05-11T05:45:48.674Z"
+          },
+          "t72h": null,
+          "t24h": null,
+          "t12h": null,
+          "t6h": null,
+          "t1h": null,
+          "t30m": null,
+          "closing": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": 2.5,
+            "over_odd": 1.84,
+            "under_odd": 1.943,
+            "captured_ts": "2026-06-04T13:13:35.547Z"
+          }
+        },
+        "segments": [
+          {
+            "from": "t72h",
+            "to": "t24h",
+            "present": false
+          },
+          {
+            "from": "t24h",
+            "to": "t12h",
+            "present": false
+          },
+          {
+            "from": "t12h",
+            "to": "t6h",
+            "present": false
+          },
+          {
+            "from": "t6h",
+            "to": "t1h",
+            "present": false
+          },
+          {
+            "from": "t1h",
+            "to": "t30m",
+            "present": false
+          }
+        ],
+        "summary": {
+          "present_anchors": 0,
+          "shape": "insufficient",
+          "tag": null
+        }
       }
     },
-    "t24h": null,
-    "t12h": null,
-    "t6h": null,
-    "t1h": null,
-    "closing": {
-      "target_ts": "2026-06-03T13:13:16.491000+00:00",
+    "singbet": {
       "handicap": {
-        "line": -1.25,
-        "home_odd": 1.917,
-        "away_odd": 1.884,
-        "captured_ts": "2026-06-03T13:13:16.491Z"
+        "anchors": {
+          "initial": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": -1.25,
+            "home_odd": 1.93,
+            "away_odd": 1.91,
+            "captured_ts": "2026-06-01T13:56:28.628Z"
+          },
+          "t72h": null,
+          "t24h": null,
+          "t12h": null,
+          "t6h": null,
+          "t1h": null,
+          "t30m": null,
+          "closing": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": -1.25,
+            "home_odd": 1.94,
+            "away_odd": 1.9,
+            "captured_ts": "2026-06-04T17:37:42.443Z"
+          }
+        },
+        "segments": [
+          {
+            "from": "t72h",
+            "to": "t24h",
+            "present": false
+          },
+          {
+            "from": "t24h",
+            "to": "t12h",
+            "present": false
+          },
+          {
+            "from": "t12h",
+            "to": "t6h",
+            "present": false
+          },
+          {
+            "from": "t6h",
+            "to": "t1h",
+            "present": false
+          },
+          {
+            "from": "t1h",
+            "to": "t30m",
+            "present": false
+          }
+        ],
+        "summary": {
+          "present_anchors": 0,
+          "shape": "insufficient",
+          "tag": null
+        }
       },
       "over_under": {
-        "line": 2.5,
-        "over_odd": 1.84,
-        "under_odd": 1.943,
-        "captured_ts": "2026-06-03T13:13:16.491Z"
+        "anchors": {
+          "initial": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": 2.5,
+            "over_odd": 1.91,
+            "under_odd": 1.91,
+            "captured_ts": "2026-06-01T13:56:28.628Z"
+          },
+          "t72h": null,
+          "t24h": null,
+          "t12h": null,
+          "t6h": null,
+          "t1h": null,
+          "t30m": null,
+          "closing": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": 2.5,
+            "over_odd": 1.89,
+            "under_odd": 1.93,
+            "captured_ts": "2026-06-04T17:37:42.443Z"
+          }
+        },
+        "segments": [
+          {
+            "from": "t72h",
+            "to": "t24h",
+            "present": false
+          },
+          {
+            "from": "t24h",
+            "to": "t12h",
+            "present": false
+          },
+          {
+            "from": "t12h",
+            "to": "t6h",
+            "present": false
+          },
+          {
+            "from": "t6h",
+            "to": "t1h",
+            "present": false
+          },
+          {
+            "from": "t1h",
+            "to": "t30m",
+            "present": false
+          }
+        ],
+        "summary": {
+          "present_anchors": 0,
+          "shape": "insufficient",
+          "tag": null
+        }
       }
     }
   },
   "closing_settled": false,
-  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+  "pulled_at_local": "2026-06-05T04:07:13.083831+08:00"
 }
