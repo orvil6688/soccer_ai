@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666456934",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "Scotland",
+  "away": "Morocco",
+  "kickoff_utc": "2026-06-19T22:00:00+00:00",
+  "kickoff_local": "2026-06-20T06:00:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-05-11T05:42:09.384000+00:00",
+      "handicap": {
+        "line": 0.25,
+        "home_odd": 1.961,
+        "away_odd": 1.854,
+        "captured_ts": "2026-05-11T05:42:09.384Z"
+      },
+      "over_under": {
+        "line": 2.25,
+        "over_odd": 2.009,
+        "under_odd": 1.8,
+        "captured_ts": "2026-05-11T05:42:14.154Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-03T13:13:16.476000+00:00",
+      "handicap": {
+        "line": 0.5,
+        "home_odd": 1.826,
+        "away_odd": 1.98,
+        "captured_ts": "2026-06-03T13:13:16.476Z"
+      },
+      "over_under": {
+        "line": 2.25,
+        "over_odd": 1.98,
+        "under_odd": 1.806,
+        "captured_ts": "2026-06-03T13:13:16.476Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}

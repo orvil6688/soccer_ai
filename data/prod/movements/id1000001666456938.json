@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666456938",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "Morocco",
+  "away": "Haiti",
+  "kickoff_utc": "2026-06-24T22:00:00+00:00",
+  "kickoff_local": "2026-06-25T06:00:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-05-25T11:37:19.562000+00:00",
+      "handicap": {
+        "line": -1.25,
+        "home_odd": 1.84,
+        "away_odd": 1.98,
+        "captured_ts": "2026-05-25T11:37:19.562Z"
+      },
+      "over_under": {
+        "line": 2.5,
+        "over_odd": 1.84,
+        "under_odd": 1.97,
+        "captured_ts": "2026-05-25T11:37:19.562Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-03T21:12:41.713000+00:00",
+      "handicap": {
+        "line": -1.75,
+        "home_odd": 1.909,
+        "away_odd": 1.877,
+        "captured_ts": "2026-06-03T21:12:41.713Z"
+      },
+      "over_under": {
+        "line": 2.75,
+        "over_odd": 1.826,
+        "under_odd": 1.943,
+        "captured_ts": "2026-06-03T21:12:41.713Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}

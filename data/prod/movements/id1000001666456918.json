@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666456918",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "Qatar",
+  "away": "Switzerland",
+  "kickoff_utc": "2026-06-13T19:00:00+00:00",
+  "kickoff_local": "2026-06-14T03:00:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-05-12T00:35:08.539000+00:00",
+      "handicap": {
+        "line": 1.5,
+        "home_odd": 2.029,
+        "away_odd": 1.8,
+        "captured_ts": "2026-05-12T00:35:08.539Z"
+      },
+      "over_under": {
+        "line": 2.75,
+        "over_odd": 1.8,
+        "under_odd": 2.02,
+        "captured_ts": "2026-05-12T00:35:08.539Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-04T05:53:52.621000+00:00",
+      "handicap": {
+        "line": 1.75,
+        "home_odd": 2.009,
+        "away_odd": 1.9,
+        "captured_ts": "2026-06-04T05:53:52.621Z"
+      },
+      "over_under": {
+        "line": 2.75,
+        "over_odd": 1.854,
+        "under_odd": 2.04,
+        "captured_ts": "2026-06-04T05:53:52.621Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}

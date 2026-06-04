@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666456946",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "Turkiye",
+  "away": "Paraguay",
+  "kickoff_utc": "2026-06-20T03:00:00+00:00",
+  "kickoff_local": "2026-06-20T11:00:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-05-11T05:43:41.497000+00:00",
+      "handicap": {
+        "line": -0.25,
+        "home_odd": 1.909,
+        "away_odd": 1.909,
+        "captured_ts": "2026-05-11T05:43:41.497Z"
+      },
+      "over_under": {
+        "line": 2.25,
+        "over_odd": 2.009,
+        "under_odd": 1.8,
+        "captured_ts": "2026-05-11T05:43:46.467Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-03T13:13:16.516000+00:00",
+      "handicap": {
+        "line": -0.25,
+        "home_odd": 1.9,
+        "away_odd": 1.9,
+        "captured_ts": "2026-06-03T13:13:16.516Z"
+      },
+      "over_under": {
+        "line": 2.25,
+        "over_odd": 2.0,
+        "under_odd": 1.793,
+        "captured_ts": "2026-06-03T13:13:16.515Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}

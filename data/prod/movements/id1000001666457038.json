@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666457038",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "Colombia",
+  "away": "Portugal",
+  "kickoff_utc": "2026-06-27T23:30:00+00:00",
+  "kickoff_local": "2026-06-28T07:30:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-05-25T11:46:14.288000+00:00",
+      "handicap": {
+        "line": 0.25,
+        "home_odd": 1.952,
+        "away_odd": 1.869,
+        "captured_ts": "2026-05-25T11:46:14.288Z"
+      },
+      "over_under": {
+        "line": 2.25,
+        "over_odd": 1.854,
+        "under_odd": 1.943,
+        "captured_ts": "2026-05-25T11:46:14.288Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-03T13:13:16.498000+00:00",
+      "handicap": {
+        "line": 0.25,
+        "home_odd": 1.943,
+        "away_odd": 1.862,
+        "captured_ts": "2026-06-03T13:13:16.498Z"
+      },
+      "over_under": {
+        "line": 2.25,
+        "over_odd": 1.84,
+        "under_odd": 1.952,
+        "captured_ts": "2026-06-03T13:13:16.497Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}

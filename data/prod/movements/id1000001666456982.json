@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666456982",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "Belgium",
+  "away": "Egypt",
+  "kickoff_utc": "2026-06-15T19:00:00+00:00",
+  "kickoff_local": "2026-06-16T03:00:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-03-08T19:01:58.414000+00:00",
+      "handicap": {
+        "line": -1.0,
+        "home_odd": 1.925,
+        "away_odd": 1.892,
+        "captured_ts": "2026-03-08T19:01:58.415Z"
+      },
+      "over_under": {
+        "line": 2.75,
+        "over_odd": 1.934,
+        "under_odd": 1.869,
+        "captured_ts": "2026-03-08T19:01:58.414Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-04T04:48:37.715000+00:00",
+      "handicap": {
+        "line": -0.75,
+        "home_odd": 1.892,
+        "away_odd": 2.02,
+        "captured_ts": "2026-06-04T04:48:37.715Z"
+      },
+      "over_under": {
+        "line": 2.5,
+        "over_odd": 1.98,
+        "under_odd": 1.909,
+        "captured_ts": "2026-06-04T04:48:37.715Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}

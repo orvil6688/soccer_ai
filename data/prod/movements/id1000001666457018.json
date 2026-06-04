@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666457018",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "Argentina",
+  "away": "Algeria",
+  "kickoff_utc": "2026-06-17T01:00:00+00:00",
+  "kickoff_local": "2026-06-17T09:00:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-03-09T02:02:01.272000+00:00",
+      "handicap": {
+        "line": -1.25,
+        "home_odd": 1.943,
+        "away_odd": 1.877,
+        "captured_ts": "2026-03-09T02:02:01.273Z"
+      },
+      "over_under": {
+        "line": 2.5,
+        "over_odd": 1.884,
+        "under_odd": 1.917,
+        "captured_ts": "2026-03-09T02:02:01.272Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-04T04:48:49.301000+00:00",
+      "handicap": {
+        "line": -1.25,
+        "home_odd": 1.943,
+        "away_odd": 1.961,
+        "captured_ts": "2026-06-04T04:48:49.300Z"
+      },
+      "over_under": {
+        "line": 2.5,
+        "over_odd": 1.97,
+        "under_odd": 1.917,
+        "captured_ts": "2026-06-04T04:48:49.300Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}

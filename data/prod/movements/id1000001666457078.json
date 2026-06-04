@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666457078",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "Ecuador",
+  "away": "Germany",
+  "kickoff_utc": "2026-06-25T20:00:00+00:00",
+  "kickoff_local": "2026-06-26T04:00:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-05-25T11:09:26.947000+00:00",
+      "handicap": {
+        "line": 1.0,
+        "home_odd": 1.925,
+        "away_odd": 2.0,
+        "captured_ts": "2026-05-25T11:09:26.947Z"
+      },
+      "over_under": {
+        "line": 2.5,
+        "over_odd": 1.833,
+        "under_odd": 1.97,
+        "captured_ts": "2026-05-25T11:09:35.303Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-03T13:13:16.513000+00:00",
+      "handicap": {
+        "line": 0.75,
+        "home_odd": 1.961,
+        "away_odd": 1.847,
+        "captured_ts": "2026-06-03T13:13:16.512Z"
+      },
+      "over_under": {
+        "line": 2.5,
+        "over_odd": 1.877,
+        "under_odd": 1.909,
+        "captured_ts": "2026-06-03T13:13:16.512Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}

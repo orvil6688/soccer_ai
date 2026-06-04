@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666456940",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "USA",
+  "away": "Paraguay",
+  "kickoff_utc": "2026-06-13T01:00:00+00:00",
+  "kickoff_local": "2026-06-13T09:00:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-03-05T17:53:47.701000+00:00",
+      "handicap": {
+        "line": -0.5,
+        "home_odd": 1.917,
+        "away_odd": 1.9,
+        "captured_ts": "2026-03-05T17:53:47.702Z"
+      },
+      "over_under": {
+        "line": 2.5,
+        "over_odd": 1.99,
+        "under_odd": 1.819,
+        "captured_ts": "2026-03-05T17:53:47.701Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-04T04:48:10.307000+00:00",
+      "handicap": {
+        "line": -0.5,
+        "home_odd": 2.02,
+        "away_odd": 1.892,
+        "captured_ts": "2026-06-04T04:48:10.307Z"
+      },
+      "over_under": {
+        "line": 2.25,
+        "over_odd": 2.06,
+        "under_odd": 1.84,
+        "captured_ts": "2026-06-04T04:48:10.307Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}

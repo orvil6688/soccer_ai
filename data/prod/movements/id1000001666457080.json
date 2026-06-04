@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666457080",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "Curacao",
+  "away": "Ivory Coast",
+  "kickoff_utc": "2026-06-25T20:00:00+00:00",
+  "kickoff_local": "2026-06-26T04:00:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-05-25T11:29:38.084000+00:00",
+      "handicap": {
+        "line": 1.5,
+        "home_odd": 1.862,
+        "away_odd": 1.961,
+        "captured_ts": "2026-05-25T11:29:38.084Z"
+      },
+      "over_under": {
+        "line": 2.75,
+        "over_odd": 2.0,
+        "under_odd": 1.813,
+        "captured_ts": "2026-05-25T11:29:38.084Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-03T13:13:16.508000+00:00",
+      "handicap": {
+        "line": 1.5,
+        "home_odd": 1.862,
+        "away_odd": 1.943,
+        "captured_ts": "2026-06-03T13:13:16.508Z"
+      },
+      "over_under": {
+        "line": 2.75,
+        "over_odd": 1.97,
+        "under_odd": 1.819,
+        "captured_ts": "2026-06-03T13:13:16.508Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}

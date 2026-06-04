@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666457074",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "Germany",
+  "away": "Ivory Coast",
+  "kickoff_utc": "2026-06-20T20:00:00+00:00",
+  "kickoff_local": "2026-06-21T04:00:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-05-11T05:44:59.360000+00:00",
+      "handicap": {
+        "line": -1.0,
+        "home_odd": 1.99,
+        "away_odd": 1.833,
+        "captured_ts": "2026-05-11T05:45:05.195Z"
+      },
+      "over_under": {
+        "line": 2.5,
+        "over_odd": 1.8,
+        "under_odd": 2.009,
+        "captured_ts": "2026-05-11T05:45:04.084Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-03T15:38:20.413000+00:00",
+      "handicap": {
+        "line": -1.0,
+        "home_odd": 1.892,
+        "away_odd": 1.909,
+        "captured_ts": "2026-06-03T15:38:20.412Z"
+      },
+      "over_under": {
+        "line": 2.75,
+        "over_odd": 1.99,
+        "under_odd": 1.806,
+        "captured_ts": "2026-06-03T15:38:20.412Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}

@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666456990",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "New Zealand",
+  "away": "Belgium",
+  "kickoff_utc": "2026-06-27T03:00:00+00:00",
+  "kickoff_local": "2026-06-27T11:00:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-05-25T11:46:14.287000+00:00",
+      "handicap": {
+        "line": 1.5,
+        "home_odd": 1.961,
+        "away_odd": 1.862,
+        "captured_ts": "2026-05-25T11:46:14.287Z"
+      },
+      "over_under": {
+        "line": 2.75,
+        "over_odd": 1.884,
+        "under_odd": 1.917,
+        "captured_ts": "2026-05-25T11:46:14.287Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-04T05:01:24.669000+00:00",
+      "handicap": {
+        "line": 1.5,
+        "home_odd": 1.862,
+        "away_odd": 1.943,
+        "captured_ts": "2026-06-04T05:01:24.669Z"
+      },
+      "over_under": {
+        "line": 2.75,
+        "over_odd": 1.854,
+        "under_odd": 1.934,
+        "captured_ts": "2026-06-04T05:01:24.669Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}

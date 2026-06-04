@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666457072",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "Ivory Coast",
+  "away": "Ecuador",
+  "kickoff_utc": "2026-06-14T23:00:00+00:00",
+  "kickoff_local": "2026-06-15T07:00:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-03-08T19:01:58.414000+00:00",
+      "handicap": {
+        "line": 0.25,
+        "home_odd": 1.806,
+        "away_odd": 2.029,
+        "captured_ts": "2026-03-08T19:01:58.414Z"
+      },
+      "over_under": {
+        "line": 2.0,
+        "over_odd": 1.826,
+        "under_odd": 1.98,
+        "captured_ts": "2026-03-08T19:01:58.414Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-04T04:48:23.122000+00:00",
+      "handicap": {
+        "line": 0.25,
+        "home_odd": 1.917,
+        "away_odd": 1.99,
+        "captured_ts": "2026-06-04T04:48:23.122Z"
+      },
+      "over_under": {
+        "line": 1.75,
+        "over_odd": 1.813,
+        "under_odd": 2.1,
+        "captured_ts": "2026-06-04T04:48:23.121Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}

@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666456926",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "Bosnia and Herzegovina",
+  "away": "Qatar",
+  "kickoff_utc": "2026-06-24T19:00:00+00:00",
+  "kickoff_local": "2026-06-25T03:00:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-05-25T11:07:52.603000+00:00",
+      "handicap": {
+        "line": -0.5,
+        "home_odd": 1.877,
+        "away_odd": 1.943,
+        "captured_ts": "2026-05-25T11:07:52.603Z"
+      },
+      "over_under": {
+        "line": 2.25,
+        "over_odd": 1.9,
+        "under_odd": 1.9,
+        "captured_ts": "2026-05-25T11:07:58.823Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-03T13:13:16.505000+00:00",
+      "handicap": {
+        "line": -1.0,
+        "home_odd": 2.009,
+        "away_odd": 1.806,
+        "captured_ts": "2026-06-03T13:13:16.505Z"
+      },
+      "over_under": {
+        "line": 2.5,
+        "over_odd": 2.0,
+        "under_odd": 1.793,
+        "captured_ts": "2026-06-03T13:13:16.505Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}

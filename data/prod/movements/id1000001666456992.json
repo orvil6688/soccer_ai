@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666456992",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "Egypt",
+  "away": "IR Iran",
+  "kickoff_utc": "2026-06-27T03:00:00+00:00",
+  "kickoff_local": "2026-06-27T11:00:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-05-25T11:11:42.947000+00:00",
+      "handicap": {
+        "line": -0.25,
+        "home_odd": 1.961,
+        "away_odd": 1.961,
+        "captured_ts": "2026-05-25T11:11:42.947Z"
+      },
+      "over_under": {
+        "line": 2.25,
+        "over_odd": 1.97,
+        "under_odd": 1.833,
+        "captured_ts": "2026-05-25T11:11:48.210Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-03T13:13:16.484000+00:00",
+      "handicap": {
+        "line": -0.25,
+        "home_odd": 1.917,
+        "away_odd": 1.884,
+        "captured_ts": "2026-06-03T13:13:16.483Z"
+      },
+      "over_under": {
+        "line": 2.0,
+        "over_odd": 1.925,
+        "under_odd": 1.862,
+        "captured_ts": "2026-06-03T13:13:16.483Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}

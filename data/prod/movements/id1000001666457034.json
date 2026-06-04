@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666457034",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "Portugal",
+  "away": "Uzbekistan",
+  "kickoff_utc": "2026-06-23T17:00:00+00:00",
+  "kickoff_local": "2026-06-24T01:00:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-05-11T05:48:09.462000+00:00",
+      "handicap": {
+        "line": -2.0,
+        "home_odd": 1.97,
+        "away_odd": 1.833,
+        "captured_ts": "2026-05-11T05:48:12.788Z"
+      },
+      "over_under": {
+        "line": 3.0,
+        "over_odd": 1.869,
+        "under_odd": 1.917,
+        "captured_ts": "2026-05-11T05:48:12.788Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-03T13:13:16.508000+00:00",
+      "handicap": {
+        "line": -1.75,
+        "home_odd": 1.952,
+        "away_odd": 1.847,
+        "captured_ts": "2026-06-03T13:13:16.508Z"
+      },
+      "over_under": {
+        "line": 3.0,
+        "over_odd": 1.869,
+        "under_odd": 1.917,
+        "captured_ts": "2026-06-03T13:13:16.508Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}

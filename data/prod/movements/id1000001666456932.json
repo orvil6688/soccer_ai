@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666456932",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "Brazil",
+  "away": "Haiti",
+  "kickoff_utc": "2026-06-20T00:30:00+00:00",
+  "kickoff_local": "2026-06-20T08:30:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-05-11T05:43:05.971000+00:00",
+      "handicap": {
+        "line": -3.25,
+        "home_odd": 1.98,
+        "away_odd": 1.943,
+        "captured_ts": "2026-05-11T05:43:05.971Z"
+      },
+      "over_under": {
+        "line": 4.0,
+        "over_odd": 1.952,
+        "under_odd": 1.952,
+        "captured_ts": "2026-05-11T05:43:10.339Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-03T21:11:06.481000+00:00",
+      "handicap": {
+        "line": -2.75,
+        "home_odd": 1.763,
+        "away_odd": 2.02,
+        "captured_ts": "2026-06-03T21:11:06.481Z"
+      },
+      "over_under": {
+        "line": 3.75,
+        "over_odd": 1.884,
+        "under_odd": 1.9,
+        "captured_ts": "2026-06-03T21:11:06.480Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}

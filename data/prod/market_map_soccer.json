@@ -1,0 +1,832 @@
+{
+  "106": {
+    "name": "Over Under Full Time",
+    "handicap": 0.5,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "106": "Over",
+      "107": "Under"
+    }
+  },
+  "108": {
+    "name": "Over Under Full Time",
+    "handicap": 1.5,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "108": "Over",
+      "109": "Under"
+    }
+  },
+  "1010": {
+    "name": "Over Under Full Time",
+    "handicap": 2.5,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "1010": "Over",
+      "1011": "Under"
+    }
+  },
+  "1012": {
+    "name": "Over Under Full Time",
+    "handicap": 3.5,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "1012": "Over",
+      "1013": "Under"
+    }
+  },
+  "1014": {
+    "name": "Over Under Full Time",
+    "handicap": 4.5,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "1014": "Over",
+      "1015": "Under"
+    }
+  },
+  "1016": {
+    "name": "Over Under Full Time",
+    "handicap": 5.5,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "1016": "Over",
+      "1017": "Under"
+    }
+  },
+  "1018": {
+    "name": "Over Under Full Time",
+    "handicap": 6.5,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "1018": "Over",
+      "1019": "Under"
+    }
+  },
+  "1020": {
+    "name": "Over Under Full Time",
+    "handicap": 7.5,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "1020": "Over",
+      "1021": "Under"
+    }
+  },
+  "1022": {
+    "name": "Over Under Full Time",
+    "handicap": 8.5,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "1022": "Over",
+      "1023": "Under"
+    }
+  },
+  "1024": {
+    "name": "Asian Handicap",
+    "handicap": -6.0,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1024": "1",
+      "1025": "2"
+    }
+  },
+  "1026": {
+    "name": "Asian Handicap",
+    "handicap": -5.75,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1026": "1",
+      "1027": "2"
+    }
+  },
+  "1028": {
+    "name": "Asian Handicap",
+    "handicap": -5.5,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1028": "1",
+      "1029": "2"
+    }
+  },
+  "1030": {
+    "name": "Asian Handicap",
+    "handicap": -5.25,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1030": "1",
+      "1031": "2"
+    }
+  },
+  "1032": {
+    "name": "Asian Handicap",
+    "handicap": -5.0,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1032": "1",
+      "1033": "2"
+    }
+  },
+  "1034": {
+    "name": "Asian Handicap",
+    "handicap": -4.75,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1034": "1",
+      "1035": "2"
+    }
+  },
+  "1036": {
+    "name": "Asian Handicap",
+    "handicap": -4.5,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1036": "1",
+      "1037": "2"
+    }
+  },
+  "1038": {
+    "name": "Asian Handicap",
+    "handicap": -4.25,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1038": "1",
+      "1039": "2"
+    }
+  },
+  "1040": {
+    "name": "Asian Handicap",
+    "handicap": -4.0,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1040": "1",
+      "1041": "2"
+    }
+  },
+  "1042": {
+    "name": "Asian Handicap",
+    "handicap": -3.75,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1042": "1",
+      "1043": "2"
+    }
+  },
+  "1044": {
+    "name": "Asian Handicap",
+    "handicap": -3.5,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1044": "1",
+      "1045": "2"
+    }
+  },
+  "1046": {
+    "name": "Asian Handicap",
+    "handicap": -3.25,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1046": "1",
+      "1047": "2"
+    }
+  },
+  "1048": {
+    "name": "Asian Handicap",
+    "handicap": -3.0,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1048": "1",
+      "1049": "2"
+    }
+  },
+  "1050": {
+    "name": "Asian Handicap",
+    "handicap": -2.75,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1050": "1",
+      "1051": "2"
+    }
+  },
+  "1052": {
+    "name": "Asian Handicap",
+    "handicap": -2.5,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1052": "1",
+      "1053": "2"
+    }
+  },
+  "1054": {
+    "name": "Asian Handicap",
+    "handicap": -2.25,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1054": "1",
+      "1055": "2"
+    }
+  },
+  "1056": {
+    "name": "Asian Handicap",
+    "handicap": -2.0,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1056": "1",
+      "1057": "2"
+    }
+  },
+  "1058": {
+    "name": "Asian Handicap",
+    "handicap": -1.75,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1058": "1",
+      "1059": "2"
+    }
+  },
+  "1060": {
+    "name": "Asian Handicap",
+    "handicap": -1.5,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1060": "1",
+      "1061": "2"
+    }
+  },
+  "1062": {
+    "name": "Asian Handicap",
+    "handicap": -1.25,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1062": "1",
+      "1063": "2"
+    }
+  },
+  "1064": {
+    "name": "Asian Handicap",
+    "handicap": -1.0,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1064": "1",
+      "1065": "2"
+    }
+  },
+  "1066": {
+    "name": "Asian Handicap",
+    "handicap": -0.75,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1066": "1",
+      "1067": "2"
+    }
+  },
+  "1068": {
+    "name": "Asian Handicap",
+    "handicap": -0.5,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1068": "1",
+      "1069": "2"
+    }
+  },
+  "1070": {
+    "name": "Asian Handicap",
+    "handicap": -0.25,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1070": "1",
+      "1071": "2"
+    }
+  },
+  "1072": {
+    "name": "Asian Handicap",
+    "handicap": 0.0,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1072": "1",
+      "1073": "2"
+    }
+  },
+  "1074": {
+    "name": "Asian Handicap",
+    "handicap": 0.25,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1074": "1",
+      "1075": "2"
+    }
+  },
+  "1076": {
+    "name": "Asian Handicap",
+    "handicap": 0.5,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1076": "1",
+      "1077": "2"
+    }
+  },
+  "1078": {
+    "name": "Asian Handicap",
+    "handicap": 0.75,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1078": "1",
+      "1079": "2"
+    }
+  },
+  "1080": {
+    "name": "Asian Handicap",
+    "handicap": 1.0,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1080": "1",
+      "1081": "2"
+    }
+  },
+  "1082": {
+    "name": "Asian Handicap",
+    "handicap": 1.25,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1082": "1",
+      "1083": "2"
+    }
+  },
+  "1084": {
+    "name": "Asian Handicap",
+    "handicap": 1.5,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1084": "1",
+      "1085": "2"
+    }
+  },
+  "1086": {
+    "name": "Asian Handicap",
+    "handicap": 1.75,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1086": "1",
+      "1087": "2"
+    }
+  },
+  "1088": {
+    "name": "Asian Handicap",
+    "handicap": 2.0,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1088": "1",
+      "1089": "2"
+    }
+  },
+  "1090": {
+    "name": "Asian Handicap",
+    "handicap": 2.25,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1090": "1",
+      "1091": "2"
+    }
+  },
+  "1092": {
+    "name": "Asian Handicap",
+    "handicap": 2.5,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1092": "1",
+      "1093": "2"
+    }
+  },
+  "1094": {
+    "name": "Asian Handicap",
+    "handicap": 2.75,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1094": "1",
+      "1095": "2"
+    }
+  },
+  "1096": {
+    "name": "Asian Handicap",
+    "handicap": 3.0,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1096": "1",
+      "1097": "2"
+    }
+  },
+  "1098": {
+    "name": "Asian Handicap",
+    "handicap": 3.25,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "1098": "1",
+      "1099": "2"
+    }
+  },
+  "10100": {
+    "name": "Asian Handicap",
+    "handicap": 3.5,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "10100": "1",
+      "10101": "2"
+    }
+  },
+  "10102": {
+    "name": "Asian Handicap",
+    "handicap": 3.75,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "10102": "1",
+      "10103": "2"
+    }
+  },
+  "10104": {
+    "name": "Asian Handicap",
+    "handicap": 4.0,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "10104": "1",
+      "10105": "2"
+    }
+  },
+  "10106": {
+    "name": "Asian Handicap",
+    "handicap": 4.25,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "10106": "1",
+      "10107": "2"
+    }
+  },
+  "10108": {
+    "name": "Asian Handicap",
+    "handicap": 4.5,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "10108": "1",
+      "10109": "2"
+    }
+  },
+  "10110": {
+    "name": "Asian Handicap",
+    "handicap": 4.75,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "10110": "1",
+      "10111": "2"
+    }
+  },
+  "10112": {
+    "name": "Asian Handicap",
+    "handicap": 5.0,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "10112": "1",
+      "10113": "2"
+    }
+  },
+  "10114": {
+    "name": "Asian Handicap",
+    "handicap": 5.25,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "10114": "1",
+      "10115": "2"
+    }
+  },
+  "10116": {
+    "name": "Asian Handicap",
+    "handicap": 5.5,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "10116": "1",
+      "10117": "2"
+    }
+  },
+  "10118": {
+    "name": "Asian Handicap",
+    "handicap": 5.75,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "10118": "1",
+      "10119": "2"
+    }
+  },
+  "10120": {
+    "name": "Asian Handicap",
+    "handicap": 6.0,
+    "type": "spreads",
+    "period": "fulltime",
+    "outcomes": {
+      "10120": "1",
+      "10121": "2"
+    }
+  },
+  "10158": {
+    "name": "Over Under Full Time",
+    "handicap": 0.25,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10158": "Over",
+      "10159": "Under"
+    }
+  },
+  "10160": {
+    "name": "Over Under Full Time",
+    "handicap": 0.75,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10160": "Over",
+      "10161": "Under"
+    }
+  },
+  "10162": {
+    "name": "Over Under Full Time",
+    "handicap": 1.0,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10162": "Over",
+      "10163": "Under"
+    }
+  },
+  "10164": {
+    "name": "Over Under Full Time",
+    "handicap": 1.25,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10164": "Over",
+      "10165": "Under"
+    }
+  },
+  "10166": {
+    "name": "Over Under Full Time",
+    "handicap": 1.75,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10166": "Over",
+      "10167": "Under"
+    }
+  },
+  "10168": {
+    "name": "Over Under Full Time",
+    "handicap": 2.0,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10168": "Over",
+      "10169": "Under"
+    }
+  },
+  "10170": {
+    "name": "Over Under Full Time",
+    "handicap": 2.25,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10170": "Over",
+      "10171": "Under"
+    }
+  },
+  "10172": {
+    "name": "Over Under Full Time",
+    "handicap": 2.75,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10172": "Over",
+      "10173": "Under"
+    }
+  },
+  "10174": {
+    "name": "Over Under Full Time",
+    "handicap": 3.0,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10174": "Over",
+      "10175": "Under"
+    }
+  },
+  "10176": {
+    "name": "Over Under Full Time",
+    "handicap": 3.25,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10176": "Over",
+      "10177": "Under"
+    }
+  },
+  "10178": {
+    "name": "Over Under Full Time",
+    "handicap": 3.75,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10178": "Over",
+      "10179": "Under"
+    }
+  },
+  "10180": {
+    "name": "Over Under Full Time",
+    "handicap": 4.0,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10180": "Over",
+      "10181": "Under"
+    }
+  },
+  "10182": {
+    "name": "Over Under Full Time",
+    "handicap": 4.25,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10182": "Over",
+      "10183": "Under"
+    }
+  },
+  "10184": {
+    "name": "Over Under Full Time",
+    "handicap": 4.75,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10184": "Over",
+      "10185": "Under"
+    }
+  },
+  "10186": {
+    "name": "Over Under Full Time",
+    "handicap": 5.0,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10186": "Over",
+      "10187": "Under"
+    }
+  },
+  "10188": {
+    "name": "Over Under Full Time",
+    "handicap": 5.25,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10188": "Over",
+      "10189": "Under"
+    }
+  },
+  "10190": {
+    "name": "Over Under Full Time",
+    "handicap": 5.75,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10190": "Over",
+      "10191": "Under"
+    }
+  },
+  "10192": {
+    "name": "Over Under Full Time",
+    "handicap": 6.0,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10192": "Over",
+      "10193": "Under"
+    }
+  },
+  "10194": {
+    "name": "Over Under Full Time",
+    "handicap": 6.25,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10194": "Over",
+      "10195": "Under"
+    }
+  },
+  "10196": {
+    "name": "Over Under Full Time",
+    "handicap": 6.75,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10196": "Over",
+      "10197": "Under"
+    }
+  },
+  "10198": {
+    "name": "Over Under Full Time",
+    "handicap": 7.0,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10198": "Over",
+      "10199": "Under"
+    }
+  },
+  "10200": {
+    "name": "Over Under Full Time",
+    "handicap": 7.25,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10200": "Over",
+      "10201": "Under"
+    }
+  },
+  "10202": {
+    "name": "Over Under Full Time",
+    "handicap": 7.75,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10202": "Over",
+      "10203": "Under"
+    }
+  },
+  "10204": {
+    "name": "Over Under Full Time",
+    "handicap": 8.0,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10204": "Over",
+      "10205": "Under"
+    }
+  },
+  "10206": {
+    "name": "Over Under Full Time",
+    "handicap": 8.25,
+    "type": "totals",
+    "period": "fulltime",
+    "outcomes": {
+      "10206": "Over",
+      "10207": "Under"
+    }
+  }
+}

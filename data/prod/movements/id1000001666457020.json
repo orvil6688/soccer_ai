@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666457020",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "Austria",
+  "away": "Jordan",
+  "kickoff_utc": "2026-06-17T04:00:00+00:00",
+  "kickoff_local": "2026-06-17T12:00:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-03-09T05:02:01.827000+00:00",
+      "handicap": {
+        "line": -1.25,
+        "home_odd": 1.8,
+        "away_odd": 2.029,
+        "captured_ts": "2026-03-09T05:02:01.827Z"
+      },
+      "over_under": {
+        "line": 2.75,
+        "over_odd": 1.8,
+        "under_odd": 2.02,
+        "captured_ts": "2026-03-09T05:02:01.827Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-04T04:48:51.489000+00:00",
+      "handicap": {
+        "line": -1.5,
+        "home_odd": 1.961,
+        "away_odd": 1.943,
+        "captured_ts": "2026-06-04T04:48:51.489Z"
+      },
+      "over_under": {
+        "line": 2.75,
+        "over_odd": 1.84,
+        "under_odd": 2.06,
+        "captured_ts": "2026-06-04T04:48:51.489Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}

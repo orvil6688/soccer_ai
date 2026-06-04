@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666456924",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "Switzerland",
+  "away": "Canada",
+  "kickoff_utc": "2026-06-24T19:00:00+00:00",
+  "kickoff_local": "2026-06-25T03:00:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-05-25T11:08:24.980000+00:00",
+      "handicap": {
+        "line": -0.5,
+        "home_odd": 1.943,
+        "away_odd": 1.877,
+        "captured_ts": "2026-05-25T11:08:24.980Z"
+      },
+      "over_under": {
+        "line": 2.25,
+        "over_odd": 1.847,
+        "under_odd": 1.952,
+        "captured_ts": "2026-05-25T11:08:32.666Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-04T05:56:54.471000+00:00",
+      "handicap": {
+        "line": -0.25,
+        "home_odd": 1.819,
+        "away_odd": 1.99,
+        "captured_ts": "2026-06-04T05:56:54.470Z"
+      },
+      "over_under": {
+        "line": 2.25,
+        "over_odd": 1.833,
+        "under_odd": 1.952,
+        "captured_ts": "2026-06-04T05:56:54.470Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}

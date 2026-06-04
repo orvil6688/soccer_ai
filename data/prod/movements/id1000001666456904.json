@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666456904",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "Mexico",
+  "away": "South Africa",
+  "kickoff_utc": "2026-06-11T19:00:00+00:00",
+  "kickoff_local": "2026-06-12T03:00:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-03-05T17:53:47.701000+00:00",
+      "handicap": {
+        "line": -1.0,
+        "home_odd": 1.877,
+        "away_odd": 1.943,
+        "captured_ts": "2026-03-05T17:53:47.701Z"
+      },
+      "over_under": {
+        "line": 2.5,
+        "over_odd": 1.961,
+        "under_odd": 1.84,
+        "captured_ts": "2026-03-05T17:53:47.701Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-04T04:48:14.645000+00:00",
+      "handicap": {
+        "line": -1.25,
+        "home_odd": 2.05,
+        "away_odd": 1.862,
+        "captured_ts": "2026-06-04T04:48:14.645Z"
+      },
+      "over_under": {
+        "line": 2.25,
+        "over_odd": 1.869,
+        "under_odd": 2.02,
+        "captured_ts": "2026-06-04T04:48:14.645Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}

@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666457014",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "Norway",
+  "away": "France",
+  "kickoff_utc": "2026-06-26T19:00:00+00:00",
+  "kickoff_local": "2026-06-27T03:00:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-05-25T11:37:19.563000+00:00",
+      "handicap": {
+        "line": 0.75,
+        "home_odd": 1.813,
+        "away_odd": 2.02,
+        "captured_ts": "2026-05-25T11:37:19.563Z"
+      },
+      "over_under": {
+        "line": 2.25,
+        "over_odd": 1.787,
+        "under_odd": 2.029,
+        "captured_ts": "2026-05-25T11:37:19.563Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-03T13:13:16.495000+00:00",
+      "handicap": {
+        "line": 0.5,
+        "home_odd": 2.0,
+        "away_odd": 1.813,
+        "captured_ts": "2026-06-03T13:13:16.495Z"
+      },
+      "over_under": {
+        "line": 2.5,
+        "over_odd": 1.98,
+        "under_odd": 1.813,
+        "captured_ts": "2026-06-03T13:13:16.495Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}

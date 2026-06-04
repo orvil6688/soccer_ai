@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666456984",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "IR Iran",
+  "away": "New Zealand",
+  "kickoff_utc": "2026-06-16T01:00:00+00:00",
+  "kickoff_local": "2026-06-16T09:00:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-05-08T11:27:18.423000+00:00",
+      "handicap": {
+        "line": -0.75,
+        "home_odd": 1.952,
+        "away_odd": 1.862,
+        "captured_ts": "2026-05-08T11:27:18.423Z"
+      },
+      "over_under": {
+        "line": 2.25,
+        "over_odd": 1.793,
+        "under_odd": 2.029,
+        "captured_ts": "2026-05-08T11:27:18.423Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-04T04:48:42.269000+00:00",
+      "handicap": {
+        "line": -0.5,
+        "home_odd": 1.934,
+        "away_odd": 1.97,
+        "captured_ts": "2026-06-04T04:48:42.269Z"
+      },
+      "over_under": {
+        "line": 2.25,
+        "over_odd": 2.06,
+        "under_odd": 1.84,
+        "captured_ts": "2026-06-04T04:48:42.269Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}

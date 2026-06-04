@@ -1,0 +1,48 @@
+{
+  "fixtureId": "id1000001666457024",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "Jordan",
+  "away": "Algeria",
+  "kickoff_utc": "2026-06-23T03:00:00+00:00",
+  "kickoff_local": "2026-06-23T11:00:00+08:00",
+  "bookmaker": "pinnacle",
+  "anchors": {
+    "initial": {
+      "target_ts": "2026-05-11T05:47:51.488000+00:00",
+      "handicap": {
+        "line": 0.75,
+        "home_odd": 2.0,
+        "away_odd": 1.819,
+        "captured_ts": "2026-05-11T05:47:51.488Z"
+      },
+      "over_under": {
+        "line": 2.5,
+        "over_odd": 1.97,
+        "under_odd": 1.84,
+        "captured_ts": "2026-05-11T05:47:56.270Z"
+      }
+    },
+    "t24h": null,
+    "t12h": null,
+    "t6h": null,
+    "t1h": null,
+    "closing": {
+      "target_ts": "2026-06-04T02:08:48.948000+00:00",
+      "handicap": {
+        "line": 1.0,
+        "home_odd": 1.847,
+        "away_odd": 1.952,
+        "captured_ts": "2026-06-04T02:08:48.948Z"
+      },
+      "over_under": {
+        "line": 2.5,
+        "over_odd": 1.909,
+        "under_odd": 1.877,
+        "captured_ts": "2026-06-04T02:08:48.948Z"
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-04T14:34:41.849409+08:00"
+}
