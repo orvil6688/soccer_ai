@@ -138,7 +138,10 @@ AI_TAG = "🤖 AI 推論"
 # 七、路徑與 TEST_MODE 隔離（沿用）
 # =========================================================================
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
-DATA_DIR = Path(os.getenv("DATA_DIR", str(_PROJECT_ROOT / "data")))
+# 防呆：DATA_DIR 環境變數「設了但空字串」（.env 常見 `DATA_DIR=`）應回退預設，
+# 否則 Path("") = 當前目錄 → 資料誤寫到 repo 根的 ./test、./prod。
+_DATA_DIR_ENV = os.getenv("DATA_DIR", "").strip()
+DATA_DIR = Path(_DATA_DIR_ENV) if _DATA_DIR_ENV else (_PROJECT_ROOT / "data")
 
 PROD_SUBDIR = "prod"
 TEST_SUBDIR = "test"
