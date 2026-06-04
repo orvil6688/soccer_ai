@@ -96,9 +96,15 @@ SETTLEMENT_MINUTES = 90
 MONTHLY_REQUEST_LIMIT = 250
 REQUEST_ALERT_REMAINING = 25  # 剩餘 <= 此值 → Discord 告警
 
-# heavy 端點節流：間隔 + 429 退避
-MIN_REQUEST_INTERVAL_SEC = 1.5
-MAX_RETRY_ON_429 = 3
+# heavy 端點節流（OddsPapi 文件：historical 屬「其他端點 200/分」桶；
+# 但 5.7MB 大回應實測 sub-1/s 即 429，故保守設基礎間隔，遠低於 200/分）。
+MIN_REQUEST_INTERVAL_SEC = 3.0            # 每次請求間「基礎間隔」（不只 429 後才等）
+BACKOFF_SCHEDULE = [1.5, 3.0, 6.0]        # 429 指數退避（秒），長度＝最大重試次數
+MAX_RETRY_ON_429 = len(BACKOFF_SCHEDULE)  # 超過即標該場抓取失敗、跳過（部分失敗分流）
+
+# 按距開賽時間篩選（避免對 45 天後賽事每次都打 historical）
+FORWARD_WINDOW = timedelta(hours=48)  # 只對 48h 內開賽者抓「五錨點」
+SETTLE_GRACE = timedelta(hours=3)     # 賽後 3h 內允許一次「收盤定版」拉取
 
 # =========================================================================
 # 五、六錨點（規格書 §3.2 寫死；不存原始/降採樣序列）

@@ -11,12 +11,34 @@
 from __future__ import annotations
 
 import logging
+import re
 from datetime import datetime
 from typing import Optional
 
 from . import config, odds_parser, oddspapi_client, storage
 
 logger = logging.getLogger(__name__)
+
+# placeholder 隊名（隊伍未定 → 莊家未開盤）：組位 1A/2B、第三名組合 3A/3B/...、
+# 勝者 W73、亞軍 RU101、敗者 L101。真實全大寫隊名（如 USA）不含數字/斜線，不誤判。
+_PLACEHOLDER_RE = re.compile(r"^(W\d+|RU\d+|L\d+|\d+[A-Z]+|[A-Z]{1,3}\d+)$")
+
+
+def _is_placeholder_name(name: str) -> bool:
+    name = (name or "").strip()
+    return not name or "/" in name or bool(_PLACEHOLDER_RE.match(name))
+
+
+def _teams_determined(fixture: dict) -> bool:
+    """兩隊皆為已定隊（非 placeholder）才算已開盤可抓。"""
+    return not (
+        _is_placeholder_name(str(fixture.get("participant1Name", "")))
+        or _is_placeholder_name(str(fixture.get("participant2Name", "")))
+    )
+
+
+def _initial_captured(record: Optional[dict]) -> bool:
+    return bool(record) and isinstance(record.get("anchors"), dict) and record["anchors"].get(config.ANCHOR_INITIAL) is not None
 
 
 # =========================================================================
@@ -97,14 +119,19 @@ def _fixture_meta(fixture: dict) -> Optional[dict]:
 
 
 def process_fixture(fixture: dict, market_map: dict, now: datetime, bookmaker: str) -> dict:
-    """拉 historical → 推導六錨點 → 入庫。回處理摘要（不拋例外）。"""
-    summary = {"fixtureId": None, "captured": False, "skipped": None, "closing_settled": False}
+    """拉 historical → 推導六錨點 → 入庫。回處理摘要（不拋例外，部分失敗分流）。"""
+    summary = {"fixtureId": None, "captured": False, "skipped": None, "closing_settled": False, "failed": False}
     meta = _fixture_meta(fixture)
     if meta is None:
         summary["skipped"] = "缺主鍵或開賽時間"
         return summary
     fid = meta["fixtureId"]
     summary["fixtureId"] = fid
+
+    # fix3：隊伍未定（placeholder）→ 莊家未開盤，直接跳過不打 API（連 404 都省）
+    if not _teams_determined(fixture):
+        summary["skipped"] = "隊伍未定（未開盤）"
+        return summary
 
     existing = storage.load_fixture_movement(fid)
     if existing and existing.get("closing_settled"):
@@ -117,7 +144,25 @@ def process_fixture(fixture: dict, market_map: dict, now: datetime, bookmaker: s
         summary["skipped"] = "開賽時間無法解析"
         return summary
 
-    hist = oddspapi_client.get_historical_odds(fid, bookmaker)
+    # fix2：按距開賽時間篩選
+    ttk = kickoff - now
+    if ttk > config.FORWARD_WINDOW:
+        # 遠期：只在初盤尚未存時抓一次（抓完就不重抓）
+        if _initial_captured(existing):
+            summary["skipped"] = "遠期·初盤已存"
+            return summary
+    elif ttk < -config.SETTLE_GRACE:
+        # 賽事已過且未定版（罕見：可能整段視窗都沒抓到）→ 不再抓，沿用現況
+        summary["skipped"] = "賽事已過（視窗外）"
+        return summary
+    # 其餘：ttk 落在 [kickoff-48h, kickoff+grace] → 抓（更新五錨點/收盤定版）
+
+    try:
+        hist = oddspapi_client.get_historical_odds(fid, bookmaker)
+    except oddspapi_client.RateLimited:
+        summary["failed"] = True
+        summary["skipped"] = "抓取失敗（429 退避耗盡）"
+        return summary
     if hist is None:
         summary["skipped"] = "尚未開盤（historical 無資料）"
         return summary
@@ -163,7 +208,7 @@ def scan(bookmaker: str = config.BOOKMAKER_PRIMARY) -> dict:
     fixtures = oddspapi_client.get_world_cup_fixtures()
     logger.info("走勢掃描開始：賽程 %d 場（bookmaker=%s, now=%s）", len(fixtures), bookmaker, now.isoformat())
 
-    stats = {"fixtures": len(fixtures), "captured": 0, "settled": 0, "skipped": 0}
+    stats = {"fixtures": len(fixtures), "captured": 0, "settled": 0, "skipped": 0, "failed": 0}
     for fixture in fixtures:
         if not isinstance(fixture, dict):
             continue
@@ -172,13 +217,15 @@ def scan(bookmaker: str = config.BOOKMAKER_PRIMARY) -> dict:
             stats["captured"] += 1
         if s["closing_settled"]:
             stats["settled"] += 1
-        if s["skipped"]:
+        if s.get("failed"):
+            stats["failed"] += 1
+        elif s["skipped"]:
             stats["skipped"] += 1
 
     acct = oddspapi_client.get_account()
     logger.info(
-        "走勢掃描結束：擷取 %d / 定版收盤 %d / 略過 %d（額度 %s）",
-        stats["captured"], stats["settled"], stats["skipped"],
+        "走勢掃描結束：擷取 %d / 定版收盤 %d / 略過 %d / 抓取失敗 %d（額度 %s）",
+        stats["captured"], stats["settled"], stats["skipped"], stats["failed"],
         f"{acct['request_count']}/{acct['request_limit']}" if acct else "未知",
     )
     return stats
