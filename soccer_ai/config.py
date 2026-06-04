@@ -125,7 +125,19 @@ ANCHOR_ORDER = [ANCHOR_INITIAL, "t24h", "t12h", "t6h", "t1h", ANCHOR_CLOSING]
 # =========================================================================
 # 六、選注與 AI 契約（沿用）
 # =========================================================================
-EDGE_THRESHOLD = 0.25
+EDGE_THRESHOLD = 0.25  # 線差主閘（球）
+
+# --- 選注引擎參數（Phase 3；多為「待回測校準」預設）---
+# edge 哲學：Pinnacle 去水位求公允 vs 1xBet 偏差 + 線移動。AI 不參與選注。
+EDGE_PCT_THRESHOLD = 0.02          # 價差次閘（同線時的 EV%），待校準
+SELECT_WINDOW_HOURS = 24           # 只對開賽前 <= 此時數的場次選注，待校準
+TRAP_EDGE_GOALS_MAX = 1.0          # 盤太甜上限（球）：超過視為陷阱/過期，待校準
+TRAP_EDGE_PCT_MAX = 0.12           # 盤太甜上限（EV%），待校準
+KEY_NUMBERS_TOTAL = [2.5, 3.0]     # 大小球關鍵數字
+KEY_NUMBERS_HANDICAP = [0.0, 0.5, 1.0]  # 讓分關鍵數字
+STAKE2_EDGE_GOALS = 0.5            # 2 單位門檻（球）：須再加同向線移動確認，待校準
+# 動機層 v1 不做（空鉤子，延後；理由見 docs/phase3_proposal.md §0.2）
+DEATH_GROUP_TEAMS: list[str] = []  # 死亡之組隊名清單（命中降權），預設空＝停用
 
 WORD_BUDGET = {
     "confidence_reasoning": 50,
