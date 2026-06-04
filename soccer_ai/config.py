@@ -97,9 +97,10 @@ MONTHLY_REQUEST_LIMIT = 250
 REQUEST_ALERT_REMAINING = 25  # 剩餘 <= 此值 → Discord 告警
 
 # heavy 端點節流（OddsPapi 文件：historical 屬「其他端點 200/分」桶；
-# 但 5.7MB 大回應實測 sub-1/s 即 429，故保守設基礎間隔，遠低於 200/分）。
-MIN_REQUEST_INTERVAL_SEC = 3.0            # 每次請求間「基礎間隔」（不只 429 後才等）
-BACKOFF_SCHEDULE = [1.5, 3.0, 6.0]        # 429 指數退避（秒），長度＝最大重試次數
+# 但 5.7MB 大回應在 GitHub Actions 共用 IP 上被限更嚴：本機 3s 零 429，雲端 3s 每場
+# 先撞一次（靠重試成功、約 6s/場）。故拉長基礎間隔至 8s，讓雲端多數呼叫第一次就過）。
+MIN_REQUEST_INTERVAL_SEC = 8.0            # 每次請求間「基礎間隔」（不只 429 後才等）
+BACKOFF_SCHEDULE = [3.0, 6.0, 12.0]       # 429 指數退避（秒），長度＝最大重試次數
 MAX_RETRY_ON_429 = len(BACKOFF_SCHEDULE)  # 超過即標該場抓取失敗、跳過（部分失敗分流）
 
 # 按距開賽時間篩選（避免對 45 天後賽事每次都打 historical）

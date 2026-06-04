@@ -102,10 +102,11 @@
 
 實機跑 movement 對 104 場連打 historical（5.7MB）撞 429 卡死，追加三條：
 
-**節流退避（fix1）**：
-- 每次請求間「基礎間隔」`MIN_REQUEST_INTERVAL_SEC = 3.0s`（不只 429 後才等）。
-- 429 指數退避 `BACKOFF_SCHEDULE = [1.5, 3.0, 6.0]`，取 `max(排程, Retry-After)`；超過即 `raise RateLimited` → 該場標「抓取失敗」跳過，**不中斷整批**（部分失敗分流）。
-- OddsPapi 文件 rate limit：odds 端點 10 req/s；**其他端點（含 historical）200 req/分**。但 historical 5.7MB 大回應實測 sub-1/s 即 429，故保守設 3s（≈20/分，遠低於 200/分）。
+**節流退避（fix1；2026-06-04 雲端調校）**：
+- 每次請求間「基礎間隔」`MIN_REQUEST_INTERVAL_SEC = 8.0s`（不只 429 後才等）。
+- 429 指數退避 `BACKOFF_SCHEDULE = [3.0, 6.0, 12.0]`，取 `max(排程, Retry-After)`；超過即 `raise RateLimited` → 該場標「抓取失敗」跳過，**不中斷整批**（部分失敗分流）。
+- OddsPapi 文件 rate limit：odds 端點 10 req/s；其他端點（含 historical）200 req/分。**但 5.7MB 大回應在 GitHub Actions 共用 IP 被限更嚴**：本機 3s 零 429；雲端 3s 每場先撞一次（靠重試成功、約 6s/場、不卡死）。故基礎間隔拉長至 **8s** 讓雲端多數呼叫第一次就過。
+- 實機驗證紀錄：commit 24d18ab 的 run 在 3s 下穩定前進（~24 場/2.5 分、零失敗），被手動取消而非失敗；取消發生在 scan 完成前，故 commit&push 未執行、runner 本地檔銷毀。→ 結論「會跑完只是慢」→ 拉長間隔。
 
 **按距開賽時間篩選（fix2）**：
 - 初盤：每場開盤後抓一次存起來，之後不重抓（遠期 `ttk > 48h` 且初盤已存 → 跳過）。
