@@ -95,6 +95,92 @@ def settle_recommendation(rec: dict, market_map: dict) -> dict:
     return rec
 
 
+# =========================================================================
+# CLV 自算（§3.6）：v4 無 /clv，自行以收盤盤口 vs 推薦產出時的線計算。
+#   收盤 = historical 序列「該注確切線/邊」在開賽前的最後一筆（與六錨點 closing 同義）。
+#   時序防呆：推薦產出時間 ≥ 收盤抓取時間 → 該筆標「無 CLV」。
+# =========================================================================
+def _historical_series_for(
+    hist_markets: dict, market_map: dict, market_type: str, line: float, side: str
+) -> Optional[list]:
+    """從 historical markets 取 (market 類型, 線, 邊) 那條 outcome 的時間序列。"""
+    target_name = _market_name_for(market_type)
+    side_label = _SIDE_TO_OUTCOME.get(side)
+    if target_name is None or side_label is None or not isinstance(hist_markets, dict):
+        return None
+    for mid, mobj in hist_markets.items():
+        meta = market_map.get(_to_int(mid))
+        if not meta or meta["name"] != target_name or abs(float(meta["handicap"]) - float(line)) > 1e-9:
+            continue
+        if not isinstance(mobj, dict):
+            continue
+        for oid, oobj in mobj.get("outcomes", {}).items():
+            if meta["outcomes"].get(str(oid)) != side_label:
+                continue
+            series = oobj.get("players", {}).get("0") if isinstance(oobj, dict) else None
+            return series if isinstance(series, list) else None
+    return None
+
+
+def closing_odds_for(
+    hist_markets: dict, market_map: dict, kickoff, market_type: str, line: float, side: str
+) -> "tuple[Optional[float], Optional[str]]":
+    """該注確切線/邊在開賽前的最後一筆賠率（收盤）。回 (odds, ts_iso) 或 (None, None)。"""
+    series = _historical_series_for(hist_markets, market_map, market_type, line, side)
+    if not series:
+        return (None, None)
+    best = None
+    for pt in series:
+        if not isinstance(pt, dict):
+            continue
+        price, cts = pt.get("price"), pt.get("createdAt")
+        if not isinstance(price, (int, float)) or not isinstance(cts, str):
+            continue
+        try:
+            t = config.parse_iso(cts)
+        except ValueError:
+            continue
+        if t < kickoff and (best is None or t > best[1]):
+            best = (float(price), t)
+    return (best[0], best[1].isoformat()) if best else (None, None)
+
+
+def compute_clv(rec: dict, market_map: dict, bookmaker: str = config.BOOKMAKER_PRIMARY) -> Optional[dict]:
+    """CLV =（推薦產出賠率 / 收盤賠率 − 1）。重抓 historical 取確切線收盤價。
+
+    回 {closing_odds, closing_ts, production_odds, clv_pct, no_clv} 或 None（無法計算）。
+    """
+    fid = rec.get("fixtureId")
+    try:
+        kickoff = config.to_utc(config.parse_iso(rec["kickoff_utc"]))
+        produced = config.parse_iso(rec["produced_at_local"])
+    except (KeyError, ValueError):
+        return None
+    try:
+        hist = oddspapi_client.get_historical_odds(fid, bookmaker) if isinstance(fid, str) else None
+    except oddspapi_client.RateLimited:
+        return None
+    bm = hist.get("bookmakers", {}) if isinstance(hist, dict) else {}
+    markets = bm.get(bookmaker, {}).get("markets") if isinstance(bm, dict) else None
+    if not isinstance(markets, dict):
+        return None
+    close_odds, close_ts = closing_odds_for(
+        markets, market_map, kickoff, rec.get("market"), rec.get("line"), rec.get("side")
+    )
+    if close_odds is None or close_ts is None:
+        return None
+    prod_odds = float(rec.get("odds", 0.0))
+    # §3.6 時序防呆：推薦產出時間 >= 收盤抓取時間 → 無 CLV
+    no_clv = produced >= config.parse_iso(close_ts)
+    return {
+        "closing_odds": close_odds,
+        "closing_ts": close_ts,
+        "production_odds": prod_odds,
+        "clv_pct": None if no_clv else round(prod_odds / close_odds - 1.0, 4),
+        "no_clv": no_clv,
+    }
+
+
 def _to_int(x) -> Optional[int]:
     try:
         return int(x)
