@@ -69,7 +69,7 @@ def main(argv=None) -> int:
             log.warning("額度告急：剩餘 %d（門檻 %d）", acct["remaining"], config.REQUEST_ALERT_REMAINING)
 
     if args.mode == "movement":
-        stats = movement.scan(bookmaker=args.bookmaker)
+        stats = movement.scan()  # 雙 book（config.MOVEMENT_BOOKMAKERS）
         log.info("走勢完成：%s", stats)
     elif args.mode == "backtest":
         m = backtest.run_backfill(date_local=args.date, bookmaker=args.bookmaker)

@@ -1,12 +1,9 @@
-"""板塊二：盤口走勢拉取 + 六錨點推導（架構 A，取代舊三窗口 snapshot）。
+"""板塊二：盤口走勢拉取 + 八錨點軌跡分類（架構 A，schema v2）。
 
-不搶時間窗、不靠排程準時：對每場拉 historical 完整序列（假設不計額度），
-再從序列「切」出六錨點。規則寫死於 derive_anchors（規格書 §3.2）：
-  錨點：initial / t24h / t12h / t6h / t1h / closing
-  規則1 取最接近目標時刻的一筆 + 存實際時間戳/offset
-  規則2 收盤=序列開賽前最後一筆，與 t1h 不同點
-  規則3 目標時刻早於序列首筆 → 該錨點 null（不硬塞）
-  initial=序列第一筆（莊家首次開盤價）
+不搶時間窗、不靠排程準時：對每場、每個 bookmaker 拉 historical 完整序列
+（假設不計額度），交 trajectory.build 切八錨點 + segment + summary。
+CROWN 雙記：MOVEMENT_BOOKMAKERS（pinnacle + singbet）各記一套，存於 trajectory[book]。
+缺場/未開盤的 book 該場 trajectory 缺，不影響其他 book（部分失敗分流）。
 """
 from __future__ import annotations
 
@@ -15,7 +12,7 @@ import re
 from datetime import datetime
 from typing import Optional
 
-from . import config, odds_parser, oddspapi_client, storage
+from . import config, odds_parser, oddspapi_client, storage, trajectory
 
 logger = logging.getLogger(__name__)
 
@@ -30,15 +27,25 @@ def _is_placeholder_name(name: str) -> bool:
 
 
 def _teams_determined(fixture: dict) -> bool:
-    """兩隊皆為已定隊（非 placeholder）才算已開盤可抓。"""
     return not (
         _is_placeholder_name(str(fixture.get("participant1Name", "")))
         or _is_placeholder_name(str(fixture.get("participant2Name", "")))
     )
 
 
+def _anchor(record: Optional[dict], book: str, market: str, anchor: str):
+    """安全取 trajectory[book][market].anchors[anchor]，缺則 None。"""
+    if not isinstance(record, dict):
+        return None
+    m = record.get("trajectory", {}).get(book, {}).get(market, {})
+    if not isinstance(m, dict):
+        return None
+    return m.get("anchors", {}).get(anchor)
+
+
 def _initial_captured(record: Optional[dict]) -> bool:
-    return bool(record) and isinstance(record.get("anchors"), dict) and record["anchors"].get(config.ANCHOR_INITIAL) is not None
+    """任一 book 的讓分已存 initial → 視為遠期初盤已抓。"""
+    return any(_anchor(record, b, "handicap", config.ANCHOR_INITIAL) for b in config.MOVEMENT_BOOKMAKERS)
 
 
 # =========================================================================
@@ -54,51 +61,6 @@ def ensure_market_map() -> dict:
     if market_map:
         storage.save_market_map(market_map)
     return market_map
-
-
-# =========================================================================
-# 六錨點推導
-# =========================================================================
-def _build_anchor(markets: dict, market_map: dict, target: datetime, timed: bool) -> dict:
-    point = odds_parser.parse_point(markets, market_map, odds_parser.make_historical_price_fn(target))
-    if timed:
-        for key in ("handicap", "over_under"):
-            sub = point.get(key)
-            if sub and sub.get("captured_ts"):
-                try:
-                    sub["offset_sec"] = int((config.parse_iso(sub["captured_ts"]) - target).total_seconds())
-                except ValueError:
-                    sub["offset_sec"] = None
-    return {"target_ts": target.isoformat(), **point}
-
-
-def derive_anchors(markets: dict, market_map: dict, kickoff: datetime) -> dict:
-    """從 historical 序列切六錨點。回 {anchor_name: {...}|None}。"""
-    anchors: dict[str, Optional[dict]] = {name: None for name in config.ANCHOR_ORDER}
-    times = odds_parser.collect_timestamps(markets, market_map)
-    if not times:
-        return anchors  # 全 null（尚未開盤）
-    earliest, latest = times[0], times[-1]
-
-    # initial = 序列第一筆
-    anchors[config.ANCHOR_INITIAL] = _build_anchor(markets, market_map, earliest, timed=False)
-
-    # closing = 開賽前最後一筆（規則2，§3.6）
-    pre_kick = [t for t in times if t < kickoff]
-    if pre_kick:
-        anchors[config.ANCHOR_CLOSING] = _build_anchor(markets, market_map, pre_kick[-1], timed=False)
-
-    # 四個 T-Nh：目標時刻落在序列觀測區間 [earliest, latest] 外 → null（規則3）
-    #   target < earliest：盤開得晚，無此時段資料
-    #   target > latest  ：時間還沒到（未來尚未發生），資料尚未存在
-    # 兩者皆不得硬塞最接近的假裝有。
-    for name, offset in config.ANCHOR_OFFSETS.items():
-        target = kickoff - offset
-        if target < earliest or target > latest:
-            anchors[name] = None
-        else:
-            anchors[name] = _build_anchor(markets, market_map, target, timed=True)
-    return anchors
 
 
 # =========================================================================
@@ -118,8 +80,25 @@ def _fixture_meta(fixture: dict) -> Optional[dict]:
     }
 
 
-def process_fixture(fixture: dict, market_map: dict, now: datetime, bookmaker: str) -> dict:
-    """拉 historical → 推導六錨點 → 入庫。回處理摘要（不拋例外，部分失敗分流）。"""
+def _build_book_trajectory(fid: str, book: str, market_map: dict, kickoff: datetime) -> "tuple[Optional[dict], Optional[str]]":
+    """拉某 book 的 historical → 兩市場軌跡。回 (trajectory_dict, fail_reason)。"""
+    try:
+        hist = oddspapi_client.get_historical_odds(fid, book)
+    except oddspapi_client.RateLimited:
+        return (None, "rate_limited")
+    if hist is None:
+        return (None, "no_data")  # 404 未開盤
+    markets = hist.get("bookmakers", {}).get(book, {}).get("markets") if isinstance(hist.get("bookmakers"), dict) else None
+    if not isinstance(markets, dict):
+        return (None, "no_markets")
+    return ({
+        "handicap": trajectory.build(markets, market_map, kickoff, "handicap"),
+        "over_under": trajectory.build(markets, market_map, kickoff, "over_under"),
+    }, None)
+
+
+def process_fixture(fixture: dict, market_map: dict, now: datetime) -> dict:
+    """逐 book 拉 historical → 軌跡 → 入庫。回處理摘要（不拋例外，部分失敗分流）。"""
     summary = {"fixtureId": None, "captured": False, "skipped": None, "closing_settled": False, "failed": False}
     meta = _fixture_meta(fixture)
     if meta is None:
@@ -128,8 +107,7 @@ def process_fixture(fixture: dict, market_map: dict, now: datetime, bookmaker: s
     fid = meta["fixtureId"]
     summary["fixtureId"] = fid
 
-    # fix3：隊伍未定（placeholder）→ 莊家未開盤，直接跳過不打 API（連 404 都省）
-    if not _teams_determined(fixture):
+    if not _teams_determined(fixture):  # placeholder → 未開盤，直接跳過不打 API
         summary["skipped"] = "隊伍未定（未開盤）"
         return summary
 
@@ -144,39 +122,37 @@ def process_fixture(fixture: dict, market_map: dict, now: datetime, bookmaker: s
         summary["skipped"] = "開賽時間無法解析"
         return summary
 
-    # fix2：按距開賽時間篩選
     ttk = kickoff - now
-    if ttk > config.FORWARD_WINDOW:
-        # 遠期：只在初盤尚未存時抓一次（抓完就不重抓）
+    if ttk > config.MOVEMENT_WINDOW:
         if _initial_captured(existing):
             summary["skipped"] = "遠期·初盤已存"
             return summary
     elif ttk < -config.SETTLE_GRACE:
-        # 賽事已過且未定版（罕見：可能整段視窗都沒抓到）→ 不再抓，沿用現況
         summary["skipped"] = "賽事已過（視窗外）"
         return summary
-    # 其餘：ttk 落在 [kickoff-48h, kickoff+grace] → 抓（更新五錨點/收盤定版）
 
-    try:
-        hist = oddspapi_client.get_historical_odds(fid, bookmaker)
-    except oddspapi_client.RateLimited:
-        summary["failed"] = True
-        summary["skipped"] = "抓取失敗（429 退避耗盡）"
-        return summary
-    if hist is None:
-        summary["skipped"] = "尚未開盤（historical 無資料）"
-        return summary
-    bm = hist.get("bookmakers", {})
-    markets = bm.get(bookmaker, {}).get("markets") if isinstance(bm, dict) else None
-    if not isinstance(markets, dict):
-        summary["skipped"] = "無盤口市場"
+    # 逐 book 建軌跡
+    traj: dict[str, dict] = {}
+    fails = []
+    for book in config.MOVEMENT_BOOKMAKERS:
+        tj, reason = _build_book_trajectory(fid, book, market_map, kickoff)
+        if tj is not None:
+            traj[book] = tj
+        elif reason == "rate_limited":
+            fails.append(book)
+    if not traj:
+        summary["failed"] = bool(fails)
+        summary["skipped"] = "抓取失敗（429）" if fails else "尚未開盤（historical 無資料）"
         return summary
 
-    anchors = derive_anchors(markets, market_map, kickoff)
-    # 賽事已開賽且抓到收盤 → 定版，往後不再重抓
-    closing_settled = now >= kickoff and anchors.get(config.ANCHOR_CLOSING) is not None
+    # 收盤定版：賽後且主 book 讓分已抓到 closing → 往後不再抓
+    primary = config.MOVEMENT_BOOKMAKERS[0]
+    closing_book = primary if primary in traj else next(iter(traj))
+    closing_present = bool(traj[closing_book]["handicap"]["anchors"].get(config.ANCHOR_CLOSING))
+    closing_settled = now >= kickoff and closing_present
 
     record = {
+        "schema_version": config.SCHEMA_VERSION,
         "fixtureId": fid,
         "tournamentId": config.WORLD_CUP_TOURNAMENT_ID,
         "sportId": config.SPORT_ID_SOCCER,
@@ -184,8 +160,8 @@ def process_fixture(fixture: dict, market_map: dict, now: datetime, bookmaker: s
         "away": meta["away"],
         "kickoff_utc": kickoff.isoformat(),
         "kickoff_local": config.to_local(kickoff).isoformat(),
-        "bookmaker": bookmaker,
-        "anchors": anchors,
+        "books": list(traj.keys()),
+        "trajectory": traj,
         "closing_settled": closing_settled,
         "pulled_at_local": config.to_local(now).isoformat(),
     }
@@ -198,7 +174,7 @@ def process_fixture(fixture: dict, market_map: dict, now: datetime, bookmaker: s
 # =========================================================================
 # 主入口
 # =========================================================================
-def scan(bookmaker: str = config.BOOKMAKER_PRIMARY) -> dict:
+def scan() -> dict:
     now = config.now_local()
     market_map = ensure_market_map()
     if not market_map:
@@ -206,13 +182,14 @@ def scan(bookmaker: str = config.BOOKMAKER_PRIMARY) -> dict:
         return {"fixtures": 0, "captured": 0, "settled": 0, "error": "no_market_map"}
 
     fixtures = oddspapi_client.get_world_cup_fixtures()
-    logger.info("走勢掃描開始：賽程 %d 場（bookmaker=%s, now=%s）", len(fixtures), bookmaker, now.isoformat())
+    logger.info("走勢掃描開始：賽程 %d 場（books=%s, now=%s）",
+                len(fixtures), config.MOVEMENT_BOOKMAKERS, now.isoformat())
 
     stats = {"fixtures": len(fixtures), "captured": 0, "settled": 0, "skipped": 0, "failed": 0}
     for fixture in fixtures:
         if not isinstance(fixture, dict):
             continue
-        s = process_fixture(fixture, market_map, now, bookmaker)
+        s = process_fixture(fixture, market_map, now)
         if s["captured"]:
             stats["captured"] += 1
         if s["closing_settled"]:
