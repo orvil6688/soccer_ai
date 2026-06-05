@@ -123,6 +123,12 @@
 - 排程：GH Actions Cron `0 * * * *`（每小時，UTC→UTC+8）；回測準確度靠賽後 settle 拉取保證，頻率只影響賽前決策新鮮度。
 
 ### 5.4 各板塊細部
+- **🔒 analyzer 定位（釘死，不走回頭路）**：
+  - Gemini ＝**推論評論員**：只解釋盤口為何這樣動，**不選注、不給信心分、不算注碼**。`confidence_reasoning` 是「信心理由」**敘述**，非驅動決策的分數。
+  - **選注永遠是 selector 純數學**；Gemini 在 selector **之後**跑、**碰不到 pick**（不能改 market/side/line/stake/edge）。
+  - 舊「GEM 開盤手一條龍（AI 自己掃描+評分+選注+凱利）」＝Colab 時代玩法，**已被現架構取代，不走回頭路**。
+  - 數據面（xG/傷兵）餵進 analyzer prompt＝**Phase 5 接 xG 後才做**；現在 analyzer 只吃盤口軌跡。
+  - **`GEMINI_MODEL` 鎖 `gemini-2.5-flash`**（2026-06-06 拍板）：pro 為 flash 約 23× 價但純盤口反推品質差距邊際；Phase 5 多維推理後再評估升 pro。
 - **Gemini 字數預算（各自獨立截斷，超出以 `...` 替換）**：`confidence_reasoning` 50 / `injury_news_inference` 100 / `market_reading` 150 字。所有產出包進 `ai{}` 區塊強制壓 `🤖 AI 推論`（區塊層 tag，不佔字數）。`injury_news_inference`＝由盤口反推的傷病/陣容消息推測（無真實傷停源，僅盤口反推、不宣稱已證實傷情）。
 - 函式實際呼叫點：`main.py --mode movement` → `movement.scan()` →（逐場、逐 book）`process_fixture()` → `oddspapi_client.get_historical_odds()` → `trajectory.build()`（八錨點+segment+summary）→ `storage.save_fixture_movement()`。`--mode backtest` → `backtest.run_backfill()`。
 - 市場對照表 `/markets`（≈9MB）抓一次後快取 `data/{}/market_map_soccer.json` 重用。

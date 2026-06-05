@@ -78,7 +78,14 @@ trajectory 訊號：線動以線為主、線不動看 de-vig 機率位移(濾水
 ```
 
 ### 資料品質標記
-✅ 真實（完整 API）/ 🟡 半真實（API+AI）/ 🤖 AI 推論。Gemini 輸出強制壓 🤖，存於推薦 JSON，由 analyzer 計算，下游讀不重判。
+✅ 真實（完整 API）/ 🟡 半真實（API+AI）/ 🤖 AI 推論。Gemini 輸出包進 `ai{}` 區塊強制壓 🤖，存於推薦 JSON，下游讀不重判。
+
+### 🔒 analyzer 定位（釘死，不走回頭路）
+- Gemini ＝**推論評論員**：只解釋盤口為何這樣動，**不選注、不給信心分、不算注碼**（`confidence_reasoning` 是敘述非分數）。
+- **選注永遠 selector 純數學**；Gemini 在 selector **之後**跑、**碰不到 pick**。
+- 舊「GEM 開盤手一條龍（AI 掃描+評分+選注+凱利）」＝Colab 時代，**已被取代，不走回頭路**。
+- 數據面（xG/傷兵）餵 analyzer prompt＝**Phase 5 才做**；現在只吃盤口軌跡。
+- `GEMINI_MODEL` 鎖 **gemini-2.5-flash**（pro 約 23× 價、純盤口品質差距邊際）；Phase 5 多維推理後再評估升 pro。
 
 ### 結算口徑（絕對紀律）
 所有讓分/大小球一律 90 分鐘（含傷停）結算，延長賽與 PK 不計。
