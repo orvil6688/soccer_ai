@@ -1,8 +1,8 @@
 # CLAUDE.md — 世界盃足球盤口分析系統 · AI 協作記憶中樞
 
-> ✅ **本檔為 v2.0-phase1A（架構 A：OddsPapi 主源）**：第五節契約已換為 OddsPapi v4，本檔自包含、
-> 可讓任何 AI 憑此恢復上下文。實測存證見 `docs/oddspapi_findings.md`、修訂範圍見 `docs/arch_A_proposal.md`。
-> `HANDOFF_TO_GEMINI.md`（API-Football 時期）降為歷史參考。
+> ✅ **本檔為 v2.0-traj（架構 A：OddsPapi 主源 + 八錨點盤口軌跡分類 schema v2）**：第五節契約自包含、
+> 可讓任何 AI 憑此恢復上下文。存證：`docs/oddspapi_findings.md`、`docs/arch_A_proposal.md`、
+> `docs/phase3_proposal.md`、`docs/movement_trajectory_proposal.md`。`HANDOFF_TO_GEMINI.md`（API-Football 時期）降為歷史參考。
 >
 > 🔗 **同步紀律**：本檔與 `小g小c協作簡報.md`（協作簡報）為一組記憶中樞。**任一更新，另一份必須同步檢查**。本檔更新時由小cc 一併更新協作簡報。
 
@@ -108,42 +108,48 @@
 - ⚠️ **`/clv` v4 不存在**（已實打），CLV 自算（見 5.5）。
 
 ### 5.2 選注引擎參數
-- **Edge 門檻** `edge_threshold = 0.25` 球。
-- Pinnacle vs 1xBet 反向線移動 → 列「加權訊號」記錄供回測，**不**直接觸發 2 單位警報。
+- **Edge 門檻** `edge_threshold = 0.25` 球：Pinnacle 去水位求公允 vs 1xBet 偏差（線差為主閘、同線價差 EV% 為次閘）。AI 不參與選注。
+- **訊號改 trajectory**（見 5.6）：`selector.line_movement_signal`（線-only）已**移除**，改 `trajectory_signal` 讀軌跡 summary —— 線動以線方向為主、**線不動看 de-vig 公允機率位移**（能抓「線黏住但賠率動」、濾掉兩邊一起調水位的假動作）→ confirm/reverse/flat。
+- 反向線移動只記「加權訊號」供回測，**不**單獨觸發 2 單位。動機層(D) v1 不做（空鉤子）。
 
-### 5.3 走勢與六錨點（取代三窗口排程）
-- OddsPapi `historical-odds` = **賽前即時走勢**（已實證），不搶時間窗、不需生存法則。
-- 對每場拉完整序列（假設不計額度，**未經官方確認**，退場條件見 §8），切六錨點。
-- **六錨點**：`initial`（序列首筆=莊家首次開盤）、`t24h`/`t12h`/`t6h`/`t1h`、`closing`。
-- **§3.2 寫死三規則**：①取最接近目標時刻一筆 + 存實際時間戳/`offset_sec`；②收盤=序列開賽前最後一筆（≠t1h，§5.5）；③目標時刻落在序列觀測區間 `[最早,最新]` 外（盤開太晚 或 時間未到）→ 該錨點 `null`，不硬塞。
+### 5.3 走勢與八錨點（schema v2，取代三窗口排程）
+- OddsPapi `historical-odds` = **賽前即時走勢**（已實證），不搶時間窗、不需生存法則。對每場拉完整序列（假設不計額度，**未經官方確認**，退場條件見 §8）切八錨點。
+- **八錨點**（每錨點存 `線/雙邊賠率/target_ts/captured_ts`(+`offset_sec`)+`role`）：
+  - **決策核心 6**：`t72h`/`t24h`/`t12h`/`t6h`/`t1h`/`t30m`（選注/推論主依據）
+  - **回測輔助 2**：`initial`（序列首筆=莊家試水溫，噪音，不當決策訊號）、`closing`（開賽前最後一筆，來不及投注，僅 CLV/回測對照）
+- **§3.2 寫死三規則**：①取最接近目標時刻一筆 + 存時間戳/`offset_sec`；②收盤≠t30m，各自獨立；③目標落在序列觀測區間 `[最早,最新]` 外（盤開太晚 或 時間未到）→ `null`，不硬塞。
 - **不存原始/降採樣序列**，需要時即時重抓（免費）。
-- **抓取範圍與節流**（§3.2 寫死，避免對全 104 場連打 historical 撞 429）：
-  - 節流：基礎間隔 **8s/次**（雲端共用 IP 對 5.7MB historical 限更嚴；3s 雲端每場先撞一次 429 靠重試過）；429 指數退避 `[3,6,12]`，耗盡標該場「抓取失敗」跳過，不中斷整批。
-  - 時間閘：初盤每場抓一次存起；五錨點只對 `ttk≤48h` 抓；賽後 3h 內定版收盤後 `closing_settled` 不再抓。
-  - **隊名 placeholder 判定已開盤**（`hasOdds` 對全 104 場皆 true，不可用）：placeholder（`W\d+`/組位 `1A`/含 `/`）→ 跳過不打 API；隊名變真實即自動納入。→ 常態 72 場小組賽抓初盤、密集只臨近 48h 的 2–4 場。
-- 排程：GitHub Actions Cron `0 * * * *`（每小時），內部 UTC、邏輯轉 **UTC+8**。
+- **抓取範圍與節流**：節流基礎間隔 **8s/次**、429 指數退避 `[3,6,12]`耗盡標該場失敗跳過；**拉取窗 80h**（涵蓋 t72h），遠期僅抓一次 initial、賽後 3h 內定版收盤後不再抓；**隊名 placeholder 判未開盤**（`hasOdds` 全 true 不可用）→ placeholder 跳過不打 API。
+- 排程：GH Actions Cron `0 * * * *`（每小時，UTC→UTC+8）；回測準確度靠賽後 settle 拉取保證，頻率只影響賽前決策新鮮度。
 
 ### 5.4 各板塊細部
 - **Gemini 字數預算（各自獨立截斷，超出以 `...` 替換）**：`confidence_reasoning` 50 / `injury_impact` 100 / `market_reading` 150 字。所有產出強制壓 `🤖 AI 推論`。
-- 函式實際呼叫點：`main.py` → `movement.scan()` →（逐場）`process_fixture()` → `oddspapi_client.get_historical_odds()` → `movement.derive_anchors()`（內呼 `odds_parser.parse_point` + `make_historical_price_fn`）→ `storage.save_fixture_movement()`。
+- 函式實際呼叫點：`main.py --mode movement` → `movement.scan()` →（逐場、逐 book）`process_fixture()` → `oddspapi_client.get_historical_odds()` → `trajectory.build()`（八錨點+segment+summary）→ `storage.save_fixture_movement()`。`--mode backtest` → `backtest.run_backfill()`。
 - 市場對照表 `/markets`（≈9MB）抓一次後快取 `data/{}/market_map_soccer.json` 重用。
 
 ### 5.5 資料結構
-- **主鍵**：字串 `fixtureId`（OddsPapi 原生，如 `id1000001666456904`）。隊名僅輔助，嚴禁當 ID。
-- **走勢檔**（prod 上線前 schema 仍可改）：`data/{prod|test}/movements/{fixtureId}.json`
+- **主鍵**：字串 `fixtureId`（OddsPapi 原生）。隊名僅輔助，嚴禁當 ID。
+- **走勢檔 v2**（`schema_version:2`；prod 上線前可改）：`data/{prod|test}/movements/{fixtureId}.json`
   ```json
-  {"fixtureId": str, "tournamentId": 16, "sportId": 10, "home": str, "away": str,
-   "kickoff_utc": ISO, "kickoff_local": ISO, "bookmaker": str,
-   "anchors": {"initial":A, "t24h":A|null, "t12h":A|null, "t6h":A|null, "t1h":A|null, "closing":A},
-   "closing_settled": bool, "pulled_at_local": ISO}
+  {"schema_version":2, "fixtureId":str, "tournamentId":16, "sportId":10, "home":str,"away":str,
+   "kickoff_utc":ISO, "kickoff_local":ISO, "books":["pinnacle","singbet"],
+   "trajectory": { "<book>": { "handicap":{anchors,segments,summary}, "over_under":{...} } },
+   "closing_settled":bool, "pulled_at_local":ISO}
   ```
-  錨點 A：`{"target_ts": ISO, "handicap": H|null, "over_under": O|null}`；
-  `H = {line, home_odd, away_odd, captured_ts, [offset_sec]}`、`O = {line, over_odd, under_odd, captured_ts, [offset_sec]}`。
+  錨點：`{target_ts,captured_ts,offset_sec,line, home_odd/away_odd 或 over_odd/under_odd}`（或 null）。
 - **歷史推薦檔**：`data/{prod|test}/recommendations/{YYYY-MM-DD}.json`（list，以 `fixtureId` upsert）。
-  推薦 schema（Phase 3 selector 產出、backtest 消費）：`{fixtureId, produced_at_local, kickoff_utc, market:"handicap"|"over_under", side:"home"|"away"|"over"|"under", line, odds, stake_units}`；backtest 回填 `result/pnl_units/settled/clv`。
-- **CLV 自算**（v4 無 /clv）：CLV% =（推薦產出賠率 / 收盤賠率 − 1），收盤＝重抓 historical 取「該確切線/邊」開賽前最後一筆；時序防呆：推薦產出時間 ≥ 收盤抓取時間 → 該筆 `no_clv`（標「無 CLV」）。
-- **單位損益**：WIN→+stake×(odds−1)、HALFWIN→半、PUSH→0、HALFLOSS→−stake/2、LOSE→−stake。命中率 PUSH 不計分母、半贏半輸計 0.5。
+  推薦 schema（selector 產出、backtest 消費）：`{fixtureId, produced_at_local, kickoff_utc, market, side, line, odds, stake_units, signals{signal,shape,tag,...}, trajectory{book:{shape,tag,...}}}`；backtest 回填 `result/pnl_units/settled/clv`。
+- **CLV 自算**（v4 無 /clv）：CLV% =（推薦產出賠率 / 收盤賠率 − 1），收盤＝重抓 historical 取「該確切線/邊」開賽前最後一筆；時序防呆：產出時間 ≥ 收盤抓取時間 → `no_clv`。
+- **單位損益**：WIN→+stake×(odds−1)、HALFWIN→半、PUSH→0、HALFLOSS→−stake/2、LOSE→−stake。命中率 PUSH 不計分母、半贏半輸計 0.5。**`by_trajectory`**：依 shape 分組出命中率/單位（統計「某軌跡形狀 → 真實過盤率」）。
 - **原子寫入**：tmp → `os.replace`；`.gitignore` 已排除 `data/prod/*.tmp`。
+
+### 5.6 盤口軌跡分類（系統核心智慧；系統＝事實層、不解讀意圖）
+- **schema 三層**：`trajectory → bookmaker → market → {anchors(8), segments(決策相鄰), summary}`。bookmaker 為頂層 key，**加家＝加 key、零遷移**。
+- **CROWN 雙記**：`MOVEMENT_BOOKMAKERS = [pinnacle, singbet]`（singbet＝皇冠 Crown skin，免費層覆蓋較少場；mansion88 本尊免費層 403 受限）。兩家各記一套軌跡，回測比哪家 sharp。
+- **segment 四維**：①線升降幾級（一級＝0.25，`級=(新線−舊線)/0.25`）②我方賠率方向 ③對方賠率方向 ④**水互換**（看低水方[賠率較低那邊]有沒有換邊，**與線升降無關**）。
+- **summary**：net級數/abs路徑/max偏離/reverted/方向變數/late_swing/水互換次數 + de-vig 機率位移 + **中性 shape** + 客觀結構化中文 tag（如「平0級·水互換·主升客升」）。
+- **shape 中性枚舉**：`flat/odds_drift/fav_swap/gradual/monotonic/spike_revert/late_swing/choppy/mixed`。系統只描述「怎麼動」；**動機（洗盤/誘散戶/消息走漏）留 Gemini 標 🤖**，shape 名不叫「洗盤」。線不動時改看賠率/水互換維度 → 不誤判 flat。
+- 門檻全「待回測校準」（`LINE_STEP/ODDS_FLAT_EPS/PROB_FLAT_EPS/FAV_EPS/shape 規則`）；shape 第一版待小組賽真實資料對照看盤迭代。
 
 ---
 
@@ -199,17 +205,27 @@
 退場條件：若假設失效（historical 開始計數或被限制）→ 退回 odds-by-tournaments（批量現況盤，會計數）為主，重排額度模型
 教訓：把未確認的有利觀察當架構支柱時，務必明列假設與退場路徑，勿寫成不可動鐵律
 ```
+```
+事件：原 selector「線-only 訊號」沉默缺陷
+根因：line_movement_signal 只比線移動，「線不動就判 flat」、完全沒看賠率
+後果：亞洲盤線常黏住、移動在賠率（例：大小線 2.5 不動但賠率 0.70/1.05→0.91/0.80＝重大 sharp 訊號）會被漏成 flat
+抓出：總司令以「線 2.5 不動但賠率大幅移動」具體例子點出，要求線+賠率雙軌
+教訓：訊號邏輯要涵蓋「線 + 賠率」雙維，別只看線。最後升級成完整「盤口軌跡分類」(§5.6)——
+     線不動改看 de-vig 公允機率位移、並濾掉兩邊一起調水位的假動作；舊 line-only bug 在新設計下不存在
+```
 
 ---
 
 ## 九、目前狀態
 
-- **最新版本**：v2.0-phase2（2026-06-04，架構 A；Phase 1A 走勢 + Phase 2 回測閉環完工）
-- **核心架構**：OddsPapi v4 主源；`historical-odds` 賽前即時走勢 → 推導六錨點 → 選注 → settlement 回測；交叉驗證 Pinnacle vs 1xBet
-- **Phase 1A 已完成**（5 commit）：封存 API-Football 舊模組(`_legacy/`)；`config.py`(OddsPapi 契約)；`oddspapi_client.py`(429 退避+額度)；`odds_parser.py`(market_map+主盤線)；`movement.py`(六錨點+三規則+48h 篩選+placeholder)；`storage.py`；`main.py`/`main_pipeline.yml`(每小時 8s 節流)。GitHub Actions 實機驗證：bot auto commit + `data/prod/movements/` 72 場、六錨點正確、持久化命脈通。
-- **Phase 2 已完成**（3 commit）：`backtest.py` — `/v4/settlements` 賽果回填(result→單位損益)、CLV 自算(§3.6 時序防呆)、命中率/ROI/CLV 彙總 + `run_backfill` + `main --mode backtest --date`。以真實 MLS 完賽場驗證全綠。
-- **下一步**：Phase 3 — `selector.py` 選注引擎(edge≥0.25/誘盤過濾/動機) + `analyzer.py`(Gemini GEM 人設) + Discord 推播 + GH Pages。**選注產出推薦＝backtest 閉環的輸入**（目前 recommendations 尚無資料）。
-- **待總司令動作**：①於 repo Secrets 設 `ODDSPAPI_API_KEY`；②（建議）寄信 OddsPapi 確認 historical 不計額度（見 §8 退場條件）。
+- **最新版本**：v2.0-traj（2026-06-05，schema v2：八錨點 + 盤口軌跡分類 + selector 改 trajectory + 雙 book）
+- **核心架構**：OddsPapi v4 主源；`historical-odds` 賽前即時走勢 → **八錨點 + 軌跡分類(§5.6)** → 選注(de-vig vs 1xBet + trajectory 訊號) → settlement 回測(含 by_trajectory)；CROWN 雙記 Pinnacle + singbet。
+- **Phase 1A 已完成**：封存 API-Football 舊模組；config/oddspapi_client/odds_parser/storage/main/yml（每小時 8s 節流、placeholder 篩選）。
+- **Phase 2 已完成**：`backtest.py` `/v4/settlements` 賽果回填 + CLV 自算 + 命中率/ROI/CLV 彙總 + by_trajectory；真實 MLS 完賽場驗證。
+- **軌跡分類已完成**（schema v2）：六錨點→**八錨點**(+t72h/+t30m，決策6/回測2/role)；`trajectory.py`(八錨點+segment 四維+summary 中性 shape+中文 tag，CROWN 雙記)；`movement.py` 重寫雙 book schema v2；`selector` line_movement_signal→`trajectory_signal`(線+de-vig 機率位移，抓「線黏住賠率動」、濾水位假動作)；`backtest` 加 by_trajectory。MLS 真實場驗證：水位假動作正確判 flat、線動 confirm/reverse 正確。CI 每小時自動遷移 v1→v2。
+- **下一步**：`analyzer.py`（Gemini GEM 開盤手人設，讀軌跡描述+原始數據推論意圖、標 🤖、字數 50/100/150、`GEMINI_API_KEY` 從 env 讀）→ Discord 推播 → GH Pages（後置）。shape 第一版待小組賽真實資料對照看盤迭代。
+- **待總司令動作**：①repo Secrets 設 `ODDSPAPI_API_KEY`；②（建議）寄信 OddsPapi 確認 historical 不計額度。
+- **暫停中**：titan007 spike（2022 回測，OddsPapi 歷史僅 3–6 個月拿不到）、上半場盤口（未來擴充）。
 
 ---
 
@@ -222,4 +238,4 @@
 
 ---
 
-**本檔版本**：v2.0-phase2｜格式來源：總司令通用範本 v1.0｜建立 2026-06-02｜Phase 2 回測閉環回填 2026-06-04
+**本檔版本**：v2.0-traj｜格式來源：總司令通用範本 v1.0｜建立 2026-06-02｜八錨點軌跡分類回填 2026-06-05
