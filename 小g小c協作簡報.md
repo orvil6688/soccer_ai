@@ -1,6 +1,6 @@
-# 小 g / 小 c 協作簡報 — 世界盃足球盤口分析系統（專案專屬版 v2.0-select）
+# 小 g / 小 c 協作簡報 — 世界盃足球盤口分析系統（專案專屬版 v2.0-loop）
 
-> ✅ **架構 A + 八錨點軌跡分類 + 選注/AI/編排閉環 已完工**：OddsPapi v4、八錨點軌跡、selector(純數學)→analyzer(🤖)→存推薦→backtest 閉環、CROWN 雙記。存證 `docs/{oddspapi_findings,arch_A_proposal,phase3_proposal,movement_trajectory_proposal,analyzer_proposal,select_pipeline_proposal}.md`。
+> ✅ **架構 A + 八錨點軌跡 + 選注/AI/推播/回測閉環全線打通**：OddsPapi v4、selector(純數學)→analyzer(🤖2.5-flash)→存推薦→notifier(Discord) ／ backtest、CROWN 雙記。存證 `docs/{oddspapi_findings,arch_A_proposal,phase3_proposal,movement_trajectory_proposal,analyzer_proposal,select_pipeline_proposal,notifier_proposal}.md`。
 > 🔗 **同步紀律**：本檔與 `CLAUDE.md` 為一組記憶中樞。**任一更新，另一份必須同步檢查**，否則兩份會講不一樣的話。CLAUDE.md 更新時由小cc 一併更新本檔。
 > 開小g / 小c 對話時整份貼上以恢復系統記憶與協作紀律。
 
@@ -100,6 +100,7 @@ trajectory 訊號：線動以線為主、線不動看 de-vig 機率位移(濾水
 - **推薦記錄**：`recommendations/{date}.json`，date＝`config.local_date(kickoff_utc)`(UTC+8 歸檔、存撈共用)；以 **`(fixtureId,market,side)` 複合鍵** upsert(一場兩注不互蓋)。schema＝selector 數學 + `produced_at_local`(首見凍,CLV基準) + `ai{}`(analyzer)；backtest 消費回填 result/pnl/clv
 - **兩個 produced_at**：`produced_at_local`(CLV基準,首見凍) ／ `ai.produced_at`(推論對應哪軌跡快照,隨 hash 更新)，各管各
 - 字數預算：confidence_reasoning 50／injury_news_inference 100／market_reading 150（各自獨立截斷，包進 ai{} 區塊壓🤖）。injury_news_inference＝盤口反推消息面（無傷停源、不宣稱已證實傷情）
+- **Discord 推播(notifier)**：四把 webhook env(📋推薦單/🧪測試/📊回測/⚠️告警，值總司令自填)；#4 實作前兩把；整輪彙總多 embed、去重 `notified_*`(下注關鍵變 OR ai 由無轉有才重推)、shape/signal 顯示層英譯中(內部 key 不動)、TEST→test/略過壓🧪、失敗不阻斷
 - 防呆：讀外部陣列/字典前 isinstance；賠率/線回傳固定 float
 
 ---
@@ -139,12 +140,12 @@ trajectory 訊號：線動以線為主、線不動看 de-vig 機率位移(濾水
 
 ## 十、目前狀態
 
-- **最新版本**：v2.0-select（2026-06-06，閉環打通：八錨點軌跡 + selector + analyzer + `--mode select`）
-- **核心架構**：OddsPapi v4 主源，historical → 八錨點+軌跡分類 → selector 選注(de-vig vs 1xBet + trajectory 訊號) → analyzer 🤖 推論(2.5-flash) → 存推薦 → settlements 回測(含 by_trajectory)；CROWN 雙記 pinnacle+singbet
-- **已完成**：Phase 1A + Phase 2(回填/CLV/命中率) + 軌跡分類(八錨點/trajectory.py/雙book v2/selector trajectory/by_trajectory) + analyzer #3(2.5-flash 開盤手、ai{} 區塊🤖、快取、insufficient 攔截、失敗分流) + #5 編排(`--mode select`/config.local_date/複合鍵/兩 produced_at)。閉環真打通(含真實 503 失敗分流、真實 ai{} 產出)；CI 每小時自動遷移 v1→v2
-- **下一步**：**#4 notifier**(Discord 推播帶 ai{} 推薦、測試模式 test webhook/略過壓🧪) → web/GH Pages(後置)
+- **最新版本**：v2.0-loop（2026-06-06，閉環全線打通：movement→selector→analyzer→存推薦→notifier ／ backtest）
+- **核心架構**：OddsPapi v4 主源，historical → 八錨點+軌跡分類 → selector 選注(de-vig vs 1xBet + trajectory 訊號) → analyzer 🤖 推論(2.5-flash) → 存推薦 → notifier(Discord) ／ settlements 回測(含 by_trajectory)；CROWN 雙記 pinnacle+singbet
+- **已完成**：Phase 1A + Phase 2 + 軌跡分類(八錨點/trajectory.py/雙book v2/by_trajectory) + analyzer #3(2.5-flash 開盤手、ai{}🤖) + #5 編排(`--mode select`/config.local_date/複合鍵/兩 produced_at) + #4 notifier(Discord 四 webhook、推播兩把、去重、英譯中；🧪 真打 204 通過)。閉環全線打通；CI 每小時自動遷移 v1→v2
+- **下一步**：**web_builder + GH Pages**(推薦/回測轉靜態網頁、每場完整 6 錨點走勢明細) → 📊回測/⚠️告警推播(後兩把 webhook，後續)
 - **暫停中**：titan007 spike(2022 回測，OddsPapi 歷史僅 3–6 月)、上半場盤口
-- **待總司令**：repo Secrets `ODDSPAPI_API_KEY`+`GEMINI_API_KEY`(已更新)+`DISCORD_WEBHOOK_URL`(#4 用)；（建議）寄信 OddsPapi 確認 historical 不計額度
+- **待總司令**：repo Secrets `ODDSPAPI_API_KEY`+`GEMINI_API_KEY`+四把 `DISCORD_*_WEBHOOK_URL`(CI 推播需)；（建議）寄信 OddsPapi 確認 historical 不計額度
 
 ---
 
@@ -154,4 +155,4 @@ trajectory 訊號：線動以線為主、線不動看 de-vig 機率位移(濾水
 
 ---
 
-**本檔版本**：v2.0-select｜由通用範本 v1.0 轉本專案專屬｜建立 2026-06-02｜選注/AI/編排閉環同步 2026-06-06
+**本檔版本**：v2.0-loop｜由通用範本 v1.0 轉本專案專屬｜建立 2026-06-02｜notifier 閉環全線同步 2026-06-06
