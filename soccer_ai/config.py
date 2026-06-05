@@ -49,6 +49,17 @@ def parse_iso(s: str) -> datetime:
     return datetime.fromisoformat(s.replace("Z", "+00:00"))
 
 
+def local_date(dt) -> str:
+    """任意 datetime / ISO 字串 → UTC+8 日曆日 'YYYY-MM-DD'。
+
+    推薦記錄「存（select）/撈（backtest）」共用此函式，杜絕一邊 UTC 一邊 UTC+8 的跨日漏撈。
+    例：KO '2026-06-12T03:00+08:00'（UTC 06-11T19:00Z）→ '2026-06-12'。
+    """
+    if isinstance(dt, str):
+        dt = parse_iso(dt)
+    return to_local(dt).strftime("%Y-%m-%d")
+
+
 # =========================================================================
 # 二、金鑰（雙軌）
 # =========================================================================
