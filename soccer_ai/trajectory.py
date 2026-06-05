@@ -180,7 +180,8 @@ _DMAP = {"up": "升", "down": "降", "flat": "平"}
 
 
 def _build_tag(market_type: str, net: int, fav_swaps: int, s1_net: str, s2_net: str) -> str:
-    lvl = f"{'升' if net > 0 else '降' if net < 0 else '平'}{abs(net)}級"
+    # 顯示字串：平盤 / 升N盤 / 降N盤（net 計算不動，僅標籤用語）
+    lvl = "平盤" if net == 0 else f"{'升' if net > 0 else '降'}{abs(net)}盤"
     swap = "·水互換" if fav_swaps > 0 else ""
     if market_type == "handicap":
         odds = f"·主{_DMAP[s1_net]}客{_DMAP[s2_net]}"
