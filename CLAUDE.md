@@ -123,7 +123,7 @@
 - 排程：GH Actions Cron `0 * * * *`（每小時，UTC→UTC+8）；回測準確度靠賽後 settle 拉取保證，頻率只影響賽前決策新鮮度。
 
 ### 5.4 各板塊細部
-- **Gemini 字數預算（各自獨立截斷，超出以 `...` 替換）**：`confidence_reasoning` 50 / `injury_impact` 100 / `market_reading` 150 字。所有產出強制壓 `🤖 AI 推論`。
+- **Gemini 字數預算（各自獨立截斷，超出以 `...` 替換）**：`confidence_reasoning` 50 / `injury_news_inference` 100 / `market_reading` 150 字。所有產出包進 `ai{}` 區塊強制壓 `🤖 AI 推論`（區塊層 tag，不佔字數）。`injury_news_inference`＝由盤口反推的傷病/陣容消息推測（無真實傷停源，僅盤口反推、不宣稱已證實傷情）。
 - 函式實際呼叫點：`main.py --mode movement` → `movement.scan()` →（逐場、逐 book）`process_fixture()` → `oddspapi_client.get_historical_odds()` → `trajectory.build()`（八錨點+segment+summary）→ `storage.save_fixture_movement()`。`--mode backtest` → `backtest.run_backfill()`。
 - 市場對照表 `/markets`（≈9MB）抓一次後快取 `data/{}/market_map_soccer.json` 重用。
 

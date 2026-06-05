@@ -90,7 +90,7 @@ trajectory 訊號：線動以線為主、線不動看 de-vig 機率位移(濾水
 - **八錨點(schema v2)**：決策核心6 `t72h/t24h/t12h/t6h/t1h/t30m` + 回測輔助2 `initial(噪音)/closing(CLV)`；每錨點存 線/雙邊賠率/target_ts/captured_ts/role；三規則：取最接近+存時間戳／收盤≠t30m／區間外標 null
 - **盤口軌跡分類**(系統核心，事實層)：schema 三層 `trajectory→bookmaker→market→{anchors,segments,summary}`；級距 0.25=一級；水互換=低水方換邊(與線升降無關)；中性 shape(`fav_swap/gradual/spike_revert/...`，動機留 Gemini🤖)；**CROWN 雙記** pinnacle+singbet，回測比 sharp；by_trajectory 統計某 shape→過盤率
 - CLV 自算（v4 無 /clv）：收盤錨點 vs 推薦產出線；產出時間≥收盤抓取→無 CLV
-- 字數預算：confidence_reasoning 50／injury_impact 100／market_reading 150（各自獨立截斷）
+- 字數預算：confidence_reasoning 50／injury_news_inference 100／market_reading 150（各自獨立截斷，包進 ai{} 區塊壓🤖）。injury_news_inference＝盤口反推消息面（無傷停源、不宣稱已證實傷情）
 - 防呆：讀外部陣列/字典前 isinstance；賠率/線回傳固定 float
 
 ---
