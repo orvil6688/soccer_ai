@@ -112,16 +112,29 @@ def _recommendations_path(date_local: Optional[str] = None) -> Path:
     return _recommendations_dir() / f"{date_local}.json"
 
 
+def _rec_key(it: dict) -> tuple:
+    return (it.get("fixtureId"), it.get("market"), it.get("side"))
+
+
 def append_recommendation(record: dict, date_local: Optional[str] = None) -> Path:
-    """以 fixtureId 為鍵 upsert 一筆推薦至當日推薦檔。"""
+    """以 (fixtureId, market, side) 複合鍵 upsert 一筆推薦（一場可同時有讓分+大小球兩注，不互相覆蓋）。"""
     path = _recommendations_path(date_local)
     existing = _read_json(path)
     items: list[dict] = existing if isinstance(existing, list) else []
-    fid = record.get("fixtureId")
-    items = [it for it in items if it.get("fixtureId") != fid]
+    key = _rec_key(record)
+    items = [it for it in items if _rec_key(it) != key]
     items.append(record)
     _atomic_write_json(path, items)
     return path
+
+
+def find_recommendation(date_local: str, fixture_id: str, market: str, side: str) -> Optional[dict]:
+    """取符合 (fixtureId, market, side) 的既有推薦（供 select 取 prior_ai / 保留 produced_at_local）。"""
+    target = (fixture_id, market, side)
+    for it in load_recommendations(date_local):
+        if _rec_key(it) == target:
+            return it
+    return None
 
 
 def load_recommendations(date_local: str) -> list[dict]:
