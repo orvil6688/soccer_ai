@@ -12,14 +12,16 @@
 
 ---
 
-## 1. 觸發點與流程
-- 接在 `--mode select` 編排尾端：每筆 `append_recommendation` 後（或整批收集後）呼叫 `notifier.notify(rec)`。
-- 建議**整批收集、逐筆送**（逐筆 embed），順序依 kickoff。
+## 1. 觸發點與流程（裁示：整批彙總一則）
+- `--mode select` 編排：先存完所有推薦，**整輪結束彙總成「一則訊息、內含多 embed」推一次**（某輪 1 筆＝一則一 embed）。
 ```
+sent_recs = []
 for pick in picks:
     ... 存推薦 ...
-    notifier.notify(rec)     # rec = 剛存的完整推薦(含 signals/ai{})
+    if notifier.should_notify(rec): sent_recs.append(rec)   # 去重判定(§4)
+notifier.notify_batch(sent_recs)   # 一則訊息多 embed；送出後回寫 notified_hash/notified_at
 ```
+- Discord 單則訊息上限 **10 embeds** → 超過 10 筆自動分多則送。
 
 ## 2. 推什麼（內容 + 🤖 界線）
 單筆推薦 → 一則 Discord embed：
@@ -29,27 +31,37 @@ for pick in picks:
 - **🤖 AI 推論**（`ai.available` 時）：三欄 `confidence_reasoning / injury_news_inference / market_reading`，整段冠 `🤖 AI 推論`；`ai.available=false` → 顯示「🤖 暫無（reason）」不顯三欄。
 - **資料品質標記**：系統層 ✅ 客觀 / AI 層 🤖；明確分區，下游/總司令一眼分清「事實 vs 推論」。
 
-## 3. 環境變數 / 測試模式
-- **正式**：`config.DISCORD_WEBHOOK_URL`（env，不硬編）。缺 → log 警告、略過推播（非致命）。
-- **測試（`is_test_mode()`）**：
-  - 有 `config.DISCORD_TEST_WEBHOOK_URL` → 推到 test 頻道；否則**略過不推**（不污染正式頻道）。
-  - 內容壓 `🧪`（標題前綴），與正式區隔。
+## 3. 環境變數 / 頻道對應 / 測試模式
+- **四把 webhook env 一次全定義在位**（config 全 `os.getenv` 讀、`.env.example` 列名值留空）。
+  **小cc 絕不經手 URL 值、不印 log；總司令自填 .env + GitHub Secret + 自驗收**。
+  | env 變數 | Discord 頻道 | #4 本次 |
+  |---|---|---|
+  | `DISCORD_WEBHOOK_URL` | 📋-推薦單（正式推薦）| **本次實作推播** |
+  | `DISCORD_TEST_WEBHOOK_URL` | 🧪-測試（TEST_MODE 推這、與正式隔離）| **本次實作推播** |
+  | `DISCORD_BACKTEST_WEBHOOK_URL` | 📊-回測戰報 | env 先接好、**推播留 backtest 推播後續** |
+  | `DISCORD_ALERT_WEBHOOK_URL` | ⚠️-系統告警 | env 先接好、**推播留告警模組後續** |
+  - 即：四把變數現在全定義好（免日後回頭補），但 #4 只實作前兩把的推播。
+- **正式（TEST off）**：推 `DISCORD_WEBHOOK_URL`。缺 → log 警告一次、略過推播（非致命）。
+- **測試（`is_test_mode()`）**：有 `DISCORD_TEST_WEBHOOK_URL` → 推 test 頻道；否則**略過不推**（不污染正式）。內容壓 `🧪`。
 
-## 4. 防重複推播（不每小時洗頻）
-- `--mode select` 每小時跑、同一注會重複出現 → 必須去重，否則洗版。
-- **notify_hash** = `sha1(fixtureId,market,side,line,odds,stake_units,signals.signal,ai.summary_hash)`。
-- 推播前比對推薦記錄既有 `notified_hash`：**相同 → 跳過不推**；不同（首次／線/注/訊號/AI 有變）→ 推，並把 `notified_hash`+`notified_at` 寫回該推薦記錄。
-- 效果：首次出單推一次；之後只在「實質變化」時再推（例：line 變、stake 升、AI 從無到有）。
-- ⚠️ 這會在推薦記錄多兩個欄位 `notified_hash`/`notified_at`（list[dict] 格式不變、非 §10 寫入格式契約變更，僅加欄）。
+## 4. 防重複推播（裁示：下注關鍵 OR ai 由無轉有）
+- `--mode select` 每小時跑、同一注重複出現 → 去重免洗版。
+- **重推條件**（`should_notify`）：首次出單 **OR** 下注關鍵欄變（`line`/`odds`/`stake_units`）**OR** `ai.available` 由 **false→true**（AI 從無到有）。
+  - **AI 文字措辭變（available 仍 true）→ 不重推**；ai true→false（如 503 暫失）→ **不重推**（已推過、不為失去 AI 洗頻）。
+- 實作：`notify_hash = sha1(fixtureId,market,side,line,odds,stake_units)`；
+  重推 = `notify_hash != rec.notified_hash`（下注關鍵變/首次）**或**（`prior.ai.available==False and 現 ai.available==True`）。
+- 送出後把 `notified_hash` + `notified_at`（+ `notified_ai_available`）寫回推薦記錄。
+- ⚠️ 推薦記錄多 `notified_hash`/`notified_at`/`notified_ai_available` 欄（list[dict] 格式不變、僅加欄，非 §10 契約變更）。
 
 ## 5. 失敗分流
-- 逐筆 try/except 具名攔截：webhook 缺/4xx/5xx/逾時/網路 → log 警告、**該筆跳過、不中斷其餘、不中斷 pipeline**。
-- 不重試或輕量 1 次重試（Discord 偶發 429 帶 retry_after，可選尊重；逾時上限短）。
-- 推播失敗不影響推薦已存與回測。
+- 具名攔截：webhook 缺/4xx/5xx/逾時/網路 → **不中斷 pipeline**（推薦已存、回測照跑）。
+- **告警只記一次／輪**（跟 Gemini 503 同理）：本輪 webhook 錯誤彙總後 log 一次，**不逐筆刷**。
+- 429 帶 retry_after 可輕量尊重 1 次；逾時上限短。
 
 ## 6. 模組與切分
-- `notifier.py`：`_format_embed(rec)` / `_notify_hash(rec)` / `send(webhook, payload)` / `notify(rec)`（含去重+測試分流+失敗攔截，回 sent/skipped/failed）。
-- `main._run_select`：存推薦後呼叫 `notifier.notify(rec)`；彙總 sent/skipped/failed 數入 log。
+- `config`：新增 4 把 webhook `os.getenv` 讀（值不經手）；`.env.example` 列 4 變數名值留空。
+- `notifier.py`：`should_notify(rec)`（去重判定 §4）/ `_format_embed(rec)` / `_webhook_url()`（依 TEST_MODE 選 test/正式，缺則略過）/ `notify_batch(recs)`（一則多 embed、>10 分批、回寫 notified_*、告警記一次、回 sent/skipped/failed）。
+- `main._run_select`：存推薦後收集 `should_notify` 為真者 → 整輪 `notify_batch` → 彙總數入 log。
 - 不動 selector/analyzer/trajectory/backtest 邏輯。
 
 ## 7. 不在本塊
@@ -69,7 +81,10 @@ for pick in picks:
 
 ---
 
-## 待確認（請總司令/小c 裁）
-- 去重：notify_hash 含 `ai.summary_hash`（AI 內容變也重推）—— 認可？還是只看下注關鍵欄(line/odds/stake)變才重推、AI 變不重推？
-- 推播時機：每筆即推 vs 整批彙總一則訊息？（提案：逐筆 embed）
-- `ai.available=false`（如 insufficient/503）的推薦：仍推（標🤖暫無）還是不推？（提案：仍推，因下注決策來自 selector 數學、AI 只是評論）
+## 裁示已定（總司令 2026-06-06）
+- **去重**：line/odds/stake 變 **OR** ai.available 由 false→true → 重推；AI 文字措辭變 → 不重推（§4）。✅
+- **推播時機**：整批彙總一則（內含多 embed），一輪 select 跑完彙總推（§1）。✅
+- **ai.available=false 仍推**（標🤖暫無）——下注決策來自 selector 數學，AI 只評論，AI 掛不代表推薦不成立（§2）。✅
+- **四把 webhook env 全定義**、#4 只實作 📋-推薦單 + 🧪-測試兩把推播，📊-回測/⚠️-告警 env 在位、推播後續（§3）。✅
+- webhook 4xx/5xx **告警記一次／輪**、不逐筆刷（§5）。✅
+- 🔒 webhook 值：小cc 不經手、不印 log；總司令自填 .env/Secret + 自驗收。
