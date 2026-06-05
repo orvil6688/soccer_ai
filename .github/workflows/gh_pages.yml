@@ -1,0 +1,58 @@
+name: gh_pages
+
+# main_pipeline（每小時 movement/select + commit data/）完成後觸發 → web_builder 產 site/ → 部署 Pages。
+# 部署鐵律3：main_pipeline 先把 data/ commit&push 回 repo，本工作 checkout ref=main 取「含該 commit 的最新」，
+# 故網頁讀到的是最新資料、不慢一輪。
+on:
+  workflow_run:
+    workflows: ["main_pipeline"]
+    types: [completed]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build-deploy:
+    # 僅在 main_pipeline 成功後（或手動）才部署
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    env:
+      TEST_MODE: "false"   # 讀 data/prod（CI 預設 TEST_MODE 為 true，須明設 false）
+    steps:
+      - name: Checkout（ref=main 取最新，含 main_pipeline 剛 commit 的 data/prod）
+        uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Build static site（讀 data/prod → site/）
+        run: python -m soccer_ai.web_builder
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v6      # node24
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v5         # node24
