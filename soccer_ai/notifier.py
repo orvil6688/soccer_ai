@@ -23,14 +23,23 @@ _SIDE_ZH = {"home": "主", "away": "客", "over": "大", "under": "小"}
 # ⚠️ 純顯示層翻譯：英文 shape/signal key → 中文標籤。**絕不改 trajectory/selector/backtest
 # 的內部 shape key**（那是 by_trajectory 統計/回測對應鍵，動了會錯、踩 §10）。
 _SHAPE_SIGNAL_ZH = {
-    "fav_swap": "讓受互換", "flat": "盤口持平", "monotonic": "單邊走勢", "gradual": "緩步移動",
-    "spike_revert": "急拉回吐", "late_swing": "臨場變盤", "choppy": "上下洗盤", "odds_drift": "賠率浮動",
-    "mixed": "混合", "confirm": "順勢", "reverse": "逆勢", "insufficient": "資料不足",
+    # ⚠️ fav_swap=賠率反轉（低水方/被看好方中途換邊，非讓分換受讓）
+    "fav_swap": "賠率反轉", "flat": "盤口持平", "monotonic": "單向走盤", "gradual": "緩步推移",
+    "spike_revert": "急拉回吐", "late_swing": "臨場變盤", "choppy": "上下震盪", "odds_drift": "賠率單向飄",
+    "mixed": "混合", "confirm": "順勢確認", "reverse": "逆勢背離", "insufficient": "資料不足",
 }
 
 
 def _zh(key) -> str:
     return _SHAPE_SIGNAL_ZH.get(key, key) if key else "—"
+
+
+def _odds(v) -> str:
+    """賠率顯示小數點後 2 位（儲存原始值/回測全精度不動）。"""
+    try:
+        return f"{float(v):.2f}"
+    except (TypeError, ValueError):
+        return str(v)
 
 
 # =========================================================================
@@ -60,7 +69,7 @@ def _format_embed(rec: dict) -> dict:
     sig = rec.get("signals", {})
     fields = [
         {"name": "選注（系統數學）",
-         "value": f"{market} **{side}** 線 {rec.get('line')} @ {rec.get('odds')}　**{rec.get('stake_units')} 單位**　edge {edge}",
+         "value": f"{market} **{side}** 線 {rec.get('line')} @ {_odds(rec.get('odds'))}　**{rec.get('stake_units')} 單位**　edge {edge}",
          "inline": False},
         {"name": "盤口軌跡（系統客觀）",
          "value": f"形狀 **{_zh(sig.get('shape'))}**　{sig.get('tag') or '—'}　訊號 **{_zh(sig.get('signal'))}**",

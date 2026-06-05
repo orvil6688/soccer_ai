@@ -17,7 +17,7 @@ import os
 from pathlib import Path
 
 from . import backtest, config, storage
-from .notifier import _MARKET_ZH, _SIDE_ZH, _zh  # 顯示層對照（內部 key 不動）
+from .notifier import _MARKET_ZH, _SIDE_ZH, _odds, _zh  # 顯示層對照（內部 key 不動）
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +107,7 @@ def _market_block(traj_market: dict, market: str) -> str:
             rows.append(f"<tr><td>{name}</td><td class='muted'>{role}</td><td colspan='3' class='muted'>—（缺/未到）</td></tr>")
             continue
         rows.append(f"<tr><td>{name}</td><td class='muted'>{role}</td><td>{_esc(a.get('line'))}</td>"
-                    f"<td>{_esc(a.get(o1))}</td><td>{_esc(a.get(o2))}</td></tr>")
+                    f"<td>{_esc(_odds(a.get(o1)))}</td><td>{_esc(_odds(a.get(o2)))}</td></tr>")
         labels.append(name)
         line_s.append(a.get("line"))
         a_s.append(a.get(o1))
@@ -159,7 +159,7 @@ def render_index(recs: list[dict], have_fixture: set) -> str:
         rows.append(
             f"<tr><td>{_esc(str(r.get('kickoff_local',''))[:16])}</td><td>{match_html}</td>"
             f"<td>{_MARKET_ZH.get(r.get('market'),r.get('market'))} {_SIDE_ZH.get(r.get('side'),r.get('side'))} {_esc(r.get('line'))}</td>"
-            f"<td>{_esc(r.get('odds'))}</td><td class='{ucls}'>{_esc(r.get('stake_units'))}</td>"
+            f"<td>{_esc(_odds(r.get('odds')))}</td><td class='{ucls}'>{_esc(r.get('stake_units'))}</td>"
             f"<td>{_esc(_zh(r.get('signals',{}).get('shape')))}</td><td>{result}</td>"
             f"<td style='text-align:left'>{_esc(why)}</td></tr>")
     table = (f"<table><tr><th>開賽</th><th>對戰</th><th>選注</th><th>賠率</th><th>單位</th><th>形狀</th><th>賽果</th><th>🤖 信心理由</th></tr>"
