@@ -13,7 +13,7 @@ import argparse
 import logging
 import sys
 
-from . import backtest, config, movement, oddspapi_client
+from . import analyzer, backtest, config, movement, oddspapi_client, selector, storage
 
 
 def _setup_logging() -> None:
@@ -29,8 +29,8 @@ def _parse_args(argv=None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="世界盃盤口分析系統 主流程（OddsPapi）")
     parser.add_argument("--test", action="store_true", help="測試模式：讀寫 data/test/、產出壓 🧪")
     parser.add_argument(
-        "--mode", choices=["movement", "backtest"], default="movement",
-        help="movement=走勢拉取+六錨點（Phase 1）；backtest=賽果回填+CLV（Phase 2）",
+        "--mode", choices=["movement", "backtest", "select"], default="movement",
+        help="movement=走勢+軌跡；backtest=賽果回填+CLV；select=選注→analyzer→存推薦（閉環）",
     )
     parser.add_argument(
         "--bookmaker", default=config.BOOKMAKER_PRIMARY,
@@ -74,8 +74,37 @@ def main(argv=None) -> int:
     elif args.mode == "backtest":
         m = backtest.run_backfill(date_local=args.date, bookmaker=args.bookmaker)
         log.info("回測完成：%s", {k: v for k, v in m.items() if k != "breakdown"})
+    elif args.mode == "select":
+        _run_select(log)
 
     return 0
+
+
+def _run_select(log) -> None:
+    """#5 編排：selector→analyzer→存推薦（閉環接 backtest）。逐 pick 隔離、部分失敗不阻斷。"""
+    picks = selector.select()
+    stored = ai_ok = 0
+    reasons: dict = {}
+    for pick in picks:
+        fid = pick.get("fixtureId")
+        try:
+            record = storage.load_fixture_movement(fid) or {}
+            date = config.local_date(pick["kickoff_utc"])          # 存撈共用 UTC+8 歸檔
+            prior = storage.find_recommendation(date, fid, pick["market"], pick["side"])
+            # produced_at_local：CLV 基準，首見凍結、重跑不更新
+            pick["produced_at_local"] = (prior or {}).get("produced_at_local") or config.now_local().isoformat()
+            prior_ai = (prior or {}).get("ai")
+            pick["ai"] = analyzer.analyze(pick, record, prior_ai)  # 內含 C 快取；ai.produced_at 隨 hash 更新
+            storage.append_recommendation(pick, date_local=date)   # (fixtureId,market,side) upsert
+            stored += 1
+            if pick["ai"].get("available"):
+                ai_ok += 1
+            else:
+                r = pick["ai"].get("reason")
+                reasons[r] = reasons.get(r, 0) + 1
+        except Exception as e:  # 單筆失敗不阻斷其餘
+            log.warning("select 單筆失敗 fixture=%s：%s", fid, e)
+    log.info("選注完成：picks %d / 已存 %d / ai可用 %d / ai未用 %s", len(picks), stored, ai_ok, reasons)
 
 
 if __name__ == "__main__":
