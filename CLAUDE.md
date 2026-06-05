@@ -103,7 +103,8 @@
 - **sportId = 10**（Soccer）；**tournamentId = 16**（2026 世界盃正盤，104 場）。
 - 市場名：**`Asian Handicap`**（spreads，outcome "1"=主/"2"=客）、**`Over Under Full Time`**（totals，Over/Under）；period 取 `fulltime`。
 - Bookmaker slug：主 `pinnacle`、交叉驗證 `1xbet`。
-- **結算**：`/v4/settlements?fixtureId=` 按 market/outcome 取 result；嚴格 90 分鐘（fulltime）。result 列舉（實測）：`WIN/LOSE/HALFWIN/HALFLOSS/PUSH/UNDECIDED`（不提供比分，result 直接給）。
+- **結算**：`/v4/settlements?fixtureId=` 按 market/outcome 取 result；嚴格 90 分鐘（fulltime）。result 列舉（實測）：`WIN/LOSE/HALFWIN/HALFLOSS/PUSH/UNDECIDED`。
+- **比分反推**：OddsPapi **無直接比分**（REST settlements/fixtures 皆無、比分僅 WS `scores` 而免費 `websocket_access:0`）。→ **`backtest.derive_score` 由 O/U+讓分多盤口階梯反推確切比分**（O/U 邊界定總進球、讓分邊界定淨差 → 主=(總+差)/2），零新資料源；存 `rec["score"]`，Discord/網頁顯真比分。已驗 MLS 多場（1:0/2:0/2:1）。
 - **額度**：免費層 250/月，以 `/v4/account` 的 `request_count` 監控（不計額度）；剩餘 ≤25 告警。
 - ⚠️ **`/clv` v4 不存在**（已實打），CLV 自算（見 5.5）。
 
@@ -111,6 +112,9 @@
 - **Edge 門檻** `edge_threshold = 0.25` 球：Pinnacle 去水位求公允 vs 1xBet 偏差（線差為主閘、同線價差 EV% 為次閘）。AI 不參與選注。
 - **訊號改 trajectory**（見 5.6）：`selector.line_movement_signal`（線-only）已**移除**，改 `trajectory_signal` 讀軌跡 summary —— 線動以線方向為主、**線不動看 de-vig 公允機率位移**（能抓「線黏住但賠率動」、濾掉兩邊一起調水位的假動作）→ confirm/reverse/flat。
 - 反向線移動只記「加權訊號」供回測，**不**單獨觸發 2 單位。動機層(D) v1 不做（空鉤子）。
+- 🔒 **釐清（選注依據唯一性）**：**選注唯一依據＝edge（找定價歧見）**；八錨點軌跡/trajectory 訊號＝**加權確認 + Gemini 解讀材料**，**不單獨選注**；xG/實際數據面＝**Phase 5 才接**（現只有盤口）。
+- **edge 對手盤＝1xBet**（公允錨＝Pinnacle）：總司令實際下注皇冠/平博；待 2026 小組賽真實資料看「皇冠 vs 1xBet 實際出 edge」情況再評估是否改對手盤，**暫不動 selector**。
+- **pick.odds 取 1xBet（下注軟盤）**、movement 錨點取 pinnacle（sharp 參考）→ 兩者**不同莊故賠率不一致＝設計非 bug**（CLV 現用 pinnacle 收盤＝跨莊，同上待評估）。
 
 ### 5.3 走勢與八錨點（schema v2，取代三窗口排程）
 - OddsPapi `historical-odds` = **賽前即時走勢**（已實證），不搶時間窗、不需生存法則。對每場拉完整序列（假設不計額度，**未經官方確認**，退場條件見 §8）切八錨點。
@@ -148,7 +152,8 @@
   錨點：`{target_ts,captured_ts,offset_sec,line, home_odd/away_odd 或 over_odd/under_odd}`（或 null）。
 - **歷史推薦檔**：`data/{prod|test}/recommendations/{YYYY-MM-DD}.json`，**檔名日期＝`config.local_date(kickoff_utc)`（kickoff 的 UTC+8 日曆日，存撈共用，杜絕跨日漏撈）**；list，以 **`(fixtureId, market, side)` 複合鍵** upsert（一場可同時讓分+大小球兩注、不互蓋）。
   推薦 schema（selector 數學產出 + analyzer 加 `ai{}`、backtest 消費）：
-  `{fixtureId, market, side, line, odds, stake_units, kickoff_utc, kickoff_local, home, away, edge_*, signals{signal,shape,tag,...}, trajectory{book:{shape,tag,...}}, produced_at_local, ai{}}`；backtest 回填 `result/pnl_units/settled/clv`。
+  `{fixtureId, market, side, line, odds, stake_units, kickoff_utc, kickoff_local, home, away, edge_*, signals{signal,shape,tag,...}, trajectory{book:{shape,tag,...}}, produced_at_local, ai{}}`；backtest 回填 `result/pnl_units/settled/clv/score{home,away,total,margin}`。
+  - `odds`＝1xBet 下注價（非 pinnacle 錨點），故與 movement 錨點賠率不一致屬正常（不同莊）。
   - **兩個 produced_at 各管各**：`produced_at_local`（頂層，CLV 基準，**首見凍結**）／`ai.produced_at`（在 `ai{}` 內，標推論對應哪個軌跡快照，**隨 summary_hash 變更新**）。`ai{}` 格式見 §5.4 / docs/analyzer_proposal.md。
   - **notifier 去重欄**（推播後回寫，list[dict] 格式不變、僅加欄）：`notified_hash`(=sha1(fixtureId,market,side,line,odds,stake_units))、`notified_at`、`notified_ai_available`。重推＝下注關鍵變 OR ai.available false→true。
 - **Discord 推播（notifier #4）**：四把 webhook env（📋推薦單 `DISCORD_WEBHOOK_URL` / 🧪測試 `DISCORD_TEST_WEBHOOK_URL` / 📊回測 `DISCORD_BACKTEST_WEBHOOK_URL` / ⚠️告警 `DISCORD_ALERT_WEBHOOK_URL`，值僅總司令自填）；#4 已實作前兩把推播（📊/⚠️ env 在位、推播後續）。TEST_MODE→test 頻道或略過、壓 🧪；整輪彙總一則多 embed（>10 分多則）；shape/signal 顯示層英譯中（內部 key 不動）；失敗逐筆跳過、告警記一次/輪。
@@ -225,6 +230,14 @@
 抓出：總司令以「線 2.5 不動但賠率大幅移動」具體例子點出，要求線+賠率雙軌
 教訓：訊號邏輯要涵蓋「線 + 賠率」雙維，別只看線。最後升級成完整「盤口軌跡分類」(§5.6)——
      線不動改看 de-vig 公允機率位移、並濾掉兩邊一起調水位的假動作；舊 line-only bug 在新設計下不存在
+```
+```
+事件：OddsPapi 無直接比分、推薦 odds 對不上錨點（疑似 bug，查證後皆非 bug）
+查證：①settlement/fixtures REST 無 score、比分僅 WS 而免費 websocket_access=0（實打證實）
+     →以 O/U+讓分多盤口階梯反推確切比分(derive_score)，零新資料源，MLS 多場驗對(1:0/2:0/2:1)
+     ②pick.odds 取 1xBet(下注軟盤)、movement 錨點取 pinnacle(sharp 參考)，不同莊故不一致＝設計
+     （demo 的 1.95 是手寫 mock 加劇誤會）；edge 仍餵真值給 Gemini、未掰
+教訓：報 bug 前先實打/讀碼分清「mock 殘留 vs 真錯 vs 設計」；缺的能力（比分）常可由既有富資料反推
 ```
 
 ---

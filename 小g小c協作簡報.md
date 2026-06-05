@@ -96,7 +96,10 @@ trajectory 訊號：線動以線為主、線不動看 de-vig 機率位移(濾水
 - 額度 250/月，`/v4/account` request_count 監控（不計額度）；剩餘 ≤25 告警。⚠️ historical 不計額度為未確認假設，失效退回 odds-by-tournaments
 - **八錨點(schema v2)**：決策核心6 `t72h/t24h/t12h/t6h/t1h/t30m` + 回測輔助2 `initial(噪音)/closing(CLV)`；每錨點存 線/雙邊賠率/target_ts/captured_ts/role；三規則：取最接近+存時間戳／收盤≠t30m／區間外標 null
 - **盤口軌跡分類**(系統核心，事實層)：schema 三層 `trajectory→bookmaker→market→{anchors,segments,summary}`；級距 0.25=一級；水互換=低水方換邊(與線升降無關)；中性 shape(`fav_swap/gradual/spike_revert/...`，動機留 Gemini🤖)；**CROWN 雙記** pinnacle+singbet，回測比 sharp；by_trajectory 統計某 shape→過盤率
-- CLV 自算（v4 無 /clv）：收盤錨點 vs 推薦產出線；產出時間≥收盤抓取→無 CLV
+- **選注依據唯一性**：選注唯一依據＝**edge（定價歧見）**；八錨點軌跡＝加權確認+Gemini 解讀材料、**不單獨選注**；xG/實際數據＝Phase 5。**edge 對手盤＝1xBet**（公允錨 Pinnacle），待小組賽真實資料看皇冠 vs 1xBet 出 edge 再評估，暫不動 selector
+- **比分反推**：OddsPapi 無直接比分（REST/WS 免費皆無）→ `backtest.derive_score` 由 O/U+讓分階梯反推確切比分（已驗 MLS 1:0/2:0/2:1），存 rec.score、Discord/網頁顯
+- **pick.odds 取 1xBet 下注盤**、movement 錨點取 pinnacle → 不同莊賠率不一致＝設計非 bug
+- CLV 自算（v4 無 /clv）：收盤錨點 vs 推薦產出線；產出時間≥收盤抓取→無 CLV（現用 pinnacle 收盤＝跨莊，同上待評估）
 - **推薦記錄**：`recommendations/{date}.json`，date＝`config.local_date(kickoff_utc)`(UTC+8 歸檔、存撈共用)；以 **`(fixtureId,market,side)` 複合鍵** upsert(一場兩注不互蓋)。schema＝selector 數學 + `produced_at_local`(首見凍,CLV基準) + `ai{}`(analyzer)；backtest 消費回填 result/pnl/clv
 - **兩個 produced_at**：`produced_at_local`(CLV基準,首見凍) ／ `ai.produced_at`(推論對應哪軌跡快照,隨 hash 更新)，各管各
 - 字數預算：confidence_reasoning 50／injury_news_inference 100／market_reading 150（各自獨立截斷，包進 ai{} 區塊壓🤖）。injury_news_inference＝盤口反推消息面（無傷停源、不宣稱已證實傷情）
@@ -135,6 +138,7 @@ trajectory 訊號：線動以線為主、線不動看 de-vig 機率位移(濾水
 4. **API-Football 免費層拿不到 2026 賽季**（僅 2022–2024）→ 🔒#5 改 OddsPapi、🔒#6（BDL 無世界盃）作廢。教訓：資料源對「目標賽季/賽事」實打驗證，別只看文件。
 5. **OddsPapi historical 不計額度為未確認假設**：架構 A 依賴之；失效須退回 odds-by-tournaments。教訓：未確認的有利觀察當支柱時須明列假設與退場路徑。
 6. **原 selector「線-only 訊號」沉默缺陷**：line_movement_signal 線不動就判 flat、沒看賠率 → 漏掉「線黏住但賠率大幅移動」的 sharp 訊號。總司令以「線 2.5 不動但賠率 0.70/1.05→0.91/0.80」具體例子抓出 → 升級成完整盤口軌跡分類(線+de-vig 機率位移)。教訓：訊號邏輯要涵蓋線+賠率雙軌，別只看線。
+7. **OddsPapi 無比分 / 推薦 odds 對不上錨點（查證後皆非 bug）**：①比分僅 WS(免費 websocket_access=0)→由 O/U+讓分階梯 derive_score 反推(MLS 驗對)；②pick.odds=1xBet、錨點=pinnacle 不同莊故不一致＝設計(demo 1.95 是 mock 加劇誤會)；edge 仍餵真值。教訓：報 bug 前實打/讀碼分清 mock殘留/真錯/設計；缺的能力常可由既有富資料反推。
 
 ---
 
