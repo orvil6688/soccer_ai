@@ -109,6 +109,21 @@ def _dir(delta: float) -> str:
     return "up" if delta > 0 else "down"
 
 
+def _devig_p1(odd1: float, odd2: float) -> float:
+    """side1 去水位後公允機率。"""
+    if odd1 <= 1 or odd2 <= 1:
+        return 0.5
+    p1, p2 = 1.0 / odd1, 1.0 / odd2
+    return p1 / (p1 + p2)
+
+
+def _prob_dir(shift: float) -> str:
+    """公允機率位移方向：up=機率升(往該邊)、down=機率降、flat。"""
+    if abs(shift) <= config.PROB_FLAT_EPS:
+        return "flat"
+    return "up" if shift > 0 else "down"
+
+
 def build_segments(anchors: dict, market_type: str) -> list[dict]:
     s1, s2 = _SIDES[market_type]
     k1, k2 = _ODD_KEY[s1], _ODD_KEY[s2]
@@ -196,6 +211,10 @@ def build_summary(anchors: dict, segments: list[dict], market_type: str) -> dict
     odds_active = any(
         s.get("present") and (s["side1_dir"] != "flat" or s["side2_dir"] != "flat") for s in segments
     )
+    # 去水位後 side1 公允機率位移（首→末決策錨點）：濾掉「兩邊一起調水位」的假動作。
+    p1_shift = _devig_p1(present[-1][k1], present[-1][k2]) - _devig_p1(present[0][k1], present[0][k2])
+    s1_prob_net = _prob_dir(p1_shift)
+    s2_prob_net = _prob_dir(-p1_shift)
 
     shape = _classify(net, abs_path, excur, reverted, dir_changes, late, fav_swaps, odds_active)
     return {
@@ -208,8 +227,8 @@ def build_summary(anchors: dict, segments: list[dict], market_type: str) -> dict
         "late_swing": late,
         "fav_swap_count": fav_swaps,
         "fav_final": _favorite(present[-1], market_type),
-        "side1": s1, "side1_odd_net": s1_net,
-        "side2": s2, "side2_odd_net": s2_net,
+        "side1": s1, "side1_odd_net": s1_net, "side1_prob_net": s1_prob_net,
+        "side2": s2, "side2_odd_net": s2_net, "side2_prob_net": s2_prob_net,
         "shape": shape,
         "tag": _build_tag(market_type, net, fav_swaps, s1_net, s2_net),
     }

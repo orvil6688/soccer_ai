@@ -210,7 +210,26 @@ def compute_metrics(recs: list) -> dict:
         "avg_clv_pct": round(sum(clvs) / len(clvs), 4) if clvs else None,
         "beat_close_rate": round(sum(1 for c in clvs if c > 0) / len(clvs), 4) if clvs else None,
         "breakdown": {res: sum(1 for r in decided if r["result"] == res) for res in _DECIDED},
+        "by_trajectory": _by_trajectory(decided),
     }
+
+
+def _by_trajectory(decided: list) -> dict:
+    """依凍結的軌跡 shape 分組 → 各形狀的命中率/單位/筆數（回答「某種軌跡→真實過盤率」）。"""
+    groups: dict[str, list] = {}
+    for r in decided:
+        shape = (r.get("signals") or {}).get("shape") or "unknown"
+        groups.setdefault(shape, []).append(r)
+    out = {}
+    for shape, rs in groups.items():
+        w = sum(_WIN_WEIGHT.get(r["result"], 0.0) for r in rs)
+        l = sum(_LOSE_WEIGHT.get(r["result"], 0.0) for r in rs)
+        out[shape] = {
+            "n": len(rs),
+            "hit_rate": round(w / (w + l), 4) if (w + l) > 0 else None,
+            "units": round(sum(float(r.get("pnl_units", 0.0)) for r in rs), 4),
+        }
+    return out
 
 
 def run_backfill(date_local: Optional[str] = None, bookmaker: str = config.BOOKMAKER_PRIMARY) -> dict:

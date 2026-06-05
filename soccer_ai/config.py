@@ -134,7 +134,8 @@ MOVEMENT_BOOKMAKERS = ["pinnacle", "singbet"]
 
 # 軌跡判定門檻（全「待回測校準」）
 LINE_STEP = 0.25                 # 一級＝0.25 球
-ODDS_FLAT_EPS = 0.02             # 賠率變化 <= 此值視為 flat
+ODDS_FLAT_EPS = 0.02             # 裸賠率變化 <= 此值視為 flat（tag 用）
+PROB_FLAT_EPS = 0.01             # 去水位後公允機率位移 <= 此值視為 flat（訊號用，濾水位假動作）
 FAV_EPS = 0.02                   # 兩邊賠率差 <= 此值視為無明顯低水方(even)
 SHAPE_SPIKE_EXCURSION_STEPS = 2  # spike_revert：最大偏離 >= 此級數且頭尾回歸
 SHAPE_MONO_NET_STEPS = 2         # monotonic：同向且淨移動 >= 此級數

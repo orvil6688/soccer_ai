@@ -184,36 +184,50 @@ def find_candidates(now: Optional[datetime] = None) -> list[dict]:
 
 
 # =========================================================================
-# #2 線移動訊號（讀 movement 六錨點：initial vs 最新）
+# #2 軌跡訊號（讀 movement v2 trajectory summary；線+賠率雙維，取代舊 line-only）
 # =========================================================================
-def _latest_anchor(anchors: dict) -> Optional[dict]:
-    for name in ("closing", "t1h", "t6h", "t12h", "t24h"):
-        a = anchors.get(name)
-        if a:
-            return a
-    return None
+def _pin_summary(rec: Optional[dict], market: str) -> Optional[dict]:
+    """主 book(pinnacle) 該 market 的 trajectory summary。"""
+    if not isinstance(rec, dict):
+        return None
+    m = rec.get("trajectory", {}).get(config.MOVEMENT_BOOKMAKERS[0], {}).get(market, {})
+    return m.get("summary") if isinstance(m, dict) else None
 
 
-def line_movement_signal(rec: Optional[dict], pick: dict) -> str:
-    """Pinnacle 初盤→最新線相對「我方 pick」的方向：confirm / reverse / flat。"""
-    if not rec or not isinstance(rec.get("anchors"), dict):
+def trajectory_signal(summary: Optional[dict], market: str, side: str) -> str:
+    """軌跡相對「我方 side」的方向：confirm / reverse / flat。
+
+    線有動 → 以線方向為主（線往我方=confirm）；線不動 → 看我方賠率方向
+    （我方賠率縮水=資金往我方=confirm；走高=reverse）。天然涵蓋「線不動賠率動」。
+    """
+    if not isinstance(summary, dict) or summary.get("shape") in (None, "insufficient"):
         return "flat"
-    anchors = rec["anchors"]
-    init, late = anchors.get(config.ANCHOR_INITIAL), _latest_anchor(anchors)
-    if not init or not late:
-        return "flat"
-    mkt = pick["market"]
-    a_i, a_l = init.get(mkt), late.get(mkt)
-    if not a_i or not a_l:
-        return "flat"
-    d = a_l["line"] - a_i["line"]
-    if abs(d) < 1e-9:
-        return "flat"
-    if mkt == "handicap":
-        toward = "home" if d < 0 else "away"  # 線更負＝往主隊
+    net = summary.get("net_line_steps", 0) or 0
+    side1 = side in ("home", "over")  # side1=home/over, side2=away/under
+    if market == "handicap":
+        line_toward = -net if side == "home" else net   # home：線更負(net<0)＝往主
     else:
-        toward = "over" if d > 0 else "under"  # 總分上移＝往大
-    return "confirm" if pick["side"] == toward else "reverse"
+        line_toward = net if side == "over" else -net    # 總分上移＝往大
+    if line_toward > 0:
+        return "confirm"
+    if line_toward < 0:
+        return "reverse"
+    # 線不動 → 看我方「去水位公允機率」位移（升=資金往我方=confirm）；濾掉水位假動作
+    our_prob = summary.get("side1_prob_net") if side1 else summary.get("side2_prob_net")
+    return {"up": "confirm", "down": "reverse", "flat": "flat"}.get(our_prob, "flat")
+
+
+def _freeze_trajectory(rec: Optional[dict], market: str) -> dict:
+    """凍結各 book 該 market 的軌跡摘要進推薦（供透明化 + backtest by_trajectory）。"""
+    out = {}
+    if not isinstance(rec, dict):
+        return out
+    for book in config.MOVEMENT_BOOKMAKERS:
+        m = rec.get("trajectory", {}).get(book, {}).get(market, {})
+        s = m.get("summary") if isinstance(m, dict) else None
+        if isinstance(s, dict):
+            out[book] = {k: s.get(k) for k in ("shape", "tag", "net_line_steps", "fav_swap_count")}
+    return out
 
 
 def _key_number_cross(c: dict) -> bool:
@@ -231,10 +245,17 @@ def _key_number_cross(c: dict) -> bool:
 # #2 誘盤過濾 + 注碼
 # =========================================================================
 def _filter_and_stake(c: dict, rec: Optional[dict]) -> dict:
-    """回傳加上 signals/stake_units/filtered/filter_reason 的 pick。"""
-    signal = line_movement_signal(rec, c)
+    """回傳加上 signals/trajectory/stake_units/filtered/filter_reason 的 pick。"""
+    summary = _pin_summary(rec, c["market"])
+    signal = trajectory_signal(summary, c["market"], c["side"])
     key_cross = _key_number_cross(c)
-    c["signals"] = {"line_move": signal, "reverse_against": signal == "reverse", "key_number_cross": key_cross}
+    c["signals"] = {
+        "signal": signal, "reverse_against": signal == "reverse",
+        "key_number_cross": key_cross,
+        "shape": summary.get("shape") if isinstance(summary, dict) else None,
+        "tag": summary.get("tag") if isinstance(summary, dict) else None,
+    }
+    c["trajectory"] = _freeze_trajectory(rec, c["market"])
 
     reason = None
     # 盤太甜（過期/錯盤/陷阱）→ 剔除
