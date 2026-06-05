@@ -160,10 +160,15 @@ DEATH_GROUP_TEAMS: list[str] = []  # 死亡之組隊名清單（命中降權）�
 
 WORD_BUDGET = {
     "confidence_reasoning": 50,
-    "injury_impact": 100,
+    "injury_news_inference": 100,   # 由盤口反推的傷病/陣容消息推測（無傷停源、不宣稱已證實）
     "market_reading": 150,
 }
 AI_TAG = "🤖 AI 推論"
+# Gemini 模型（新 SDK google-genai 實查，2026-06-06）。此金鑰實測：2.0-flash 免費配額為 0、
+# 2.5-flash 有配額 → 用 2.5-flash 並關 thinking(thinking_budget=0，免 thinking 吃 output token)。
+# 2.5-flash 偶 503 高負載 → 由 analyze 部分失敗處理(非致命，下次重試)。
+GEMINI_MODEL = "gemini-2.5-flash"
+GEMINI_THINKING_BUDGET = 0  # 關閉 thinking（結構化短輸出不需要，且免吃 output 額度）
 
 # =========================================================================
 # 七、路徑與 TEST_MODE 隔離（沿用）
