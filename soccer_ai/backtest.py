@@ -93,7 +93,76 @@ def settle_recommendation(rec: dict, market_map: dict) -> dict:
     rec["result"] = result
     rec["pnl_units"] = pnl
     rec["settled"] = pnl is not None
+    rec["score"] = derive_score(settlements, market_map)  # 從同一份結算階梯反推比分（可 None）
     return rec
+
+
+# =========================================================================
+# 反推比分（OddsPapi 無直接比分；由 O/U + 讓分多盤口階梯反推確切比分）
+# =========================================================================
+def _collect_settle_lines(settlements: dict, market_map: dict):
+    """回 (ou, ah)：ou[line]={'Over':res,'Under':res}；ah[home_line]=home("1") result。"""
+    ou: dict = {}
+    ah: dict = {}
+    markets = settlements.get("markets") if isinstance(settlements, dict) else None
+    if not isinstance(markets, dict):
+        return ou, ah
+    for mid, mobj in markets.items():
+        meta = market_map.get(_to_int(mid))
+        if not meta or not isinstance(mobj, dict):
+            continue
+        for oid, oobj in mobj.get("outcomes", {}).items():
+            res = oobj.get("players", {}).get("0", {}).get("result") if isinstance(oobj, dict) else None
+            side = meta["outcomes"].get(str(oid))
+            ln = float(meta["handicap"])
+            if meta["name"] == config.MARKET_OVER_UNDER and side:
+                ou.setdefault(ln, {})[side] = res
+            elif meta["name"] == config.MARKET_ASIAN_HANDICAP and side == "1":
+                ah[ln] = res
+    return ou, ah
+
+
+def _derive_total(ou: dict) -> "int | None":
+    """總進球：整數線 PUSH ⟹ total=該線；否則 .5 線 Over==WIN 計數（Over k-0.5 WIN ⟺ total≥k）。"""
+    for ln, sides in ou.items():
+        if ln == int(ln) and (sides.get("Over") == "PUSH" or sides.get("Under") == "PUSH"):
+            return int(ln)
+    half_win = [ln for ln, s in ou.items() if abs(ln - int(ln) - 0.5) < 1e-9 and s.get("Over") == "WIN"]
+    return int(max(half_win)) + 1 if half_win else None
+
+
+def _derive_margin(ah: dict) -> "int | None":
+    """淨球差(主-客)：整數讓分線 PUSH ⟹ margin=-line；否則由 .5 線 home WIN/LOSE 邊界夾出。"""
+    for ln, res in ah.items():
+        if ln == int(ln) and res == "PUSH":
+            return int(-ln)
+    # home(-h)=home line ln；門檻 t=-ln，home WIN ⟺ margin>t。取 .5 線邊界
+    halves = sorted((ln, res) for ln, res in ah.items() if abs(ln - int(ln) - 0.5) < 1e-9 or abs(ln - int(ln) + 0.5) < 1e-9)
+    win_t = [-ln for ln, res in halves if res == "WIN"]
+    lose_t = [-ln for ln, res in halves if res == "LOSE"]
+    if win_t and lose_t:
+        # margin 介於 max(win_t) 與 min(lose_t) 之間的整數
+        lo, hi = max(win_t), min(lose_t)
+        if lo < hi:
+            cand = [m for m in (int(lo + 0.5), int(hi - 0.5)) if lo < m < hi]
+            if cand:
+                return cand[0]
+    return None
+
+
+def derive_score(settlements: dict, market_map: dict) -> "dict | None":
+    """由結算階梯反推確切比分：O/U 邊界定總進球、讓分邊界定淨差 → 主/客。
+
+    回 {'home':int,'away':int,'total':int,'margin':int} 或 None（階梯不足以唯一確定）。
+    """
+    ou, ah = _collect_settle_lines(settlements, market_map)
+    total, margin = _derive_total(ou), _derive_margin(ah)
+    if total is None or margin is None:
+        return None
+    h, a = (total + margin) / 2, (total - margin) / 2
+    if h != int(h) or a != int(a) or h < 0 or a < 0:
+        return None  # 階梯不一致/不足 → 不硬湊
+    return {"home": int(h), "away": int(a), "total": total, "margin": margin}
 
 
 # =========================================================================

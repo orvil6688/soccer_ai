@@ -75,6 +75,12 @@ def _format_embed(rec: dict) -> dict:
          "value": f"形狀 **{_zh(sig.get('shape'))}**　{sig.get('tag') or '—'}　訊號 **{_zh(sig.get('signal'))}**",
          "inline": False},
     ]
+    if rec.get("settled"):
+        sc = rec.get("score")
+        rv = rec.get("result")
+        val = (f"{rec.get('home','主')} **{sc['home']} : {sc['away']}** {rec.get('away','客')}（{rv}）"
+               if isinstance(sc, dict) else f"（{rv}）")
+        fields.append({"name": "🏁 賽果", "value": val, "inline": False})
     ai = rec.get("ai", {})
     if ai.get("available"):
         fields += [

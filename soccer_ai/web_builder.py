@@ -155,7 +155,12 @@ def render_index(recs: list[dict], have_fixture: set) -> str:
         match = f"{r.get('home','?')} vs {r.get('away','?')}"
         fid = r.get("fixtureId")
         match_html = f"<a href='fixtures/{_esc(fid)}.html'>{_esc(match)}</a>" if fid in have_fixture else _esc(match)
-        result = _esc(r.get("result")) if r.get("settled") else "<span class='muted'>未結算</span>"
+        if r.get("settled"):
+            sc = r.get("score")
+            result = (f"{sc['home']}:{sc['away']}（{_esc(r.get('result'))}）"
+                      if isinstance(sc, dict) else _esc(r.get("result")))
+        else:
+            result = "<span class='muted'>未結算</span>"
         rows.append(
             f"<tr><td>{_esc(str(r.get('kickoff_local',''))[:16])}</td><td>{match_html}</td>"
             f"<td>{_MARKET_ZH.get(r.get('market'),r.get('market'))} {_SIDE_ZH.get(r.get('side'),r.get('side'))} {_esc(r.get('line'))}</td>"
