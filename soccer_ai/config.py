@@ -65,8 +65,11 @@ def local_date(dt) -> str:
 # =========================================================================
 ODDSPAPI_API_KEY = os.getenv("ODDSPAPI_API_KEY", "")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL", "")
-DISCORD_TEST_WEBHOOK_URL = os.getenv("DISCORD_TEST_WEBHOOK_URL", "")
+# Discord 四把 webhook（值僅由總司令自填 .env/Secret；程式只 os.getenv 讀、不經手不印）
+DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL", "")              # 📋-推薦單（正式）
+DISCORD_TEST_WEBHOOK_URL = os.getenv("DISCORD_TEST_WEBHOOK_URL", "")    # 🧪-測試（TEST_MODE）
+DISCORD_BACKTEST_WEBHOOK_URL = os.getenv("DISCORD_BACKTEST_WEBHOOK_URL", "")  # 📊-回測戰報（推播後續）
+DISCORD_ALERT_WEBHOOK_URL = os.getenv("DISCORD_ALERT_WEBHOOK_URL", "")        # ⚠️-系統告警（推播後續）
 
 
 def require_key(name: str) -> str:
