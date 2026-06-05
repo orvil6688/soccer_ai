@@ -14,3 +14,6 @@ venv/
 
 # === 雜項 ===
 *.log
+
+# === web_builder 產出（CI 打包部署 Pages，不進 repo）===
+site/
