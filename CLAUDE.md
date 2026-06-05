@@ -1,6 +1,6 @@
 # CLAUDE.md — 世界盃足球盤口分析系統 · AI 協作記憶中樞
 
-> ✅ **本檔為 v2.0-loop（架構 A：OddsPapi 主源 + 八錨點軌跡 + 選注/AI/推播/回測閉環全線打通）**：第五節契約自包含、
+> ✅ **本檔為 v2.0-web（架構 A：OddsPapi 主源 + 八錨點軌跡 + 選注/AI/推播/回測閉環 + 公開網頁，Phase 3 全完成）**：第五節契約自包含、
 > 可讓任何 AI 憑此恢復上下文。存證：`docs/oddspapi_findings.md`、`docs/arch_A_proposal.md`、
 > `docs/phase3_proposal.md`、`docs/movement_trajectory_proposal.md`。`HANDOFF_TO_GEMINI.md`（API-Football 時期）降為歷史參考。
 >
@@ -56,10 +56,11 @@
 ### 板塊組成
 
 ```
-板塊一：核心抓取    api_client.py（API-Football）/ bdl_client.py（BALLDONTLIE）
-板塊二：資料處理    odds_parser.py / snapshot.py（三錨點快照·核心）/ storage.py
-板塊三：分析輸出    selector.py（選注引擎）/ analyzer.py（Gemini）
-板塊四：流程編排    backtest.py（賽果回填）/ main.py
+板塊一：核心抓取    oddspapi_client.py（OddsPapi v4 主）｜_legacy/（API-Football/BDL 封存）
+板塊二：資料處理    odds_parser.py（market_map+主盤線）/ trajectory.py（八錨點軌跡分類·核心）/ movement.py（雙book編排）/ storage.py
+板塊三：分析輸出    selector.py（選注·純數學）/ analyzer.py（Gemini🤖）/ notifier.py（Discord）/ web_builder.py（靜態網頁）
+板塊四：流程編排    backtest.py（settlements 回填+CLV+derive_score）/ main.py（--mode movement|select|backtest）
+排程/部署          .github/workflows/main_pipeline.yml（每小時）/ gh_pages.yml（Pages 部署）
 後期實驗：          scrapers/titan007.py
 ```
 
@@ -169,17 +170,24 @@
 - **shape 中性枚舉**：`flat/odds_drift/fav_swap/gradual/monotonic/spike_revert/late_swing/choppy/mixed`。系統只描述「怎麼動」；**動機（洗盤/誘散戶/消息走漏）留 Gemini 標 🤖**，shape 名不叫「洗盤」。線不動時改看賠率/水互換維度 → 不誤判 flat。
 - 門檻全「待回測校準」（`LINE_STEP/ODDS_FLAT_EPS/PROB_FLAT_EPS/FAV_EPS/shape 規則`）；shape 第一版待小組賽真實資料對照看盤迭代。
 
+### 5.7 靜態網頁 + GitHub Pages（web_builder + gh_pages）
+- `web_builder.py`：**純讀 `data/` 產自包含 HTML**（無 CDN、內嵌 SVG）：`index`（推薦列表+賽果欄顯真比分）/`fixtures/{id}`（單場八錨點逐點線+賠率+SVG 走勢圖，雙 book×讓分/大小球）/`backtest`（命中率/ROI/CLV/by_trajectory）。公開頁衛生：**不讀 .env、不輸出 webhook/key/內部 hash、白名單欄位、shape 顯示層英譯中、缺/壞場跳過**。
+- `gh_pages.yml`：`workflow_run`（main_pipeline 完成且成功後）+ `workflow_dispatch` 觸發 → **`checkout ref=main`（取 main_pipeline 剛 commit 的 data/prod、不慢一輪，鐵律3）** → `TEST_MODE=false` 讀 data/prod → web_builder 產 `site/` → `upload-pages-artifact@v5`+`deploy-pages@v5`（全 **node24**：configure-pages@v6/deploy-pages@v5/checkout@v6/setup-python@v6）。`site/` gitignored、CI 打包不進 repo。
+- **公開網址**：`https://orvil6688.github.io/soccer_ai/`（Settings→Pages→Source=GitHub Actions 啟用）。
+- **顯示層調整（D/E/F）**：shape/signal 英譯中（fav_swap=賠率反轉…，內部 key 不動）；tag 級→盤/平盤（net 計算不動）；賠率顯示 `{:.2f}`（儲存/回測全精度不動）。
+
 ---
 
 ## 六、Phase 計畫（對應 🔒 #11 施工序）
 
 > 鐵律：6/11 前 Phase 1+2 必須能跑，否則回測永遠生不出勝率。
 
-- **Phase 1（6/11 前必須）**：config + api_client + snapshot + storage（三錨點抓盤存庫）
-- **Phase 2（6/11 前必須）**：backtest 賽果回填 + 命中率（閉環最後一塊）
-- **Phase 3**：selector 選注引擎 + analyzer（GEM 人設）
-- **Phase 4**：bdl_client 交叉驗證 + edge 門檻調校
-- **Phase 5（後期）**：xG 接入、scrapers 爬蟲實驗、俱樂部賽季漏斗
+> 註：架構 A 後實際路徑＝OddsPapi（見 §5）；下列 Phase 名沿用，內容以架構 A 為準。
+- **✅ Phase 1（完成）**：config + oddspapi_client + movement/trajectory（八錨點軌跡）+ storage（架構 A 取代原三錨點）。
+- **✅ Phase 2（完成）**：backtest `/v4/settlements` 賽果回填 + CLV 自算 + 命中率/by_trajectory + derive_score 比分反推。
+- **✅ Phase 3（完成）**：selector（純數學選注）+ analyzer（Gemini🤖 推論評論員）+ notifier（Discord）+ web_builder/gh_pages（公開網頁）。閉環+公開網頁全線。
+- **Phase 4**：交叉驗證/edge 對手盤調校（待小組賽真實資料；原 bdl_client 作廢→改 Pinnacle vs 1xBet/singbet 比較）。
+- **Phase 5（後期）**：xG/實際數據面接入 analyzer、scrapers/titan007 實驗、上半場盤口。
 
 ---
 
@@ -244,16 +252,19 @@
 
 ## 九、目前狀態
 
-- **最新版本**：v2.0-loop（2026-06-06，閉環全線打通：movement→selector→analyzer→存推薦→notifier ／ backtest）
+- **最新版本**：v2.0-web（2026-06-06，**Phase 3 全完成**：閉環 + 公開網頁全線上線）
+- **公開網址**：`https://orvil6688.github.io/soccer_ai/`（GH Pages，gh_pages.yml 部署）。
 - **核心架構**：OddsPapi v4 主源；`historical-odds` 賽前即時走勢 → **八錨點 + 軌跡分類(§5.6)** → `selector` 選注(de-vig vs 1xBet + trajectory 訊號) → `analyzer` 🤖 推論(Gemini 2.5-flash) → 存推薦 → `backtest` settlement 回測(含 by_trajectory)；CROWN 雙記 Pinnacle + singbet。
 - **Phase 1A 已完成**：封存 API-Football 舊模組；config/oddspapi_client/odds_parser/storage/main/yml（每小時 8s 節流、placeholder 篩選）。
 - **Phase 2 已完成**：`backtest.py` `/v4/settlements` 賽果回填 + CLV 自算 + 命中率/ROI/CLV 彙總 + by_trajectory；真實 MLS 完賽場驗證。
 - **軌跡分類已完成**（schema v2）：六錨點→**八錨點**(+t72h/+t30m，決策6/回測2/role)；`trajectory.py`(八錨點+segment 四維+summary 中性 shape+中文 tag，CROWN 雙記)；`movement.py` 重寫雙 book schema v2；`selector` line_movement_signal→`trajectory_signal`(線+de-vig 機率位移，抓「線黏住賠率動」、濾水位假動作)；`backtest` 加 by_trajectory。MLS 真實場驗證：水位假動作正確判 flat、線動 confirm/reverse 正確。CI 每小時自動遷移 v1→v2。
 - **analyzer #3 已完成**：`analyzer.py`（Gemini 2.5-flash 開盤手推論評論員，**只解釋不選注**；三欄獨立截斷、`ai{}` 區塊🤖、summary_hash 快取、insufficient 前置攔截、TEST_MODE mock、失敗分流）。GEMINI_MODEL 鎖 2.5-flash（見 §5.4）。真打驗證敘述品質達標。
 - **#5 編排已完成**：`--mode select`（selector→analyzer→存推薦→notifier）+ `config.local_date` UTC+8 歸檔 + storage `(fixtureId,market,side)` 複合鍵 + 兩個 produced_at 各管各。
-- **#4 notifier 已完成**：Discord 推播（四把 webhook env 在位、實作 📋推薦單+🧪測試兩把；整輪彙總多 embed、去重 `notified_*`、shape/signal 顯示層英譯中、TEST→test/略過壓🧪、失敗不阻斷告警記一次）。**🧪 頻道真打驗證 204 通過**。**閉環全線打通**：movement→selector→analyzer→存推薦→notifier ／ backtest。
-- **下一步**：**web_builder + GH Pages**（推薦/回測轉靜態網頁、每場完整 6 錨點走勢明細，補 Discord summary 看不到的）→ 📊回測戰報/⚠️告警推播（後兩把 webhook，後續）。shape 第一版待小組賽真實資料對照看盤迭代。
-- **待總司令動作**：repo Secrets `ODDSPAPI_API_KEY`+`GEMINI_API_KEY`+四把 `DISCORD_*_WEBHOOK_URL`（CI 跑 select 推播需）。
+- **#4 notifier 已完成**：Discord 推播（四 webhook、實作 📋推薦單+🧪測試；彙總多 embed、去重 `notified_*`、英譯中、失敗不阻斷）。🧪 真打 204 通過。
+- **web_builder + gh_pages 已完成**：`web_builder.py`（純讀 data/ 產自包含 HTML：推薦列表+賽果真比分、單場八錨點+SVG 走勢圖、回測戰報）；`gh_pages.yml`（workflow_run 後 deploy-pages，全 node24，checkout ref=main 取最新 data）；**公開網頁線上**（首頁框架正常、賽前推薦空屬正常、fixtures/* 72 場走勢有料）；derive_score 比分反推已上（賽果顯 `主N:M客`）。
+- **Phase 3 全完成**：selector→analyzer→notifier→web_builder 全線；閉環 + 公開網頁全到位。
+- **下一步（Phase 3 後）**：見「尚未做清單」——titan007 spike / 上半場 / edge 對手盤待小組賽評估 / xG=Phase5 / 比分顯示樣式微調(可選)。
+- **待總司令動作**：repo Secrets `ODDSPAPI_API_KEY`+`GEMINI_API_KEY`+四把 `DISCORD_*_WEBHOOK_URL`（已備）；GH Pages Settings→Source=GitHub Actions（已啟用）。
 - **暫停中**：titan007 spike（2022 回測，OddsPapi 歷史僅 3–6 個月拿不到）、上半場盤口（未來擴充）。
 
 ---
@@ -267,4 +278,4 @@
 
 ---
 
-**本檔版本**：v2.0-loop｜格式來源：總司令通用範本 v1.0｜建立 2026-06-02｜notifier 閉環全線回填 2026-06-06
+**本檔版本**：v2.0-web｜格式來源：總司令通用範本 v1.0｜建立 2026-06-02｜Phase 3 全完成(閉環+公開網頁)回填 2026-06-06

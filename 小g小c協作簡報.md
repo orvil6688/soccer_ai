@@ -1,6 +1,6 @@
-# 小 g / 小 c 協作簡報 — 世界盃足球盤口分析系統（專案專屬版 v2.0-loop）
+# 小 g / 小 c 協作簡報 — 世界盃足球盤口分析系統（專案專屬版 v2.0-web）
 
-> ✅ **架構 A + 八錨點軌跡 + 選注/AI/推播/回測閉環全線打通**：OddsPapi v4、selector(純數學)→analyzer(🤖2.5-flash)→存推薦→notifier(Discord) ／ backtest、CROWN 雙記。存證 `docs/{oddspapi_findings,arch_A_proposal,phase3_proposal,movement_trajectory_proposal,analyzer_proposal,select_pipeline_proposal,notifier_proposal}.md`。
+> ✅ **Phase 3 全完成：閉環 + 公開網頁全線**：OddsPapi v4、selector(純數學)→analyzer(🤖)→notifier(Discord)→web_builder(公開網頁 orvil6688.github.io/soccer_ai/) ／ backtest(含 derive_score 比分)、CROWN 雙記。存證 `docs/*_proposal.md` + oddspapi_findings/movement_trajectory/web_builder。
 > 🔗 **同步紀律**：本檔與 `CLAUDE.md` 為一組記憶中樞。**任一更新，另一份必須同步檢查**，否則兩份會講不一樣的話。CLAUDE.md 更新時由小cc 一併更新本檔。
 > 開小g / 小c 對話時整份貼上以恢復系統記憶與協作紀律。
 
@@ -52,8 +52,8 @@
 ```
 板塊一：核心抓取   oddspapi_client.py（OddsPapi v4 主）｜_legacy/（API-Football/BDL 封存）
 板塊二：資料處理   odds_parser.py（market_map+主盤線）/ trajectory.py（八錨點+軌跡分類·核心）/ movement.py（雙 book 編排）/ storage.py
-板塊三：分析輸出   selector.py（選注+trajectory 訊號）/ analyzer.py（Gemini，待做）/ notifier.py（DC 推播，待做）/ web_builder.py（靜態網頁，後置）
-板塊四：流程編排   backtest.py（settlements 回填+CLV+by_trajectory）/ main.py
+板塊三：分析輸出   selector.py（選注·純數學）/ analyzer.py（Gemini🤖2.5-flash）/ notifier.py（Discord）/ web_builder.py（靜態網頁，已上線）
+板塊四：流程編排   backtest.py（settlements 回填+CLV+by_trajectory+derive_score）/ main.py（movement|select|backtest）
 排程/部署          .github/workflows/（Actions 每小時 8s 節流）/ docs/（GitHub Pages）
 後期實驗          scrapers/titan007.py（2022 回測，暫停）
 ```
@@ -144,12 +144,13 @@ trajectory 訊號：線動以線為主、線不動看 de-vig 機率位移(濾水
 
 ## 十、目前狀態
 
-- **最新版本**：v2.0-loop（2026-06-06，閉環全線打通：movement→selector→analyzer→存推薦→notifier ／ backtest）
-- **核心架構**：OddsPapi v4 主源，historical → 八錨點+軌跡分類 → selector 選注(de-vig vs 1xBet + trajectory 訊號) → analyzer 🤖 推論(2.5-flash) → 存推薦 → notifier(Discord) ／ settlements 回測(含 by_trajectory)；CROWN 雙記 pinnacle+singbet
-- **已完成**：Phase 1A + Phase 2 + 軌跡分類(八錨點/trajectory.py/雙book v2/by_trajectory) + analyzer #3(2.5-flash 開盤手、ai{}🤖) + #5 編排(`--mode select`/config.local_date/複合鍵/兩 produced_at) + #4 notifier(Discord 四 webhook、推播兩把、去重、英譯中；🧪 真打 204 通過)。閉環全線打通；CI 每小時自動遷移 v1→v2
-- **下一步**：**web_builder + GH Pages**(推薦/回測轉靜態網頁、每場完整 6 錨點走勢明細) → 📊回測/⚠️告警推播(後兩把 webhook，後續)
+- **最新版本**：v2.0-web（2026-06-06，**Phase 3 全完成**：閉環 + 公開網頁全線上線）
+- **公開網址**：https://orvil6688.github.io/soccer_ai/
+- **核心架構**：OddsPapi v4，historical → 八錨點軌跡 → selector(純數學 edge) → analyzer 🤖(2.5-flash) → 存推薦 → notifier(Discord) ／ backtest(settlements 回填+CLV+by_trajectory+derive_score 比分) ／ web_builder(公開網頁)；CROWN 雙記 pinnacle+singbet
+- **已完成**：Phase 1A + Phase 2 + 軌跡分類 + analyzer #3 + #5 編排 + #4 notifier + web_builder/gh_pages(公開網頁上線、賽果顯真比分)；閉環+公開網頁全線；CI 每小時自動遷移 v1→v2
+- **下一步（Phase 3 後）**：見「尚未做清單」(titan007 spike / 上半場 / edge 對手盤待小組賽 / xG=Phase5 / 比分樣式微調可選)
 - **暫停中**：titan007 spike(2022 回測，OddsPapi 歷史僅 3–6 月)、上半場盤口
-- **待總司令**：repo Secrets `ODDSPAPI_API_KEY`+`GEMINI_API_KEY`+四把 `DISCORD_*_WEBHOOK_URL`(CI 推播需)；（建議）寄信 OddsPapi 確認 historical 不計額度
+- **待總司令**：repo Secrets 四把 `DISCORD_*` + `ODDSPAPI`/`GEMINI`(已備)；GH Pages Source=Actions(已啟用)；（建議）寄信 OddsPapi 確認 historical 不計額度
 
 ---
 
@@ -159,4 +160,4 @@ trajectory 訊號：線動以線為主、線不動看 de-vig 機率位移(濾水
 
 ---
 
-**本檔版本**：v2.0-loop｜由通用範本 v1.0 轉本專案專屬｜建立 2026-06-02｜notifier 閉環全線同步 2026-06-06
+**本檔版本**：v2.0-web｜由通用範本 v1.0 轉本專案專屬｜建立 2026-06-02｜Phase 3 全完成(閉環+公開網頁)同步 2026-06-06
