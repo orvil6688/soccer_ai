@@ -13,7 +13,7 @@ import argparse
 import logging
 import sys
 
-from . import analyzer, backtest, config, movement, oddspapi_client, selector, storage
+from . import analyzer, backtest, config, movement, notifier, oddspapi_client, selector, storage
 
 
 def _setup_logging() -> None:
@@ -81,30 +81,37 @@ def main(argv=None) -> int:
 
 
 def _run_select(log) -> None:
-    """#5 編排：selector→analyzer→存推薦（閉環接 backtest）。逐 pick 隔離、部分失敗不阻斷。"""
+    """#5 編排：selector→analyzer→存推薦→#4 notifier 推播。逐 pick 隔離、部分失敗不阻斷。"""
     picks = selector.select()
     stored = ai_ok = 0
     reasons: dict = {}
+    to_notify: list = []
     for pick in picks:
         fid = pick.get("fixtureId")
         try:
             record = storage.load_fixture_movement(fid) or {}
             date = config.local_date(pick["kickoff_utc"])          # 存撈共用 UTC+8 歸檔
-            prior = storage.find_recommendation(date, fid, pick["market"], pick["side"])
+            prior = storage.find_recommendation(date, fid, pick["market"], pick["side"]) or {}
             # produced_at_local：CLV 基準，首見凍結、重跑不更新
-            pick["produced_at_local"] = (prior or {}).get("produced_at_local") or config.now_local().isoformat()
-            prior_ai = (prior or {}).get("ai")
-            pick["ai"] = analyzer.analyze(pick, record, prior_ai)  # 內含 C 快取；ai.produced_at 隨 hash 更新
+            pick["produced_at_local"] = prior.get("produced_at_local") or config.now_local().isoformat()
+            pick["ai"] = analyzer.analyze(pick, record, prior.get("ai"))  # 含 C 快取；ai.produced_at 隨 hash
+            # 帶入既有去重狀態(供 notifier.should_notify 比對)
+            for k in ("notified_hash", "notified_at", "notified_ai_available"):
+                if k in prior:
+                    pick[k] = prior[k]
             storage.append_recommendation(pick, date_local=date)   # (fixtureId,market,side) upsert
             stored += 1
             if pick["ai"].get("available"):
                 ai_ok += 1
             else:
-                r = pick["ai"].get("reason")
-                reasons[r] = reasons.get(r, 0) + 1
+                reasons[pick["ai"].get("reason")] = reasons.get(pick["ai"].get("reason"), 0) + 1
+            if notifier.should_notify(pick):
+                to_notify.append(pick)
         except Exception as e:  # 單筆失敗不阻斷其餘
             log.warning("select 單筆失敗 fixture=%s：%s", fid, e)
-    log.info("選注完成：picks %d / 已存 %d / ai可用 %d / ai未用 %s", len(picks), stored, ai_ok, reasons)
+    nstats = notifier.notify_batch(to_notify)   # 整輪彙總一則多 embed（成功回寫 notified_*）
+    log.info("選注完成：picks %d / 已存 %d / ai可用 %d / ai未用 %s / 推播 %s",
+             len(picks), stored, ai_ok, reasons, nstats)
 
 
 if __name__ == "__main__":
