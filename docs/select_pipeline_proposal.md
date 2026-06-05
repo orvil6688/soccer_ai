@@ -19,10 +19,10 @@ main --mode select [--test]:
   2) picks = selector.select()         # 候選偵測→誘盤過濾→注碼；已含 signals/trajectory(凍結)
   3) for pick in picks:
        rec   = storage.load_fixture_movement(pick.fixtureId)     # 取完整軌跡供 analyzer 渲染
-       date  = pick.kickoff 的 UTC+8 日期
-       prior = storage.find_recommendation(date, fixtureId, market, side)  # 取既有(供快取+保留 produced_at)
-       pick.produced_at_local = prior.produced_at_local if prior else now_local()   # 首見凍結，重跑不漂移
-       pick.ai = analyzer.analyze(pick, rec, prior_ai = prior.ai if prior else None) # C 快取在內
+       date  = config.local_date(pick.kickoff_utc)               # kickoff 轉 UTC+8 的日曆日（共用函式）
+       prior = storage.find_recommendation(date, fixtureId, market, side)  # 取既有(供快取+保留 produced_at_local)
+       pick.produced_at_local = prior.produced_at_local if prior else config.now_local().isoformat()  # 首見凍結(CLV 基準)
+       pick.ai = analyzer.analyze(pick, rec, prior_ai = prior.ai if prior else None)  # 內含 C 快取 + ai.produced_at 隨 hash 更新
        storage.append_recommendation(pick, date_local=date)      # 以 (fixtureId,market,side) upsert
   4) log：本次 picks 數 / ai available 數 / 各 reason 計數 / 額度
   （5) notify → #4，本塊不做）
@@ -47,6 +47,13 @@ main --mode select [--test]:
 - **儲存日期**：以**該場 kickoff 的 UTC+8 日期**為檔名（非產出日）→ backtest `run_backfill(該日)` D+1 直接撈到當日所有推薦結算。
 - prod `recommendations/` 目前**空**（未上線），故此改動不破壞既有資料。
 
+### 🔴 跨日歸檔：存/撈共用同一個 UTC+8 日期函式
+- 世界盃台灣半夜開賽（如 KO `2026-06-12T03:00+08:00`，其 UTC 為 `06-11T19:00Z`）。**歸檔日期＝kickoff 轉 UTC+8 後的日曆日**＝`06-12`（不是 UTC 的 `06-11`）。
+- **新增共用函式 `config.local_date(dt_or_iso) -> "YYYY-MM-DD"`**（內部 `to_local()` 轉 UTC+8 再取日期）。
+  - select 編排：`date = config.local_date(pick["kickoff_utc"])` 決定存檔日。
+  - backtest：`run_backfill` 預設日 `config.local_date(now_local - 1天)`；指定日也走同函式。
+- **存與撈一律經此函式**，杜絕「一邊 UTC 一邊 UTC+8 → 存 6/12 撈 6/11」漏撈。
+
 ---
 
 ## 3. 推薦記錄最終形狀（backtest 直接吃）
@@ -61,13 +68,20 @@ selector pick + `produced_at_local` + `ai{}`：
   "ai":{...} }                                                   // 🤖 推論層(analyzer)；backtest 不讀
 ```
 - backtest 既有 `settle_recommendation/compute_clv/by_trajectory` 只讀系統欄位（market/side/line/odds/stake_units/kickoff_utc/produced_at_local/signals.shape）→ **閉環自動接上**，`ai{}` 純附加不影響。
-- `produced_at_local`：**首見凍結、重跑不更新**（保 CLV 時序防呆的「下注時點」穩定）。
+
+### 🔴 兩個 produced_at 是不同欄位，各管各（勿混為一談）
+| 欄位 | 層 | 語意 | 重跑行為 |
+|---|---|---|---|
+| **`produced_at_local`**（推薦頂層）| 推薦/CLV 層 | **下注時點**＝CLV 時序防呆基準 | **首見凍結、重跑不更新**（否則 CLV 基準漂移）|
+| **`ai.produced_at`**（在 `ai{}` 內）| analyzer 推論層 | 標「這版 Gemini 推論對應**哪個軌跡快照**」 | **隨軌跡 hash 變而更新**（analyzer §F；否則回測分不清哪版推論對應哪個 shape，by_trajectory 會錯）|
+- 由不同模組管：`ai.produced_at` 由 `analyzer.analyze` 寫（hash 變即更新）；`produced_at_local` 由 select 編排寫（首見凍結）。兩者**不得用一句「produced_at 凍結」一起凍**。
 
 ---
 
 ## 4. 快取/覆寫（併 analyzer C/F）
-- 重跑 select：`analyzer.analyze(pick, rec, prior_ai)` 內部以 `summary_hash` 判定——軌跡摘要沒變→沿用 prior `ai{}`（不重打 Gemini）；變了→重算覆寫、`ai.produced_at` 更新。
-- 系統欄位（line/odds/edge/signals/trajectory）每次以最新 upsert 覆蓋；`produced_at_local` 保留首見值。
+- 重跑 select：`analyzer.analyze(pick, rec, prior_ai)` 內部以 `summary_hash` 判定——軌跡摘要沒變→沿用 prior `ai{}`（不重打 Gemini，`ai.produced_at` 不變）；變了→重算覆寫、**`ai.produced_at` 更新**（標新快照）。
+- 系統欄位（line/odds/edge/signals/trajectory）每次以最新 upsert 覆蓋；**`produced_at_local` 保留首見值**（CLV 基準不漂移）。
+- 注意：analyzer 現版 `ai{}` 已含 `produced_at`（=快照戳記）；本塊不改 analyzer，只在編排層額外蓋一個**頂層** `produced_at_local`（CLV 基準）。兩戳記並存、語意不同。
 
 ---
 
@@ -105,6 +119,10 @@ selector pick + `produced_at_local` + `ai{}`：
 ---
 
 ## 待確認（請總司令/小c 裁）
-- storage upsert 改複合鍵：認可？（格式不變、僅去重鍵 + 新增 getter）
-- 推薦儲存日期＝kickoff UTC+8 日期：認可？
-- `produced_at_local` 首見凍結（不隨重跑更新）：認可？
+- storage upsert 改複合鍵 (fixtureId,market,side)：認可？（格式不變、僅去重鍵 + 新增 getter）✅ 小c 已認可
+- 推薦儲存日期＝kickoff UTC+8 日期、存撈共用 `config.local_date`：認可？
+- **兩個 produced_at 各管各**（`produced_at_local` 首見凍結／`ai.produced_at` 隨軌跡 hash 更新）：認可？
+
+## 🟡 補釘（複審回應）
+- **🟡1 produced_at 兩義性**：已拆清為兩欄各管各（§3「兩個 produced_at」表 + §4）。`produced_at_local`(CLV 基準)首見凍；`ai.produced_at`(快照戳記)隨 hash 更新——不再用一句話一起凍。
+- **🟡2 跨日歸檔**：新增共用 `config.local_date()`，存(select)與撈(backtest)一律經此 UTC+8 轉換，杜絕跨日漏撈（§2 跨日歸檔）。
