@@ -185,6 +185,190 @@ def render_backtest(recs: list[dict]) -> str:
 
 
 # =========================================================================
+# titan007 2022 本機離線回測頁（local-only；不上 GitHub Pages、不進 git）
+# -------------------------------------------------------------------------
+# 口徑（總司令 2026-06-07 裁決）：
+#   2022 titan007 只有 pinnacle+singbet、無 1xBet → 無 edge 對手盤 → 不是 selector 命中率，
+#   是 by_trajectory：shape → 實際過盤率。過盤基準＝**收盤低水方（盤面最終看好邊）**。
+#   過盤判定一律 90 分鐘比分（嚴格 fulltime），延長賽/PK 不計（score 由全量結果頁只取 90 分鐘）。
+# 沿用 backtest 計分口徑：PUSH 不計分母、半贏半輸計 0.5。
+# =========================================================================
+_T007_DIR = config._PROJECT_ROOT / "data" / "titan007_2022"
+_WIN_W = {"WIN": 1.0, "HALFWIN": 0.5}
+_LOSE_W = {"LOSE": 1.0, "HALFLOSS": 0.5}
+
+
+def _cover_result(score: dict, market: str, line, side: str):
+    """以 90 分鐘比分判某邊是否過盤 → WIN/HALFWIN/PUSH/HALFLOSS/LOSE 或 None（資料不足）。
+
+    讓分：line＝主隊視角（正=主受讓）；adj = (主-客) + line，主用 adj、客用 -adj。
+    大小：base = 總進球 - 線；大用 base、小用 -base。亞洲盤 1/4 線 → 半贏半輸。
+    """
+    if not isinstance(score, dict) or line is None or side is None:
+        return None
+    h, a = score.get("home"), score.get("away")
+    if not isinstance(h, (int, float)) or not isinstance(a, (int, float)):
+        return None
+    if market == "handicap":
+        adj = (h - a) + float(line)
+        x = adj if side == "home" else -adj
+    else:
+        base = (h + a) - float(line)
+        x = base if side == "over" else -base
+    if x >= 0.5 - 1e-9:
+        return "WIN"
+    if abs(x - 0.25) < 1e-9:
+        return "HALFWIN"
+    if abs(x) < 1e-9:
+        return "PUSH"
+    if abs(x + 0.25) < 1e-9:
+        return "HALFLOSS"
+    return "LOSE"
+
+
+def _closing_favored_side(traj_market: dict, market: str):
+    """收盤低水方（賠率較低那邊）。收盤缺則退而取最接近開賽的非空錨點；平水回 None。"""
+    if not isinstance(traj_market, dict):
+        return None
+    anchors = traj_market.get("anchors", {})
+    a = None
+    for name in reversed(config.ANCHOR_ORDER):  # closing, t30m, t1h, ... 取最接近開賽
+        if anchors.get(name):
+            a = anchors[name]
+            break
+    if not a:
+        return None
+    o1, o2 = ("home_odd", "away_odd") if market == "handicap" else ("over_odd", "under_odd")
+    s1, s2 = ("home", "away") if market == "handicap" else ("over", "under")
+    od1, od2 = a.get(o1), a.get(o2)
+    if not isinstance(od1, (int, float)) or not isinstance(od2, (int, float)):
+        return None
+    if abs(od1 - od2) <= config.FAV_EPS:
+        return None  # 平水 → 無看好邊 → 不計
+    return s1 if od1 < od2 else s2
+
+
+def _titan_records(mv: dict) -> list[dict]:
+    """單場 → 每 (market, book) 一筆：shape + 收盤低水方 + 過盤 result。"""
+    out = []
+    score = mv.get("score")
+    for book in mv.get("books", []):
+        bt = mv.get("trajectory", {}).get(book, {})
+        for market in ("handicap", "over_under"):
+            tm = bt.get(market, {})
+            if not isinstance(tm, dict) or not tm.get("anchors"):
+                continue
+            su = tm.get("summary", {})
+            fav = _closing_favored_side(tm, market)
+            line = (tm.get("anchors", {}).get("closing") or {}).get("line")
+            result = _cover_result(score, market, line, fav) if fav else None
+            out.append({
+                "fixtureId": mv.get("fixtureId"), "home": mv.get("home"), "away": mv.get("away"),
+                "kickoff_local": mv.get("kickoff_local"), "market": market, "book": book,
+                "shape": su.get("shape"), "tag": su.get("tag"),
+                "fav": fav, "line": line, "result": result, "score": score,
+            })
+    return out
+
+
+def _titan_by_trajectory(records: list[dict]) -> dict:
+    """shape → {n(已判定筆數), hit_rate(過盤率), fixtures(樣本場次)}。PUSH 不計分母、半贏半輸 0.5。"""
+    groups: dict[str, list] = {}
+    for r in records:
+        if r["result"] in _WIN_W or r["result"] in _LOSE_W or r["result"] == "PUSH":
+            groups.setdefault(r.get("shape") or "unknown", []).append(r)
+    out = {}
+    for shape, rs in groups.items():
+        w = sum(_WIN_W.get(r["result"], 0.0) for r in rs)
+        l = sum(_LOSE_W.get(r["result"], 0.0) for r in rs)
+        out[shape] = {
+            "n": len(rs),
+            "hit_rate": round(w / (w + l), 4) if (w + l) > 0 else None,
+            "fixtures": len({r["fixtureId"] for r in rs}),
+        }
+    return out
+
+
+def _load_titan_movements() -> list[dict]:
+    out = []
+    for p in sorted(glob.glob(str(_T007_DIR / "*.json"))):
+        data = storage._read_json(Path(p))
+        if isinstance(data, dict) and data.get("fixtureId"):
+            out.append(data)
+    return out
+
+
+_RESULT_ZH = {"WIN": "過盤", "HALFWIN": "半過", "PUSH": "走盤", "HALFLOSS": "半輸", "LOSE": "輸盤"}
+
+
+def render_titan_index(records: list[dict], movements: list[dict]) -> str:
+    by = _titan_by_trajectory(records)
+
+    def _pct(hr):
+        return "—" if hr is None else f"{hr:.0%}"
+
+    bt = "".join(
+        f"<tr><td>{_esc(_zh(k))}</td><td>{_esc(v['n'])}</td>"
+        f"<td>{_pct(v['hit_rate'])}</td><td>{_esc(v['fixtures'])}</td></tr>"
+        for k, v in sorted(by.items(), key=lambda kv: -kv[1]["n"])
+    )
+    # 逐場明細
+    det = []
+    for mv in sorted(movements, key=lambda m: str(m.get("kickoff_local", ""))):
+        fid = mv.get("fixtureId")
+        sc = mv.get("score") or {}
+        sc_txt = f"{sc.get('home','?')}:{sc.get('away','?')}" if isinstance(sc, dict) else "—"
+        match = f"{mv.get('home','?')} vs {mv.get('away','?')}"
+        link = f"<a href='fixtures/{_esc(storage._safe_name(fid))}.html'>{_esc(match)}</a>"
+        recs = [r for r in records if r["fixtureId"] == fid]
+        sub = "".join(
+            f"<tr><td>{_MARKET_ZH.get(r['market'], r['market'])}</td><td>{_esc(r['book'])}</td>"
+            f"<td>{_esc(_zh(r['shape']))}　<span class='tag'>{_esc(r['tag'])}</span></td>"
+            f"<td>{_SIDE_ZH.get(r['fav'], '平水·不計') if r['fav'] else '平水·不計'}</td>"
+            f"<td>{_esc(r['line'])}</td>"
+            f"<td>{_RESULT_ZH.get(r['result'], '—') if r['result'] else '—'}</td></tr>"
+            for r in recs
+        )
+        det.append(
+            f"<div class='card'><h3>{link}　<span class='muted'>{_esc(str(mv.get('kickoff_local',''))[:16])}　🏁 {sc_txt}（90 分鐘）</span></h3>"
+            f"<table><tr><th>盤口</th><th>莊</th><th>形狀</th><th>收盤低水方</th><th>收盤線</th><th>過盤</th></tr>{sub}</table></div>"
+        )
+    body = (
+        f"<h1>🔬 titan007 2022 世界盃 · 本機離線回測</h1>"
+        f"<div class='muted'>口徑：by_trajectory（shape → 過盤率），過盤基準＝<b>收盤低水方</b>；無 1xBet/無 edge，非 selector 命中率。</div>"
+        f"<h3>各軌跡形狀 → 過盤率（PUSH 不計分母、半過/半輸計 0.5）</h3>"
+        f"<table><tr><th>形狀</th><th>已判定筆數</th><th>過盤率</th><th>樣本場次</th></tr>"
+        f"{bt or '<tr><td colspan=4 class=muted>尚無可判定資料</td></tr>'}</table>"
+        f"<h2>逐場明細（{len(movements)} 場）</h2>{''.join(det)}"
+        f"<p class='muted'>本機離線回測 · titan007 2022 · 僅供校準</p>"
+    )
+    return _page("titan007 2022 本機回測", body)
+
+
+def build_titan007_local(out_dir: str = "site_titan007") -> dict:
+    """local-only：讀 data/titan007_2022/ → 產 site_titan007/（不上 Pages、不進 git）。"""
+    out = Path(out_dir)
+    (out / "fixtures").mkdir(parents=True, exist_ok=True)
+    stats = {"fixtures": 0, "records": 0, "failed": 0}
+    movements, records = [], []
+    for mv in _load_titan_movements():
+        fid = mv.get("fixtureId")
+        try:
+            (out / "fixtures" / f"{storage._safe_name(fid)}.html").write_text(render_fixture(mv), encoding="utf-8")
+            records.extend(_titan_records(mv))
+            movements.append(mv)
+            stats["fixtures"] += 1
+        except Exception as e:  # 單場壞 → 跳過不阻斷
+            logger.warning("titan007 本機回測單場失敗 fixture=%s：%s", fid, e)
+            stats["failed"] += 1
+    stats["records"] = len(records)
+    (out / "index.html").write_text(render_titan_index(records, movements), encoding="utf-8")
+    logger.info("titan007 本機回測完成：場次 %d / 記錄 %d / 失敗 %d → %s",
+                stats["fixtures"], stats["records"], stats["failed"], out.resolve())
+    return stats
+
+
+# =========================================================================
 # build
 # =========================================================================
 def build(out_dir: str = "site") -> dict:
@@ -215,5 +399,15 @@ def build(out_dir: str = "site") -> dict:
 
 
 if __name__ == "__main__":
+    import argparse
+
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    build(os.getenv("SITE_OUT", "site"))
+    ap = argparse.ArgumentParser(description="web_builder：公開站(預設) 或 titan007 本機離線回測頁")
+    ap.add_argument("--mode", choices=["public", "titan007_local"], default="public",
+                    help="public=讀 data/ 產公開站(gh_pages 用)；titan007_local=讀 data/titan007_2022/ 產本機回測頁(不上 Pages)")
+    ap.add_argument("--out", default=None, help="輸出目錄（預設 public→site / titan007_local→site_titan007）")
+    args = ap.parse_args()
+    if args.mode == "titan007_local":
+        build_titan007_local(args.out or "site_titan007")
+    else:
+        build(args.out or os.getenv("SITE_OUT", "site"))
