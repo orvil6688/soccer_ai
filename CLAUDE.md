@@ -1,6 +1,6 @@
 # CLAUDE.md — 世界盃足球盤口分析系統 · AI 協作記憶中樞
 
-> ✅ **本檔為 v2.0-web（架構 A：OddsPapi 主源 + 八錨點軌跡 + 選注/AI/推播/回測閉環 + 公開網頁，Phase 3 全完成）**：第五節契約自包含、
+> ✅ **本檔為 v2.0-titan（架構 A：OddsPapi 主源 + 八錨點軌跡 + 選注/AI/推播/回測閉環 + 公開網頁，Phase 3 全完成；titan007 spike 單場重建完成、待總司令確認線符號+選點後 go 全量 64 場）**：第五節契約自包含、
 > 可讓任何 AI 憑此恢復上下文。存證：`docs/oddspapi_findings.md`、`docs/arch_A_proposal.md`、
 > `docs/phase3_proposal.md`、`docs/movement_trajectory_proposal.md`。`HANDOFF_TO_GEMINI.md`（API-Football 時期）降為歷史參考。
 >
@@ -247,12 +247,18 @@
      （demo 的 1.95 是手寫 mock 加劇誤會）；edge 仍餵真值給 Gemini、未掰
 教訓：報 bug 前先實打/讀碼分清「mock 殘留 vs 真錯 vs 設計」；缺的能力（比分）常可由既有富資料反推
 ```
+```
+事件：titan007 端點 OverDown.aspx 是空錯頁、overunder.aspx 才有料
+查證：抓 changeDetail/OverDown.aspx 回 875b/912b 空殼（無 odds2 表），憑「OverDown=大小」拼的端點是錯的；
+     實打試 overunder.aspx 才回 60KB 含完整大小球時間序列；讓分正解＝handicap.aspx；companyID 47=平博/3=皇冠。
+教訓：再次驗證憑記憶/語意拼第三方端點會錯——端點要實打試出來、用回應大小/結構驗證有沒有真資料，別只看名字像
+```
 
 ---
 
 ## 九、目前狀態
 
-- **最新版本**：v2.0-web（2026-06-06，**Phase 3 全完成**：閉環 + 公開網頁全線上線）
+- **最新版本**：v2.0-titan（2026-06-07，**Phase 3 全完成**：閉環 + 公開網頁全線上線；titan007 spike 單場重建完成、待確認後 go 全量 64 場）
 - **公開網址**：`https://orvil6688.github.io/soccer_ai/`（GH Pages，gh_pages.yml 部署）。
 - **核心架構**：OddsPapi v4 主源；`historical-odds` 賽前即時走勢 → **八錨點 + 軌跡分類(§5.6)** → `selector` 選注(de-vig vs 1xBet + trajectory 訊號) → `analyzer` 🤖 推論(Gemini 2.5-flash) → 存推薦 → `backtest` settlement 回測(含 by_trajectory)；CROWN 雙記 Pinnacle + singbet。
 - **Phase 1A 已完成**：封存 API-Football 舊模組；config/oddspapi_client/odds_parser/storage/main/yml（每小時 8s 節流、placeholder 篩選）。
@@ -263,9 +269,14 @@
 - **#4 notifier 已完成**：Discord 推播（四 webhook、實作 📋推薦單+🧪測試；彙總多 embed、去重 `notified_*`、英譯中、失敗不阻斷）。🧪 真打 204 通過。
 - **web_builder + gh_pages 已完成**：`web_builder.py`（純讀 data/ 產自包含 HTML：推薦列表+賽果真比分、單場八錨點+SVG 走勢圖、回測戰報）；`gh_pages.yml`（workflow_run 後 deploy-pages，全 node24，checkout ref=main 取最新 data）；**公開網頁線上**（首頁框架正常、賽前推薦空屬正常、fixtures/* 72 場走勢有料）；derive_score 比分反推已上（賽果顯 `主N:M客`）。
 - **Phase 3 全完成**：selector→analyzer→notifier→web_builder 全線；閉環 + 公開網頁全到位。
-- **下一步（Phase 3 後）**：見「尚未做清單」——titan007 spike / 上半場 / edge 對手盤待小組賽評估 / xG=Phase5 / 比分顯示樣式微調(可選)。
-- **待總司令動作**：repo Secrets `ODDSPAPI_API_KEY`+`GEMINI_API_KEY`+四把 `DISCORD_*_WEBHOOK_URL`（已備）；GH Pages Settings→Source=GitHub Actions（已啟用）。
-- **暫停中**：titan007 spike（2022 回測，OddsPapi 歷史僅 3–6 個月拿不到）、上半場盤口（未來擴充）。
+- **titan007 spike 進行中**：OddsPapi 歷史僅 3–6 個月拿不到 2022，改用 titan007 凍結歷史補 2022 世界盃 64 場做離線回測校準。
+  - scrapling 輕量裝（`requirements-titan007.txt`，不進主 requirements、不上 CI 🔒#7）；端點釘死：讓分 `changeDetail/handicap.aspx`、大小 `changeDetail/overunder.aspx`（**OverDown.aspx 是空錯頁已棄用**，見 §八），`companyID 47=平博→pinnacle / 3=皇冠→singbet`，表 id="odds2"、gb2312。
+  - adapter `scrapers/titan007_spike.py` 單場八錨點重建完成（卡塔爾 0-2 厄瓜多爾 id=2185072 → `data/titan007_2022/2185072.json` schema_v2，commit **c98f4e4**）；防呆：濾 ts<kickoff 排滾球、§3.2 取最近目標時刻/區間外→null；reuse `trajectory.build_segments/build_summary`；八錨點全命中（讓分+大小×pinnacle+singbet）、比分對上。
+  - `data/titan007_2022/` gitignored（爬來的第三方資料、本機離線回測用、不公開上 repo）。
+  - **待總司令確認**：spike 的線符號慣例（正值=主隊受讓）+ 八錨點選點是否正確 → **確認後才 go 全量 64 場**（全量時 score 改抓 titan007 結果頁，spike 是手填）。
+- **下一步（Phase 3 後）尚未做清單**：titan007 全量 64 場（待 spike 確認）／上半場盤口(Phase 5)／edge 對手盤調校(待小組賽真實資料)／xG/數據面接 analyzer(Phase 5)／scrapers/titan007 正式化／📊回測+⚠️告警 Discord 推播(env 在位、推播後續)／比分顯示樣式微調(可選)。
+- **待總司令動作**：repo Secrets `ODDSPAPI_API_KEY`+`GEMINI_API_KEY`+四把 `DISCORD_*_WEBHOOK_URL`（已備）；GH Pages Settings→Source=GitHub Actions（已啟用）；**確認 titan007 spike 線符號+選點**。
+- **暫停/排隊中**：titan007 全量 64 場（待 spike 確認）、上半場盤口（未來擴充）、6/11 校準（小組賽開打後以 2022 的 64 場 + 真實小組賽當樣本校準 shape/門檻/edge 對手盤）。
 
 ---
 
@@ -278,4 +289,4 @@
 
 ---
 
-**本檔版本**：v2.0-web｜格式來源：總司令通用範本 v1.0｜建立 2026-06-02｜Phase 3 全完成(閉環+公開網頁)回填 2026-06-06
+**本檔版本**：v2.0-titan｜格式來源：總司令通用範本 v1.0｜建立 2026-06-02｜Phase 3 全完成(閉環+公開網頁)回填 2026-06-06｜titan007 spike 單場重建完成同步 2026-06-07

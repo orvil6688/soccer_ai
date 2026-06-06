@@ -1,6 +1,7 @@
-# 小 g / 小 c 協作簡報 — 世界盃足球盤口分析系統（專案專屬版 v2.0-web）
+# 小 g / 小 c 協作簡報 — 世界盃足球盤口分析系統（專案專屬版 v2.0-titan）
 
 > ✅ **Phase 3 全完成：閉環 + 公開網頁全線**：OddsPapi v4、selector(純數學)→analyzer(🤖)→notifier(Discord)→web_builder(公開網頁 orvil6688.github.io/soccer_ai/) ／ backtest(含 derive_score 比分)、CROWN 雙記。存證 `docs/*_proposal.md` + oddspapi_findings/movement_trajectory/web_builder。
+> 🔬 **titan007 spike 進行中**：OddsPapi 歷史拿不到 2022 → 改 titan007 凍結歷史補 2022 世界盃 64 場做離線回測校準。adapter 單場八錨點重建完成（id=2185072，commit c98f4e4），**待總司令確認線符號+選點 → 確認後 go 全量 64 場**。
 > 🔗 **同步紀律**：本檔與 `CLAUDE.md` 為一組記憶中樞。**任一更新，另一份必須同步檢查**，否則兩份會講不一樣的話。CLAUDE.md 更新時由小cc 一併更新本檔。
 > 開小g / 小c 對話時整份貼上以恢復系統記憶與協作紀律。
 
@@ -139,18 +140,20 @@ trajectory 訊號：線動以線為主、線不動看 de-vig 機率位移(濾水
 5. **OddsPapi historical 不計額度為未確認假設**：架構 A 依賴之；失效須退回 odds-by-tournaments。教訓：未確認的有利觀察當支柱時須明列假設與退場路徑。
 6. **原 selector「線-only 訊號」沉默缺陷**：line_movement_signal 線不動就判 flat、沒看賠率 → 漏掉「線黏住但賠率大幅移動」的 sharp 訊號。總司令以「線 2.5 不動但賠率 0.70/1.05→0.91/0.80」具體例子抓出 → 升級成完整盤口軌跡分類(線+de-vig 機率位移)。教訓：訊號邏輯要涵蓋線+賠率雙軌，別只看線。
 7. **OddsPapi 無比分 / 推薦 odds 對不上錨點（查證後皆非 bug）**：①比分僅 WS(免費 websocket_access=0)→由 O/U+讓分階梯 derive_score 反推(MLS 驗對)；②pick.odds=1xBet、錨點=pinnacle 不同莊故不一致＝設計(demo 1.95 是 mock 加劇誤會)；edge 仍餵真值。教訓：報 bug 前實打/讀碼分清 mock殘留/真錯/設計；缺的能力常可由既有富資料反推。
+8. **titan007 端點 OverDown.aspx 是空錯頁、overunder.aspx 才有料**：憑「OverDown=大小」拼端點回 875b 空殼(無 odds2)；實打 overunder.aspx 才回 60KB 含完整大小球時序，讓分正解＝handicap.aspx，companyID 47=平博/3=皇冠。教訓：再次驗證憑記憶/語意拼第三方端點會錯——端點要實打試、用回應大小/結構驗有沒有真資料，別只看名字像。
 
 ---
 
 ## 十、目前狀態
 
-- **最新版本**：v2.0-web（2026-06-06，**Phase 3 全完成**：閉環 + 公開網頁全線上線）
+- **最新版本**：v2.0-titan（2026-06-07，**Phase 3 全完成**：閉環 + 公開網頁全線上線；titan007 spike 單場重建完成、待確認後 go 全量 64 場）
 - **公開網址**：https://orvil6688.github.io/soccer_ai/
 - **核心架構**：OddsPapi v4，historical → 八錨點軌跡 → selector(純數學 edge) → analyzer 🤖(2.5-flash) → 存推薦 → notifier(Discord) ／ backtest(settlements 回填+CLV+by_trajectory+derive_score 比分) ／ web_builder(公開網頁)；CROWN 雙記 pinnacle+singbet
 - **已完成**：Phase 1A + Phase 2 + 軌跡分類 + analyzer #3 + #5 編排 + #4 notifier + web_builder/gh_pages(公開網頁上線、賽果顯真比分)；閉環+公開網頁全線；CI 每小時自動遷移 v1→v2
-- **下一步（Phase 3 後）**：見「尚未做清單」(titan007 spike / 上半場 / edge 對手盤待小組賽 / xG=Phase5 / 比分樣式微調可選)
-- **暫停中**：titan007 spike(2022 回測，OddsPapi 歷史僅 3–6 月)、上半場盤口
-- **待總司令**：repo Secrets 四把 `DISCORD_*` + `ODDSPAPI`/`GEMINI`(已備)；GH Pages Source=Actions(已啟用)；（建議）寄信 OddsPapi 確認 historical 不計額度
+- **titan007 spike 進行中**：OddsPapi 歷史拿不到 2022 → titan007 凍結歷史補 2022 世界盃 64 場離線校準。scrapling 輕量裝(`requirements-titan007.txt`，不進主 requirements/不上 CI 🔒#7)；端點釘死讓分 `handicap.aspx`/大小 `overunder.aspx`(**OverDown.aspx 空錯頁棄用**)、companyID 47=平博→pinnacle/3=皇冠→singbet、表 id="odds2" gb2312；adapter `scrapers/titan007_spike.py` 單場八錨點重建完成(id=2185072→`data/titan007_2022/2185072.json` schema_v2，commit c98f4e4，濾 ts<kickoff 排滾球+§3.2 區間外 null+reuse trajectory.build_segments/build_summary，八錨點全命中、比分對上)；data/titan007_2022/ gitignored。
+- **下一步（Phase 3 後）尚未做清單**：titan007 全量 64 場(待 spike 確認)／上半場盤口(Phase 5)／edge 對手盤調校(待小組賽真實資料)／xG/數據面接 analyzer(Phase 5)／📊回測+⚠️告警 Discord 推播(env 在位、後續)／比分樣式微調(可選)
+- **暫停/排隊中**：titan007 全量 64 場(待 spike 線符號+選點確認)、上半場盤口、**6/11 校準**(小組賽開打後以 2022 的 64 場 + 真實小組賽當樣本校準 shape/門檻/edge 對手盤)
+- **待總司令**：repo Secrets 四把 `DISCORD_*` + `ODDSPAPI`/`GEMINI`(已備)；GH Pages Source=Actions(已啟用)；**確認 titan007 spike 線符號+選點 → 確認後才 go 全量 64**；（建議）寄信 OddsPapi 確認 historical 不計額度
 
 ---
 
@@ -160,4 +163,4 @@ trajectory 訊號：線動以線為主、線不動看 de-vig 機率位移(濾水
 
 ---
 
-**本檔版本**：v2.0-web｜由通用範本 v1.0 轉本專案專屬｜建立 2026-06-02｜Phase 3 全完成(閉環+公開網頁)同步 2026-06-06
+**本檔版本**：v2.0-titan｜由通用範本 v1.0 轉本專案專屬｜建立 2026-06-02｜Phase 3 全完成(閉環+公開網頁)同步 2026-06-06｜titan007 spike 單場重建完成同步 2026-06-07
