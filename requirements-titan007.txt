@@ -1,0 +1,3 @@
+# titan007 一次性歷史採集專用（🔒#7：不進主 requirements、不上 CI、不接 main.py）
+# changeDetail 為靜態 HTML 表格 → 輕量 parser 即可（無需 [fetchers]/瀏覽器）
+scrapling
