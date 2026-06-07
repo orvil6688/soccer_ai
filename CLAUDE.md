@@ -278,6 +278,13 @@
 影響：edge＝pinnacle vs 1xbet，沒 1xbet 的 ~61 場算不出 edge → 不出下注 pick（但 movement/八錨點靠 pinnacle/singbet、照常有走勢）。
 教訓：報「抓不到某 book」前先讀回傳+試 slug 變體+查 /bookmakers 權威清單分清「覆蓋缺口 vs slug/解析 bug」；覆蓋是資料源天花板、改 code 救不了
 ```
+```
+事件：動系統核心的安全範式（trigger_anchors / event_pipeline 本輪實證）
+範式：改 trajectory / 排程這類核心時，**①只新增輸出、不改既有判定**（trigger_anchors 在 build() 後附加 summary 新 key、不碰 _classify/build_summary）；
+     **②全量回歸把關**（全 64 場 shape/tag/summary 逐欄 diff=0 mismatch 才算「只多吐歸因、沒改判定」、否則 revert）；
+     **③動命脈用並行不取代 + 一鍵回退**（event_pipeline 新增、main_pipeline 原封不動當安全網，正式切換待真實驗證才拍板）。
+教訓：動核心前先想「怎麼證明它沒變」——附加而非修改、全量 diff、並行可退；驗收要含「模擬關鍵時刻(t30m)+回退實跑」，不是只驗 happy path 一場。
+```
 
 ---
 
@@ -301,9 +308,13 @@
   - **全量結果：64 寫出 / 0 跳過 / 0 旗標**（commit **5524c46**）。八錨點：濾 ts<kickoff 排滾球、§3.2 取最近目標時刻/區間外→null；reuse `trajectory.build_segments/build_summary`；CROWN 雙記 pinnacle+singbet。
   - 本機回測頁 `web_builder --mode titan007_local` → `site_titan007/`（by_trajectory：shape→過盤率，過盤基準=**收盤低水方**零門檻、PUSH 不計分母；逐場八錨點+SVG）。`data/titan007_2022/`(64 檔)、`site_titan007/` 皆 gitignored（第三方爬料/本機頁，不上 repo）。
   - 2022 校準素材：緩步推移 75 筆 46%、賠率單向飄 50 筆 57%、賠率反轉 47 筆 51%、混合 43 筆 41%、上下震盪 6 筆 18%、急拉回吐 4 筆 25%（純校準、不參與線上選注）。
+- **觀察場功能已完成 ✅**（commit **a957716**）：有 movement 但無 pick 的場（無 1xbet 或 edge 不足）→ 存 **`observations/{date}.json`**（鍵=fixtureId、無 pick 欄、零污染 recommendations 格式、backtest/notifier 不讀）；照樣有八錨點走勢 + `analyzer.analyze_observation`（唯讀加法、不改 analyze()；無 pick→只出 market_reading+injury_news_inference、不評信心）；推薦頁標「👁 觀察場（無 edge 對手盤）」連八錨點頁；**不出 pick、不推 Discord、不可當選注依據**（選注唯一依據仍是 edge）。`selector.select_and_observe` 與 picks 共用一次 fetch（零額外額度）。
+- **trigger_anchors 已完成 ✅**（commit **33d3593**）：`trajectory.trigger_anchors()` 純加法輸出「造成此 shape 的決策錨點」於 `summary.trigger_anchors`（**不碰 _classify/build_summary、判定未變**；全 64 場逐欄 diff=0 mismatch）；歸因寧粗不錯（fav_swap→水互換 segment 兩端、late_swing→末段、spike_revert→偏離峰+頭尾、choppy→轉向多點、monotonic/gradual/mixed→整段）；web_builder 單場頁表格列(◀)+SVG(藍圈/虛線)高亮。
+- **event_pipeline 逐場事件驅動 tick 已完成 ✅**（commit **11ab94f**，**與 main_pipeline 並行、未取代**）：`--mode tick` + `scheduler.py`（`plan_tick` 純函式判 active/scan/select_due）+ `event_pipeline.yml` cron `*/30`；每場在自己 **t30m** 觸發 movement+select、**每輪只處理錨點窗內的場**(非全掃 104)；fixtures 改快取(每日刷省額度)、select 每場 `select_done` 去重(≤208 通)、剩餘 ≤25 告警；**catch-up**：t30m 那輪延遲/跳過→下一輪從完整序列補上、`offset_sec`>600s 顯示層標「補抓·偏收盤」。驗收(模擬+實跑)5 點全過。**正式切換待揭幕戰真實驗證後總司令拍板；在那之前 main_pipeline(每小時) 是安全網、一鍵回退**(movement.py/main_pipeline.yml 未動)。
 - **下一步（Phase 3 後）尚未做清單**：上半場盤口(Phase 5)／edge 對手盤調校(待小組賽真實資料)／xG/數據面接 analyzer(Phase 5)／📊回測+⚠️告警 Discord 推播(env 在位、推播後續)／比分顯示樣式微調(可選)。
-- **待總司令動作**：repo Secrets `ODDSPAPI_API_KEY`+`GEMINI_API_KEY`+四把 `DISCORD_*_WEBHOOK_URL`（已備）；GH Pages Settings→Source=GitHub Actions（已啟用）。
+- **待總司令動作**：repo Secrets `ODDSPAPI_API_KEY`+`GEMINI_API_KEY`+四把 `DISCORD_*_WEBHOOK_URL`（已備）；GH Pages Settings→Source=GitHub Actions（已啟用）；**揭幕戰驗證後決定是否正式切換 event_pipeline（停 main_pipeline cron）**。
 - **暫停/排隊中**：上半場盤口（未來擴充）、6/11 校準（小組賽開打後以 **2022 的 64 場**（已備齊）+ 真實小組賽當樣本校準 shape/門檻/edge 對手盤）。
+- **🔭 中期評估項（6/11 校準告一段落、即時鏈路穩定後，當獨立專案評估，非即施工）：titan007 完整資料源納入**。總司令觀察：titan007 比賽頁資料比 OddsPapi 更全且免費，除讓分/大小外另有 OddsPapi 沒有的**凱利指數、近 10 場數據（勝平負/進失球/角球/黃牌）、對賽往績、完整賽程權威頁**。方向＝**混合源**（OddsPapi 即時主源 + titan007 補 enrichment），**非用爬蟲整個替換 API**。**前提鐵律（不得跳過）**：① 不在揭幕戰前動（揭幕戰用 OddsPapi 跑、先驗證整條即時鏈路）；② 即時爬蟲三大未解風險先解決才能上＝反封鎖（高頻被擋、踩過 429）、GH Actions 雲端 IP 比本機更易被封、titan007 改版面/端點容錯（踩過 OverDown 空頁）；③ 維持 🔒#7 精神＝轉正式即時源前先與 OddsPapi 並行比對、確認穩定、保留 OddsPapi 當 fallback；④ 凱利/近況/對賽往績這類 enrichment **餵 analyzer 當 Gemini 解讀材料可以，但絕不可變成 selector 選注依據**（選注唯一依據仍是 edge，鐵律不破）。
 
 ---
 
@@ -316,4 +327,4 @@
 
 ---
 
-**本檔版本**：v2.0-titan｜格式來源：總司令通用範本 v1.0｜建立 2026-06-02｜Phase 3 全完成(閉環+公開網頁)回填 2026-06-06｜titan007 全量 64 場完成同步 2026-06-07
+**本檔版本**：v2.0-titan｜格式來源：總司令通用範本 v1.0｜建立 2026-06-02｜Phase 3 全完成(閉環+公開網頁)回填 2026-06-06｜titan007 全量 64 場完成同步 2026-06-07｜觀察場+trigger_anchors+event_pipeline tick 完成、titan007 完整源列中期評估 同步 2026-06-07

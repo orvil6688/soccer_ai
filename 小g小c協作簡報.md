@@ -144,6 +144,7 @@ trajectory 訊號：線動以線為主、線不動看 de-vig 機率位移(濾水
 9. **titan007 `_parse_ts` 單位數日期 bug（偽裝成「無盤口」）**：時間戳正則寫死 `(\d{2})-(\d{2})` 要 2 位數，但 titan007 日期不補零(`12-9 22:54`)→**日 1-9 的列整列靜默丟棄**→早段淘汰賽(12/3-9)/末輪組賽(12/1-2)整批變空，全量首跑誤報 7 跳過+11 旗標；spike 因 11-20 兩位數日僥倖沒踩。改 `(\d{1,2})` 後 64 場全完整。教訓：報「跳過/缺資料」前先查解析 bug；跳過聚集若按「日期/格式」分群而非隨機＝多半是解析雷不是來源缺。
 10. **titan007 比分欄=90 分鐘賽果(ET/PK 另寫)**：c75.js 每場 `[mid,...,'90分'(index6),'半場'(index7),...]`，ET/PK 在備註不在同欄；決賽 2302891=2-2(備註120分3-3/PK4-2)、克巴 2302885=0-0(ET1-1)→抓 index6 不誤抓。教訓：嚴格 90 分鐘結算口徑，score 取比分欄/腰盤而非全場終分；ET/PK 場用「90分≠ET」的場才驗得了沒誤抓。
 11. **OddsPapi 免費層 1xbet 覆蓋不全(覆蓋限制非 bug)**：KOR-CZE 經 historical+odds-by-tournaments+所有 slug 變體全 None、pinnacle/singbet 有盤、`/bookmakers` 確認 slug=`1xbet` 正確；1xBet 官網有盤≠OddsPapi 免費層 feed 有。**1xbet 覆蓋約 43/104**(pin 72/sing 70)、臨近開賽增加但不保證補滿、**付費同清單救不了**。影響：沒 1xbet 的 ~61 場算不出 edge→不出 pick(但 movement 靠 pin/sing 照常有走勢→催生「觀察場」需求)。教訓：報「抓不到某 book」前先讀回傳+試 slug 變體+查 /bookmakers 分清覆蓋缺口 vs 解析 bug。
+12. **動系統核心的安全範式(trigger_anchors/event_pipeline 實證)**：改 trajectory/排程這類核心＝①只新增輸出不改既有判定(附加 summary 新 key、不碰 _classify/build_summary)②全量回歸把關(全 64 場逐欄 diff=0 才算沒改判定、否則 revert)③動命脈用並行不取代+一鍵回退(event_pipeline 新增、main_pipeline 原封不動當安全網、切換待真實驗證拍板)。教訓：動核心前先想「怎麼證明它沒變」——附加而非修改+全量 diff+並行可退；驗收含「模擬關鍵時刻(t30m)+回退實跑」、非只驗 happy path 一場。
 
 ---
 
@@ -154,9 +155,13 @@ trajectory 訊號：線動以線為主、線不動看 de-vig 機率位移(濾水
 - **核心架構**：OddsPapi v4，historical → 八錨點軌跡 → selector(純數學 edge) → analyzer 🤖(2.5-flash) → 存推薦 → notifier(Discord) ／ backtest(settlements 回填+CLV+by_trajectory+derive_score 比分) ／ web_builder(公開網頁)；CROWN 雙記 pinnacle+singbet
 - **已完成**：Phase 1A + Phase 2 + 軌跡分類 + analyzer #3 + #5 編排 + #4 notifier + web_builder/gh_pages(公開網頁上線、賽果顯真比分)；閉環+公開網頁全線；CI 每小時自動遷移 v1→v2
 - **titan007 全量 64 場完成 ✅**：OddsPapi 歷史拿不到 2022 → titan007 凍結歷史補 2022 世界盃 64 場離線校準。scrapling 輕量裝(`requirements-titan007.txt`，不進主 requirements/不上 CI 🔒#7)；端點釘死讓分 `handicap.aspx`/大小 `overunder.aspx`(**OverDown.aspx 空錯頁棄用**)、companyID 47=平博→pinnacle/3=皇冠→singbet、表 id="odds2" gb2312。賽程/比分權威源 `jsData/matchResult/2022/c75.js`→解析 64 場 mid/隊名/開賽/**90分比分=比分欄 index6**(ET/PK 另寫備註不誤抓；驗決賽 2302891=2-2、克巴 2302885=0-0)。`scrapers/titan007_spike.py`(單場 build/八錨點)+`scrapers/titan007_full.py`(c75.js 解析+逐場 build+3.5s 節流+429/5xx 退避+抓不到/覆蓋不足標記跳過彙總、`--rerun`)。**全量 64 寫出/0 跳過/0 旗標**(commit 5524c46)；八錨點濾 ts<kickoff+§3.2 區間外 null+reuse trajectory；CROWN 雙記。本機頁 `web_builder --mode titan007_local`→`site_titan007/`(by_trajectory shape→過盤率、過盤基準=收盤低水方零門檻、PUSH 不計分母、逐場八錨點+SVG)。`data/titan007_2022/`(64檔)/`site_titan007/` gitignored。
+- **觀察場已完成 ✅**(commit a957716)：無 movement pick 的場(無 1xbet 或 edge 不足)→存 `observations/{date}.json`(鍵=fixtureId、無 pick 欄、零污染 recommendations、backtest/notifier 不讀)；照樣八錨點+`analyzer.analyze_observation`(唯讀加法、不改 analyze()、無 pick→只 market_reading+injury_news_inference)；推薦頁標「👁觀察場(無 edge 對手盤)」連八錨點頁；**不出 pick/不推 Discord/不可當選注依據**；`select_and_observe` 與 picks 共用一次 fetch(零額外額度)
+- **trigger_anchors 已完成 ✅**(commit 33d3593)：`trajectory.trigger_anchors()` 純加法輸出歸因錨點於 `summary.trigger_anchors`(不碰 _classify/build_summary、全 64 場 diff=0)；歸因寧粗不錯；web_builder 單場頁列(◀)+SVG(藍圈)高亮
+- **event_pipeline tick 已完成 ✅**(commit 11ab94f，**並行不取代 main_pipeline**)：`--mode tick`+`scheduler.py`(plan_tick 純函式)+`event_pipeline.yml` cron `*/30`；每場 t30m 觸發 movement+select、每輪只處理錨點窗內場(非全掃)、fixtures 快取省額度、select_done 去重(≤208 通)、catch-up(offset_sec>600 標補抓·偏收盤)；驗收 5 點全過(模擬+實跑)；**正式切換待揭幕戰驗證後拍板、在那前 main_pipeline 每小時為安全網、一鍵回退**
 - **下一步（Phase 3 後）尚未做清單**：上半場盤口(Phase 5)／edge 對手盤調校(待小組賽真實資料)／xG/數據面接 analyzer(Phase 5)／📊回測+⚠️告警 Discord 推播(env 在位、後續)／比分樣式微調(可選)
 - **暫停/排隊中**：上半場盤口、**6/11 校準**(小組賽開打後以 **2022 的 64 場**(已備齊) + 真實小組賽當樣本校準 shape/門檻/edge 對手盤)
-- **待總司令**：repo Secrets 四把 `DISCORD_*` + `ODDSPAPI`/`GEMINI`(已備)；GH Pages Source=Actions(已啟用)；（建議）寄信 OddsPapi 確認 historical 不計額度
+- **🔭 中期評估項（非即施工，6/11 校準+即時鏈路穩定後當獨立專案評估）：titan007 完整資料源納入**。titan007 比賽頁比 OddsPapi 更全且免費，另有 OddsPapi 沒有的**凱利指數、近 10 場(勝平負/進失球/角球/黃牌)、對賽往績、完整賽程權威頁**。方向＝**混合源**(OddsPapi 即時主源 + titan007 補 enrichment)、**非整個替換 API**。前提鐵律：①不在揭幕戰前動(先用 OddsPapi 驗整條即時鏈路)②即時爬蟲三大風險先解＝反封鎖(429)/GH 雲端 IP 更易被封/版面端點容錯(OverDown 教訓)③維持 🔒#7＝轉正前先與 OddsPapi 並行比對+保留 fallback④凱利/近況/對賽往績 enrichment **餵 analyzer 可、絕不可當 selector 選注依據**(唯一=edge)
+- **待總司令**：repo Secrets 四把 `DISCORD_*` + `ODDSPAPI`/`GEMINI`(已備)；GH Pages Source=Actions(已啟用)；**揭幕戰驗證後決定是否正式切換 event_pipeline(停 main_pipeline cron)**；（建議）寄信 OddsPapi 確認 historical 不計額度
 
 ---
 
@@ -166,4 +171,4 @@ trajectory 訊號：線動以線為主、線不動看 de-vig 機率位移(濾水
 
 ---
 
-**本檔版本**：v2.0-titan｜由通用範本 v1.0 轉本專案專屬｜建立 2026-06-02｜Phase 3 全完成(閉環+公開網頁)同步 2026-06-06｜titan007 全量 64 場完成同步 2026-06-07
+**本檔版本**：v2.0-titan｜由通用範本 v1.0 轉本專案專屬｜建立 2026-06-02｜Phase 3 全完成(閉環+公開網頁)同步 2026-06-06｜titan007 全量 64 場完成同步 2026-06-07｜觀察場+trigger_anchors+event_pipeline tick 完成、titan007 完整源列中期評估 同步 2026-06-07
