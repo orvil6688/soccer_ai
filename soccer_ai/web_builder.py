@@ -29,6 +29,7 @@ th,td{border:1px solid #2a2f3a;padding:6px 8px;text-align:center;font-size:14px}
 .card{background:#161a22;border:1px solid #2a2f3a;border-radius:8px;padding:12px 16px;margin:12px 0}
 .u2{color:#2ecc71;font-weight:700}.u1{color:#5ab0ff}.ai{background:#13202b;border-left:3px solid #5ab0ff;padding:8px 12px;margin:6px 0;border-radius:4px}
 .muted{color:#8b95a5;font-size:12px}.tag{font-family:monospace;color:#ffd479}
+tr.trig td{background:#16283a;border-color:#2f5170}
 """
 
 
@@ -39,8 +40,13 @@ def _esc(x) -> str:
 # =========================================================================
 # 內嵌 SVG 走勢圖（自包含、無 CDN）
 # =========================================================================
-def _svg_multiline(labels: list, series: dict, width: int = 560, height: int = 160) -> str:
-    """labels: x 軸錨點名；series: {名稱:(值list, 顏色)}。值為 None 的點跳過。"""
+def _svg_multiline(labels: list, series: dict, width: int = 560, height: int = 160,
+                   highlight: "set | None" = None) -> str:
+    """labels: x 軸錨點名；series: {名稱:(值list, 顏色)}。值為 None 的點跳過。
+
+    highlight: 要強調的錨點名集合（trigger_anchors）→ 該 x 畫淡色直線 + 放大圈，標出觸發點。
+    """
+    highlight = highlight or set()
     pad_l, pad_b, pad_t, pad_r = 44, 22, 14, 90
     vals = [v for (arr, _) in series.values() for v in arr if v is not None]
     if not vals or len(labels) < 2:
@@ -64,9 +70,15 @@ def _svg_multiline(labels: list, series: dict, width: int = 560, height: int = 1
         val = hi - (hi - lo) * frac
         parts.append(f'<line x1="{pad_l}" y1="{yy:.0f}" x2="{width-pad_r}" y2="{yy:.0f}" stroke="#222831"/>')
         parts.append(f'<text x="6" y="{yy+4:.0f}" fill="#8b95a5" font-size="10">{val:.2f}</text>')
-    # x 標籤
+    # 觸發錨點：淡色直線標記（畫在序列底下）
     for i, lab in enumerate(labels):
-        parts.append(f'<text x="{x(i):.0f}" y="{height-6}" fill="#8b95a5" font-size="10" text-anchor="middle">{_esc(lab)}</text>')
+        if lab in highlight:
+            parts.append(f'<line x1="{x(i):.0f}" y1="{pad_t}" x2="{x(i):.0f}" y2="{height-pad_b}" stroke="#5ab0ff" stroke-width="1" stroke-dasharray="3 3" opacity="0.55"/>')
+    # x 標籤（觸發點標藍）
+    for i, lab in enumerate(labels):
+        fill = "#5ab0ff" if lab in highlight else "#8b95a5"
+        weight = ' font-weight="700"' if lab in highlight else ""
+        parts.append(f'<text x="{x(i):.0f}" y="{height-6}" fill="{fill}"{weight} font-size="10" text-anchor="middle">{_esc(lab)}</text>')
     # 各序列
     cy = pad_t
     for name, (arr, color) in series.items():
@@ -75,7 +87,11 @@ def _svg_multiline(labels: list, series: dict, width: int = 560, height: int = 1
             parts.append(f'<polyline points="{" ".join(pts)}" fill="none" stroke="{color}" stroke-width="2"/>')
         for i, v in enumerate(arr):
             if v is not None:
-                parts.append(f'<circle cx="{x(i):.0f}" cy="{y(v):.1f}" r="2.5" fill="{color}"/>')
+                if labels[i] in highlight:  # 觸發點放大 + 藍色外圈
+                    parts.append(f'<circle cx="{x(i):.0f}" cy="{y(v):.1f}" r="5" fill="none" stroke="#5ab0ff" stroke-width="2"/>')
+                    parts.append(f'<circle cx="{x(i):.0f}" cy="{y(v):.1f}" r="3" fill="{color}"/>')
+                else:
+                    parts.append(f'<circle cx="{x(i):.0f}" cy="{y(v):.1f}" r="2.5" fill="{color}"/>')
         parts.append(f'<text x="{width-pad_r+6}" y="{cy+10:.0f}" fill="{color}" font-size="11">{_esc(name)}</text>')
         cy += 16
     parts.append("</svg>")
@@ -98,25 +114,31 @@ def _market_block(traj_market: dict, market: str) -> str:
         return ""
     anchors = traj_market.get("anchors", {})
     su = traj_market.get("summary", {})
+    triggers = set(su.get("trigger_anchors") or [])  # 造成此 shape 的錨點 → 高亮
     o1, o2 = ("home_odd", "away_odd") if market == "handicap" else ("over_odd", "under_odd")
     s1, s2 = ("home", "away") if market == "handicap" else ("over", "under")
     rows, labels, line_s, a_s, b_s = [], [], [], [], []
     for name in config.ANCHOR_ORDER:
         a = anchors.get(name)
         role = config.ANCHOR_ROLE.get(name, "")
+        trig = name in triggers
+        cls = " class='trig'" if trig else ""
+        mark = " ◀" if trig else ""
         if not a:
             rows.append(f"<tr><td>{name}</td><td class='muted'>{role}</td><td colspan='3' class='muted'>—（缺/未到）</td></tr>")
             continue
-        rows.append(f"<tr><td>{name}</td><td class='muted'>{role}</td><td>{_esc(a.get('line'))}</td>"
+        rows.append(f"<tr{cls}><td>{name}{mark}</td><td class='muted'>{role}</td><td>{_esc(a.get('line'))}</td>"
                     f"<td>{_esc(_odds(a.get(o1)))}</td><td>{_esc(_odds(a.get(o2)))}</td></tr>")
         labels.append(name)
         line_s.append(a.get("line"))
         a_s.append(a.get(o1))
         b_s.append(a.get(o2))
-    chart = _svg_multiline(labels, {f"{_SIDE_ZH[s1]}賠": (a_s, "#2ecc71"), f"{_SIDE_ZH[s2]}賠": (b_s, "#ff7675")})
-    line_chart = _svg_multiline(labels, {"線": (line_s, "#ffd479")})
+    chart = _svg_multiline(labels, {f"{_SIDE_ZH[s1]}賠": (a_s, "#2ecc71"), f"{_SIDE_ZH[s2]}賠": (b_s, "#ff7675")}, highlight=triggers)
+    line_chart = _svg_multiline(labels, {"線": (line_s, "#ffd479")}, highlight=triggers)
+    trig_note = (f"　<span style='color:#5ab0ff'>● 藍圈/◀＝觸發此形狀的錨點：{_esc('、'.join(su.get('trigger_anchors')))}</span>"
+                 if triggers else "")
     return (f"<h3>{_MARKET_ZH.get(market, market)}　<span class='tag'>{_esc(su.get('tag'))}</span>"
-            f"　形狀 {_esc(_zh(su.get('shape')))}</h3>"
+            f"　形狀 {_esc(_zh(su.get('shape')))}{trig_note}</h3>"
             f"<table><tr><th>錨點</th><th>role</th><th>線</th><th>{_SIDE_ZH[s1]}賠</th><th>{_SIDE_ZH[s2]}賠</th></tr>{''.join(rows)}</table>"
             f"<div class='muted'>賠率走勢</div>{chart}<div class='muted'>讓分/大小 線走勢</div>{line_chart}")
 

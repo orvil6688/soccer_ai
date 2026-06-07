@@ -235,9 +235,55 @@ def build_summary(anchors: dict, segments: list[dict], market_type: str) -> dict
     }
 
 
+# =========================================================================
+# 觸發錨點歸因（純加法、唯讀；不參與 shape 判定，僅供單場頁高亮）
+# =========================================================================
+def trigger_anchors(anchors: dict, segments: list, summary: dict, market_type: str) -> list:
+    """回「造成此 shape 的決策錨點名單」（ANCHOR_DECISION 子集，依 ANCHOR_ORDER 排序）。
+
+    **唯讀**：只讀已算好的 anchors/segments/summary，不改任何輸入、不影響 shape 判定。
+    歸因原則「寧粗不錯」：資訊不足 → 標整段（全部在場決策錨點），不硬塞單點。
+    """
+    shape = (summary or {}).get("shape")
+    if not shape or shape in ("flat", "insufficient"):
+        return []
+    present = [n for n in config.ANCHOR_DECISION if isinstance(anchors, dict) and anchors.get(n)]
+    if len(present) < 2:
+        return []
+    segs = [s for s in (segments or []) if isinstance(s, dict) and s.get("present")]
+
+    def order(names):
+        uniq = {n for n in names if n in config.ANCHOR_DECISION}
+        return [n for n in config.ANCHOR_ORDER if n in uniq]
+
+    if shape == "fav_swap":  # 水互換的 segment 兩端
+        hit = [s for s in segs if s.get("fav_swap")]
+        return order([s["from"] for s in hit] + [s["to"] for s in hit]) or order(present)
+    if shape == "odds_drift":  # 賠率有動的 segment 兩端
+        hit = [s for s in segs if s.get("side1_dir") != "flat" or s.get("side2_dir") != "flat"]
+        return order([s["from"] for s in hit] + [s["to"] for s in hit]) or order(present)
+    if shape == "late_swing":  # 末段（最後一個在場 segment）
+        last = segs[-1] if segs else None
+        return order([last["from"], last["to"]]) if last else order(present)
+    if shape == "spike_revert":  # 偏離峰錨點 + 頭尾（多點，寧粗）
+        base = anchors[present[0]]["line"]
+        peak = max(present, key=lambda n: abs(anchors[n]["line"] - base))
+        return order([present[0], peak, present[-1]])
+    if shape == "choppy":  # 轉向點（line_steps 變號處的共用錨點；多點）
+        turns = []
+        nz = [s for s in segs if s.get("line_steps")]
+        for a, b in zip(nz, nz[1:]):
+            if (a["line_steps"] > 0) != (b["line_steps"] > 0):
+                turns.append(a["to"])  # a.to == b.from 為轉向錨點
+        return order(turns) or order(present)
+    # monotonic / gradual / mixed / 其餘 → 整段（全部在場決策錨點，寧粗不錯）
+    return order(present)
+
+
 def build(markets: dict, market_map: dict, kickoff: datetime, market_type: str) -> dict:
     """單一 market 的完整軌跡：{anchors, segments, summary}。"""
     anchors = build_anchors(markets, market_map, kickoff, market_type)
     segments = build_segments(anchors, market_type)
     summary = build_summary(anchors, segments, market_type)
+    summary["trigger_anchors"] = trigger_anchors(anchors, segments, summary, market_type)  # 純加法、不改既有欄位
     return {"anchors": anchors, "segments": segments, "summary": summary}

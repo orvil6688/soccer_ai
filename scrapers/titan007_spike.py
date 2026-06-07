@@ -163,11 +163,9 @@ def build_fixture(mid: int, home: str, away: str, kickoff_utc: str, score: dict)
             series = _series(market, mid, cid, kickoff)
             anchors = _anchors_from_series(series, kickoff, market)
             segments = trajectory.build_segments(anchors, market)
-            book_t[market] = {
-                "anchors": anchors,
-                "segments": segments,
-                "summary": trajectory.build_summary(anchors, segments, market),
-            }
+            summary = trajectory.build_summary(anchors, segments, market)
+            summary["trigger_anchors"] = trajectory.trigger_anchors(anchors, segments, summary, market)
+            book_t[market] = {"anchors": anchors, "segments": segments, "summary": summary}
         traj[book] = book_t
     return {
         "schema_version": config.SCHEMA_VERSION,
