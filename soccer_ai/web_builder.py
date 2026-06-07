@@ -310,6 +310,50 @@ def _load_titan_movements() -> list[dict]:
 
 _RESULT_ZH = {"WIN": "過盤", "HALFWIN": "半過", "PUSH": "走盤", "HALFLOSS": "半輸", "LOSE": "輸盤"}
 
+
+def _titan_shape_legend(records: list[dict]) -> str:
+    """形狀說明：條件文字由 trajectory._classify 的判定階梯 + config 門檻值生成（非照抄外部描述）。
+
+    _classify 為**由上而下優先級聯**（先命中者勝）；insufficient 在 build_summary 前置判定。
+    中文取 notifier._zh（顯示層唯一來源）；實測欄為本批 64 場 256 筆的實際偵測分佈。
+    """
+    s = config  # 門檻常數唯一真實來源
+    # (內部 key, 觸發條件文字＝程式現況)；順序＝_classify 優先級聯（insufficient 最前置）
+    cascade = [
+        ("insufficient", f"決策錨點 < 2 筆，無足夠資料判形狀（build_summary 前置攔截）"),
+        ("fav_swap", f"線幾乎不動（淨 0 級且路徑 ≤ 1 級）但<b>低水方中途換邊</b>（水互換 ≥ 1，FAV_EPS={s.FAV_EPS}）"),
+        ("odds_drift", f"線幾乎不動（淨 0 級且路徑 ≤ 1 級）但<b>賠率明顯移動</b>（無水互換，ODDS_FLAT_EPS={s.ODDS_FLAT_EPS}）"),
+        ("flat", f"線幾乎不動（淨 0 級且路徑 ≤ 1 級）且無水互換、賠率也幾乎不動"),
+        ("spike_revert", f"最大偏離 ≥ {s.SHAPE_SPIKE_EXCURSION_STEPS} 級且頭尾回歸（淨 ≤ 1 級）＝沖高回吐"),
+        ("late_swing", f"末段（t1h→t30m）位移 ≥ {s.SHAPE_LATE_SWING_STEPS} 級且方向轉變 ≤ 1 次＝臨場急動"),
+        ("monotonic", f"方向 0 次轉變（單向）且淨移動 ≥ {s.SHAPE_MONO_NET_STEPS} 級"),
+        ("gradual", f"方向 0 次轉變（單向）但淨移動 < {s.SHAPE_MONO_NET_STEPS} 級＝小幅單向推移"),
+        ("choppy", f"方向轉變 ≥ 2 次且淨移動 ≤ 1 級＝來回震盪"),
+        ("mixed", f"以上皆不命中（有移動但結構不純）的其餘情況"),
+    ]
+    n_rec = {}
+    n_fix = {}
+    for r in records:
+        k = r.get("shape")
+        n_rec[k] = n_rec.get(k, 0) + 1
+        n_fix.setdefault(k, set()).add(r.get("fixtureId"))
+    total = len(records)
+    rows = "".join(
+        f"<tr><td><code>{_esc(k)}</code></td><td>{_esc(_zh(k))}</td>"
+        f"<td style='text-align:left'>{cond}</td>"
+        f"<td>{n_rec.get(k, 0)} 筆 / {len(n_fix.get(k, set()))} 場</td></tr>"
+        for k, cond in cascade
+    )
+    return (
+        f"<details><summary style='cursor:pointer;color:#9fd0ff'>📖 形狀說明（內部 key｜中文｜觸發條件｜實測）— 條件由程式判定階梯生成</summary>"
+        f"<div class='muted' style='margin:6px 0'>判定為<b>由上而下優先級聯</b>（先命中者勝）；中文為系統定調顯示層；"
+        f"實測＝本批 {total} 筆（64 場×4）的實際偵測分佈。一級＝{s.LINE_STEP} 球；"
+        f"另 <code>confirm/reverse</code> 屬 trajectory_signal（訊號層）非 shape，不列此表。</div>"
+        f"<table><tr><th>內部 key</th><th>中文（系統定調）</th><th>觸發條件（程式現況）</th><th>實測（本批）</th></tr>{rows}</table>"
+        f"</details>"
+    )
+
+
 # 純前端 inline 篩選（不依賴 CDN / localStorage）：點彙總表某 shape →
 # 卡片層依 data-shapes 顯隱（任一列命中保留），列層依 data-shape 高亮（同場多列命中多列高亮）。
 _TITAN_FILTER_JS = """<script>
@@ -397,6 +441,7 @@ def render_titan_index(records: list[dict], movements: list[dict]) -> str:
         f"<span id='fstatus' class='muted' style='font-size:14px'></span>"
         f"<button id='clearbtn' style='display:none'>清除篩選</button></h2>"
         f"<div id='cards'>{''.join(det)}</div>"
+        f"<hr>{_titan_shape_legend(records)}"
         f"<p class='muted'>本機離線回測 · titan007 2022 · 僅供校準</p>"
         f"{_TITAN_FILTER_JS}"
     )
