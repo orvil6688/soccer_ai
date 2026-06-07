@@ -227,7 +227,11 @@ def _cover_result(score: dict, market: str, line, side: str):
 
 
 def _closing_favored_side(traj_market: dict, market: str):
-    """收盤低水方（賠率較低那邊）。收盤缺則退而取最接近開賽的非空錨點；平水回 None。"""
+    """收盤低水方（賠率較低那邊）。收盤缺則退而取最接近開賽的非空錨點。
+
+    口徑（總司令 2026-06-07）：**零門檻**——od1<od2 取 s1、od1>od2 取 s2、**完全相等(diff==0)才不計**。
+    不套任何容差（FAV_EPS 只管 shape 分類，禁跨用途）；門檻是校準產物、非前提，先攤原始事實。
+    """
     if not isinstance(traj_market, dict):
         return None
     anchors = traj_market.get("anchors", {})
@@ -243,8 +247,8 @@ def _closing_favored_side(traj_market: dict, market: str):
     od1, od2 = a.get(o1), a.get(o2)
     if not isinstance(od1, (int, float)) or not isinstance(od2, (int, float)):
         return None
-    if abs(od1 - od2) <= config.FAV_EPS:
-        return None  # 平水 → 無看好邊 → 不計
+    if od1 == od2:
+        return None  # 完全平水 → 無看好邊 → 不計（僅此一種，零容差）
     return s1 if od1 < od2 else s2
 
 
@@ -272,19 +276,25 @@ def _titan_records(mv: dict) -> list[dict]:
 
 
 def _titan_by_trajectory(records: list[dict]) -> dict:
-    """shape → {n(已判定筆數), hit_rate(過盤率), fixtures(樣本場次)}。PUSH 不計分母、半贏半輸 0.5。"""
+    """shape → {n(有效判定筆數=扣走盤), push(走盤筆數,僅參考), hit_rate(過盤率), fixtures}。
+
+    **PUSH(走盤) 完全排除在分母外**：n＝有效判定筆數(非 PUSH)，hit_rate＝過盤加權/(過盤+輸盤)。
+    半過/半輸計 0.5（沿用 backtest 口徑）。走盤數另列僅供參考，不進分母。
+    """
     groups: dict[str, list] = {}
     for r in records:
         if r["result"] in _WIN_W or r["result"] in _LOSE_W or r["result"] == "PUSH":
             groups.setdefault(r.get("shape") or "unknown", []).append(r)
     out = {}
     for shape, rs in groups.items():
-        w = sum(_WIN_W.get(r["result"], 0.0) for r in rs)
-        l = sum(_LOSE_W.get(r["result"], 0.0) for r in rs)
+        decided = [r for r in rs if r["result"] != "PUSH"]  # 扣掉走盤
+        w = sum(_WIN_W.get(r["result"], 0.0) for r in decided)
+        l = sum(_LOSE_W.get(r["result"], 0.0) for r in decided)
         out[shape] = {
-            "n": len(rs),
+            "n": len(decided),
+            "push": len(rs) - len(decided),
             "hit_rate": round(w / (w + l), 4) if (w + l) > 0 else None,
-            "fixtures": len({r["fixtureId"] for r in rs}),
+            "fixtures": len({r["fixtureId"] for r in decided}),
         }
     return out
 
@@ -309,7 +319,8 @@ def render_titan_index(records: list[dict], movements: list[dict]) -> str:
 
     bt = "".join(
         f"<tr><td>{_esc(_zh(k))}</td><td>{_esc(v['n'])}</td>"
-        f"<td>{_pct(v['hit_rate'])}</td><td>{_esc(v['fixtures'])}</td></tr>"
+        f"<td>{_pct(v['hit_rate'])}</td><td class='muted'>{_esc(v['push'])}</td>"
+        f"<td>{_esc(v['fixtures'])}</td></tr>"
         for k, v in sorted(by.items(), key=lambda kv: -kv[1]["n"])
     )
     # 逐場明細
@@ -336,9 +347,9 @@ def render_titan_index(records: list[dict], movements: list[dict]) -> str:
     body = (
         f"<h1>🔬 titan007 2022 世界盃 · 本機離線回測</h1>"
         f"<div class='muted'>口徑：by_trajectory（shape → 過盤率），過盤基準＝<b>收盤低水方</b>；無 1xBet/無 edge，非 selector 命中率。</div>"
-        f"<h3>各軌跡形狀 → 過盤率（PUSH 不計分母、半過/半輸計 0.5）</h3>"
-        f"<table><tr><th>形狀</th><th>已判定筆數</th><th>過盤率</th><th>樣本場次</th></tr>"
-        f"{bt or '<tr><td colspan=4 class=muted>尚無可判定資料</td></tr>'}</table>"
+        f"<h3>各軌跡形狀 → 過盤率（走盤 PUSH 完全不計分母、半過/半輸計 0.5）</h3>"
+        f"<table><tr><th>形狀</th><th>有效判定筆數</th><th>過盤率</th><th>走盤(不計)</th><th>樣本場次</th></tr>"
+        f"{bt or '<tr><td colspan=5 class=muted>尚無可判定資料</td></tr>'}</table>"
         f"<h2>逐場明細（{len(movements)} 場）</h2>{''.join(det)}"
         f"<p class='muted'>本機離線回測 · titan007 2022 · 僅供校準</p>"
     )
