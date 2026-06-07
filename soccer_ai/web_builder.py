@@ -310,6 +310,42 @@ def _load_titan_movements() -> list[dict]:
 
 _RESULT_ZH = {"WIN": "過盤", "HALFWIN": "半過", "PUSH": "走盤", "HALFLOSS": "半輸", "LOSE": "輸盤"}
 
+# 純前端 inline 篩選（不依賴 CDN / localStorage）：點彙總表某 shape →
+# 卡片層依 data-shapes 顯隱（任一列命中保留），列層依 data-shape 高亮（同場多列命中多列高亮）。
+_TITAN_FILTER_JS = """<script>
+(function(){
+  var sel=null;
+  var sumrows=[].slice.call(document.querySelectorAll('#sumtbl tr.shaperow'));
+  var cards=[].slice.call(document.querySelectorAll('#cards .matchcard'));
+  var fstatus=document.getElementById('fstatus');
+  var shown=document.getElementById('shown');
+  var clearbtn=document.getElementById('clearbtn');
+  function apply(shape, zh){
+    sel=shape; var n=0;
+    cards.forEach(function(c){
+      var set=(' '+(c.getAttribute('data-shapes')||'')+' ');
+      var has=!shape || set.indexOf(' '+shape+' ')>=0;
+      c.style.display=has?'':'none'; if(has) n++;
+      [].slice.call(c.querySelectorAll('tr[data-shape]')).forEach(function(tr){
+        if(shape && tr.getAttribute('data-shape')===shape) tr.classList.add('hl');
+        else tr.classList.remove('hl');
+      });
+    });
+    sumrows.forEach(function(r){ r.classList.toggle('selrow', !!shape && r.getAttribute('data-shape')===shape); });
+    shown.textContent=n;
+    if(shape){ fstatus.textContent='　篩選：'+zh+' · '+n+' 場'; clearbtn.style.display=''; }
+    else { fstatus.textContent=''; clearbtn.style.display='none'; }
+  }
+  sumrows.forEach(function(r){
+    r.addEventListener('click', function(){
+      var s=r.getAttribute('data-shape');
+      if(s===sel) apply(null,null); else apply(s, r.getAttribute('data-zh'));
+    });
+  });
+  clearbtn.addEventListener('click', function(){ apply(null,null); });
+})();
+</script>"""
+
 
 def render_titan_index(records: list[dict], movements: list[dict]) -> str:
     by = _titan_by_trajectory(records)
@@ -317,13 +353,15 @@ def render_titan_index(records: list[dict], movements: list[dict]) -> str:
     def _pct(hr):
         return "—" if hr is None else f"{hr:.0%}"
 
+    # 彙總表：每列掛 data-shape(內部 key)/data-zh，供前端篩選；點擊以 key 比對（非中文）
     bt = "".join(
-        f"<tr><td>{_esc(_zh(k))}</td><td>{_esc(v['n'])}</td>"
+        f"<tr class='shaperow' data-shape='{_esc(k)}' data-zh='{_esc(_zh(k))}'>"
+        f"<td>{_esc(_zh(k))}</td><td>{_esc(v['n'])}</td>"
         f"<td>{_pct(v['hit_rate'])}</td><td class='muted'>{_esc(v['push'])}</td>"
         f"<td>{_esc(v['fixtures'])}</td></tr>"
         for k, v in sorted(by.items(), key=lambda kv: -kv[1]["n"])
     )
-    # 逐場明細
+    # 逐場明細：卡片掛 data-shapes(該場四列 shape 集合)；每列掛 data-shape
     det = []
     for mv in sorted(movements, key=lambda m: str(m.get("kickoff_local", ""))):
         fid = mv.get("fixtureId")
@@ -332,8 +370,9 @@ def render_titan_index(records: list[dict], movements: list[dict]) -> str:
         match = f"{mv.get('home','?')} vs {mv.get('away','?')}"
         link = f"<a href='fixtures/{_esc(storage._safe_name(fid))}.html'>{_esc(match)}</a>"
         recs = [r for r in records if r["fixtureId"] == fid]
+        card_shapes = " ".join(sorted({str(r["shape"]) for r in recs if r.get("shape")}))
         sub = "".join(
-            f"<tr><td>{_MARKET_ZH.get(r['market'], r['market'])}</td><td>{_esc(r['book'])}</td>"
+            f"<tr data-shape='{_esc(r['shape'])}'><td>{_MARKET_ZH.get(r['market'], r['market'])}</td><td>{_esc(r['book'])}</td>"
             f"<td>{_esc(_zh(r['shape']))}　<span class='tag'>{_esc(r['tag'])}</span></td>"
             f"<td>{_SIDE_ZH.get(r['fav'], '平水·不計') if r['fav'] else '平水·不計'}</td>"
             f"<td>{_esc(r['line'])}</td>"
@@ -341,17 +380,25 @@ def render_titan_index(records: list[dict], movements: list[dict]) -> str:
             for r in recs
         )
         det.append(
-            f"<div class='card'><h3>{link}　<span class='muted'>{_esc(str(mv.get('kickoff_local',''))[:16])}　🏁 {sc_txt}（90 分鐘）</span></h3>"
+            f"<div class='card matchcard' data-shapes='{_esc(card_shapes)}'>"
+            f"<h3>{link}　<span class='muted'>{_esc(str(mv.get('kickoff_local',''))[:16])}　🏁 {sc_txt}（90 分鐘）</span></h3>"
             f"<table><tr><th>盤口</th><th>莊</th><th>形狀</th><th>收盤低水方</th><th>收盤線</th><th>過盤</th></tr>{sub}</table></div>"
         )
     body = (
+        f"<style>.shaperow{{cursor:pointer}}.shaperow:hover td{{background:#222b38}}"
+        f".shaperow.selrow td{{background:#2d3f55;color:#fff}}tr.hl td{{background:#2d3f55}}"
+        f"#clearbtn{{background:#222b38;color:#9fd0ff;border:1px solid #3a4252;border-radius:4px;padding:3px 10px;cursor:pointer;margin-left:8px}}</style>"
         f"<h1>🔬 titan007 2022 世界盃 · 本機離線回測</h1>"
         f"<div class='muted'>口徑：by_trajectory（shape → 過盤率），過盤基準＝<b>收盤低水方</b>；無 1xBet/無 edge，非 selector 命中率。</div>"
-        f"<h3>各軌跡形狀 → 過盤率（走盤 PUSH 完全不計分母、半過/半輸計 0.5）</h3>"
-        f"<table><tr><th>形狀</th><th>有效判定筆數</th><th>過盤率</th><th>走盤(不計)</th><th>樣本場次</th></tr>"
+        f"<h3>各軌跡形狀 → 過盤率（走盤 PUSH 完全不計分母、半過/半輸計 0.5）　<span class='muted'>（點某列篩選場次）</span></h3>"
+        f"<table id='sumtbl'><tr><th>形狀</th><th>有效判定筆數</th><th>過盤率</th><th>走盤(不計)</th><th>樣本場次</th></tr>"
         f"{bt or '<tr><td colspan=5 class=muted>尚無可判定資料</td></tr>'}</table>"
-        f"<h2>逐場明細（{len(movements)} 場）</h2>{''.join(det)}"
+        f"<h2>逐場明細（<span id='shown'>{len(movements)}</span>/{len(movements)} 場）"
+        f"<span id='fstatus' class='muted' style='font-size:14px'></span>"
+        f"<button id='clearbtn' style='display:none'>清除篩選</button></h2>"
+        f"<div id='cards'>{''.join(det)}</div>"
         f"<p class='muted'>本機離線回測 · titan007 2022 · 僅供校準</p>"
+        f"{_TITAN_FILTER_JS}"
     )
     return _page("titan007 2022 本機回測", body)
 
