@@ -143,6 +143,7 @@ trajectory 訊號：線動以線為主、線不動看 de-vig 機率位移(濾水
 8. **titan007 端點 OverDown.aspx 是空錯頁、overunder.aspx 才有料**：憑「OverDown=大小」拼端點回 875b 空殼(無 odds2)；實打 overunder.aspx 才回 60KB 含完整大小球時序，讓分正解＝handicap.aspx，companyID 47=平博/3=皇冠。教訓：再次驗證憑記憶/語意拼第三方端點會錯——端點要實打試、用回應大小/結構驗有沒有真資料，別只看名字像。
 9. **titan007 `_parse_ts` 單位數日期 bug（偽裝成「無盤口」）**：時間戳正則寫死 `(\d{2})-(\d{2})` 要 2 位數，但 titan007 日期不補零(`12-9 22:54`)→**日 1-9 的列整列靜默丟棄**→早段淘汰賽(12/3-9)/末輪組賽(12/1-2)整批變空，全量首跑誤報 7 跳過+11 旗標；spike 因 11-20 兩位數日僥倖沒踩。改 `(\d{1,2})` 後 64 場全完整。教訓：報「跳過/缺資料」前先查解析 bug；跳過聚集若按「日期/格式」分群而非隨機＝多半是解析雷不是來源缺。
 10. **titan007 比分欄=90 分鐘賽果(ET/PK 另寫)**：c75.js 每場 `[mid,...,'90分'(index6),'半場'(index7),...]`，ET/PK 在備註不在同欄；決賽 2302891=2-2(備註120分3-3/PK4-2)、克巴 2302885=0-0(ET1-1)→抓 index6 不誤抓。教訓：嚴格 90 分鐘結算口徑，score 取比分欄/腰盤而非全場終分；ET/PK 場用「90分≠ET」的場才驗得了沒誤抓。
+11. **OddsPapi 免費層 1xbet 覆蓋不全(覆蓋限制非 bug)**：KOR-CZE 經 historical+odds-by-tournaments+所有 slug 變體全 None、pinnacle/singbet 有盤、`/bookmakers` 確認 slug=`1xbet` 正確；1xBet 官網有盤≠OddsPapi 免費層 feed 有。**1xbet 覆蓋約 43/104**(pin 72/sing 70)、臨近開賽增加但不保證補滿、**付費同清單救不了**。影響：沒 1xbet 的 ~61 場算不出 edge→不出 pick(但 movement 靠 pin/sing 照常有走勢→催生「觀察場」需求)。教訓：報「抓不到某 book」前先讀回傳+試 slug 變體+查 /bookmakers 分清覆蓋缺口 vs 解析 bug。
 
 ---
 

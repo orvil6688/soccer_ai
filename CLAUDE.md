@@ -268,6 +268,16 @@
      2022 無「進 ET 但沒 PK」場（5 場 ET 全進 PK），故改驗 90分≠ET 的場（更強）
 教訓：嚴格 90 分鐘結算口徑，score 必須取「比分欄/腰盤」而非全場終分；ET/PK 場用「90分≠ET」的場驗才證得了沒誤抓
 ```
+```
+事件：OddsPapi 免費層 1xbet 覆蓋不全（查證為覆蓋限制、非 bug）
+查證（2026 WC 賽前 5 天實打）：揭幕戰 MEX-RSA 1xbet 有盤；但 KOR-CZE 經 historical-odds + odds-by-tournaments
+     + 所有 slug 變體（1xbet/1xBet/onexbet…）全回 None，而 pinnacle/singbet 有盤；`/bookmakers` 權威清單
+     確認正解 slug＝`1xbet`（解析/slug 都對）。1xBet 官網有盤 ≠ OddsPapi 免費層 feed 有抓到。
+事實：1xbet 即時覆蓋約 **43/104**（pinnacle 72、singbet 70），會隨臨近開賽增加但**不保證補滿**；
+     **付費層救不了**（OddsPapi 免費/付費的莊家清單相同，差別在額度/即時推送非覆蓋）。
+影響：edge＝pinnacle vs 1xbet，沒 1xbet 的 ~61 場算不出 edge → 不出下注 pick（但 movement/八錨點靠 pinnacle/singbet、照常有走勢）。
+教訓：報「抓不到某 book」前先讀回傳+試 slug 變體+查 /bookmakers 權威清單分清「覆蓋缺口 vs slug/解析 bug」；覆蓋是資料源天花板、改 code 救不了
+```
 
 ---
 
