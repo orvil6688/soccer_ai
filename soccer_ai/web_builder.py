@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import glob
 import html
+import json
 import logging
 import os
 from pathlib import Path
@@ -390,6 +391,37 @@ _TITAN_FILTER_JS = """<script>
 })();
 </script>"""
 
+# 2022 歷史「主動查詢」工具（純前端、讀內嵌 JSON）。
+# 🔒 鐵律：只查 2022 歷史供人工對比，**絕不接 2026 推薦/selector/公開頁**；
+#          不做相似度標註、不回寫任何選注依據（選注唯一依據＝edge）。
+_TITAN_QUERY_JS = """<script>
+(function(){
+  var data=JSON.parse(document.getElementById('qdata').textContent);
+  var ZH=JSON.parse(document.getElementById('qzh').textContent);
+  function v(id){ return document.getElementById(id).value; }
+  function cat(rs){ if(rs==='WIN'||rs==='HALFWIN')return 'cover'; if(rs==='PUSH')return 'push';
+    if(rs==='LOSE'||rs==='HALFLOSS')return 'lose'; return 'none'; }
+  function run(){
+    var sh=v('q_sh'),mk=v('q_mk'),bk=v('q_bk'),rs=v('q_rs');
+    var hits=data.filter(function(d){
+      return (!sh||d.sh===sh)&&(!mk||d.mk===mk)&&(!bk||d.bk===bk)&&(!rs||cat(d.rs)===rs); });
+    var fixset={}; hits.forEach(function(h){ fixset[h.id]=1; });
+    var out='<div class="muted" style="margin:6px 0">符合 '+hits.length+' 筆 · '+Object.keys(fixset).length+' 場</div>';
+    if(!hits.length){ document.getElementById('q_result').innerHTML='<div class="muted">無符合條件</div>'; return; }
+    out+='<table><tr><th>場次</th><th>盤口</th><th>莊</th><th>形狀</th><th>收盤線</th><th>過盤</th></tr>';
+    hits.forEach(function(h){
+      out+='<tr><td style="text-align:left"><a href="fixtures/'+h.id+'.html">'+h.m+'</a> <span class="muted">'+h.ko+'</span></td>'
+        +'<td>'+(ZH.market[h.mk]||h.mk)+'</td><td>'+h.bk+'</td>'
+        +'<td>'+(ZH.shape[h.sh]||h.sh)+'</td><td>'+(h.ln==null?'—':h.ln)+'</td>'
+        +'<td>'+(h.rs?(ZH.result[h.rs]||h.rs):'平水·不計')+'</td></tr>';
+    });
+    out+='</table>';
+    document.getElementById('q_result').innerHTML=out;
+  }
+  document.getElementById('q_run').addEventListener('click',run);
+})();
+</script>"""
+
 
 def render_titan_index(records: list[dict], movements: list[dict]) -> str:
     by = _titan_by_trajectory(records)
@@ -428,22 +460,49 @@ def render_titan_index(records: list[dict], movements: list[dict]) -> str:
             f"<h3>{link}　<span class='muted'>{_esc(str(mv.get('kickoff_local',''))[:16])}　🏁 {sc_txt}（90 分鐘）</span></h3>"
             f"<table><tr><th>盤口</th><th>莊</th><th>形狀</th><th>收盤低水方</th><th>收盤線</th><th>過盤</th></tr>{sub}</table></div>"
         )
+    # #4 2022 主動查詢工具：內嵌白名單 records JSON + zh 對照（純查歷史、不接 2026）
+    qdata = [{
+        "id": storage._safe_name(r["fixtureId"]), "m": f"{r.get('home','?')} vs {r.get('away','?')}",
+        "mk": r["market"], "bk": r["book"], "sh": r["shape"], "rs": r["result"],
+        "ln": r["line"], "ko": str(r.get("kickoff_local") or "")[:10],
+    } for r in records]
+    qzh = {"shape": {s: _zh(s) for s in {r["shape"] for r in records if r.get("shape")}},
+           "market": _MARKET_ZH, "result": _RESULT_ZH}
+    shape_opts = "".join(
+        f"<option value='{_esc(s)}'>{_esc(_zh(s))}</option>"
+        for s in sorted({r["shape"] for r in records if r.get("shape")})
+    )
+    query_panel = (
+        "<div class='card' id='querytool'>"
+        "<h3>🔎 2022 歷史主動查詢　<span class='muted' style='font-size:13px'>（僅供人工查 2022 對比 · 絕不接 2026 推薦/selector/公開頁）</span></h3>"
+        "<div class='muted'>形狀 <select id='q_sh'><option value=''>全部</option>" + shape_opts + "</select>　"
+        "盤口 <select id='q_mk'><option value=''>全部</option><option value='handicap'>讓分</option><option value='over_under'>大小球</option></select>　"
+        "莊 <select id='q_bk'><option value=''>全部</option><option value='pinnacle'>pinnacle</option><option value='singbet'>singbet</option></select>　"
+        "過盤 <select id='q_rs'><option value=''>全部</option><option value='cover'>過盤(含半過)</option><option value='push'>走盤</option><option value='lose'>輸盤(含半輸)</option><option value='none'>平水不計</option></select>　"
+        "<button id='q_run'>查詢</button></div>"
+        "<div id='q_result'>（選條件後按查詢；結果可點場次連到單場頁對比）</div>"
+        f"<script type='application/json' id='qdata'>{json.dumps(qdata, ensure_ascii=False)}</script>"
+        f"<script type='application/json' id='qzh'>{json.dumps(qzh, ensure_ascii=False)}</script>"
+        "</div>"
+    )
     body = (
         f"<style>.shaperow{{cursor:pointer}}.shaperow:hover td{{background:#222b38}}"
         f".shaperow.selrow td{{background:#2d3f55;color:#fff}}tr.hl td{{background:#2d3f55}}"
-        f"#clearbtn{{background:#222b38;color:#9fd0ff;border:1px solid #3a4252;border-radius:4px;padding:3px 10px;cursor:pointer;margin-left:8px}}</style>"
+        f"#querytool select{{background:#0c0f14;color:#e6e6e6;border:1px solid #3a4252;border-radius:4px;padding:2px 4px}}"
+        f"#clearbtn,#q_run{{background:#222b38;color:#9fd0ff;border:1px solid #3a4252;border-radius:4px;padding:3px 10px;cursor:pointer;margin-left:8px}}</style>"
         f"<h1>🔬 titan007 2022 世界盃 · 本機離線回測</h1>"
         f"<div class='muted'>口徑：by_trajectory（shape → 過盤率），過盤基準＝<b>收盤低水方</b>；無 1xBet/無 edge，非 selector 命中率。</div>"
         f"<h3>各軌跡形狀 → 過盤率（走盤 PUSH 完全不計分母、半過/半輸計 0.5）　<span class='muted'>（點某列篩選場次）</span></h3>"
         f"<table id='sumtbl'><tr><th>形狀</th><th>有效判定筆數</th><th>過盤率</th><th>走盤(不計)</th><th>樣本場次</th></tr>"
         f"{bt or '<tr><td colspan=5 class=muted>尚無可判定資料</td></tr>'}</table>"
+        f"{query_panel}"
         f"<h2>逐場明細（<span id='shown'>{len(movements)}</span>/{len(movements)} 場）"
         f"<span id='fstatus' class='muted' style='font-size:14px'></span>"
         f"<button id='clearbtn' style='display:none'>清除篩選</button></h2>"
         f"<div id='cards'>{''.join(det)}</div>"
         f"<hr>{_titan_shape_legend(records)}"
         f"<p class='muted'>本機離線回測 · titan007 2022 · 僅供校準</p>"
-        f"{_TITAN_FILTER_JS}"
+        f"{_TITAN_FILTER_JS}{_TITAN_QUERY_JS}"
     )
     return _page("titan007 2022 本機回測", body)
 
