@@ -80,9 +80,37 @@ def main(argv=None) -> int:
     return 0
 
 
+def _run_observations(log, observations: list) -> None:
+    """觀察場（無 pick）：analyzer 解讀 → 存 observations 檔（**不進 recommendations、不推 Discord**）。
+
+    選注唯一依據仍是 edge；觀察場只「顯示走勢 + AI 解讀」，不產生任何 pick。逐場隔離、失敗不阻斷。
+    """
+    stored = ai_ok = 0
+    for obs in observations:
+        fid = obs.get("fixtureId")
+        try:
+            date = config.local_date(obs["kickoff_utc"])
+            prior = storage.find_observation(date, fid) or {}
+            ai = analyzer.analyze_observation(obs, prior.get("ai"))  # 唯讀加法；含快取
+            rec = {  # 精簡存檔：無 pick 欄，剝除 trajectory（細節頁讀走勢檔）
+                "fixtureId": fid, "home": obs.get("home"), "away": obs.get("away"),
+                "kickoff_utc": obs.get("kickoff_utc"), "kickoff_local": obs.get("kickoff_local"),
+                "reason": obs.get("reason"),
+                "produced_at_local": prior.get("produced_at_local") or config.now_local().isoformat(),
+                "ai": ai,
+            }
+            storage.append_observation(rec, date_local=date)
+            stored += 1
+            ai_ok += 1 if ai.get("available") else 0
+        except Exception as e:  # 單場失敗不阻斷
+            log.warning("觀察場單場失敗 fixture=%s：%s", fid, e)
+    log.info("觀察場完成：%d 場 / ai 可用 %d（無 pick、不推 Discord）", stored, ai_ok)
+
+
 def _run_select(log) -> None:
     """#5 編排：selector→analyzer→存推薦→#4 notifier 推播。逐 pick 隔離、部分失敗不阻斷。"""
-    picks = selector.select()
+    bundle = selector.select_and_observe()
+    picks = bundle["picks"]
     stored = ai_ok = 0
     reasons: dict = {}
     to_notify: list = []
@@ -112,6 +140,7 @@ def _run_select(log) -> None:
     nstats = notifier.notify_batch(to_notify)   # 整輪彙總一則多 embed（成功回寫 notified_*）
     log.info("選注完成：picks %d / 已存 %d / ai可用 %d / ai未用 %s / 推播 %s",
              len(picks), stored, ai_ok, reasons, nstats)
+    _run_observations(log, bundle["observations"])   # 觀察場：解讀+存檔，不推 Discord
 
 
 if __name__ == "__main__":

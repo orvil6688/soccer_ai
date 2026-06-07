@@ -127,18 +127,20 @@ def _book_status(item: dict, bookmaker: str) -> dict:
     }
 
 
-def find_candidates(now: Optional[datetime] = None) -> list[dict]:
-    """抓 Pinnacle + 1xBet 當前盤，對可下注窗賽事算 edge，回通過核心閘的候選 pick。"""
-    now = now or config.now_local()
+def _fetch_indices(now: datetime):
+    """抓 Pinnacle + 1xBet 當前盤索引（共用一次 fetch，供 picks 與觀察場）。回 (market_map, pin, xb) 或 None。"""
     market_map = movement.ensure_market_map()
     if not market_map:
         logger.error("選注：市場對照表為空，中止")
-        return []
-
+        return None
     pin = _index_by_fixture(oddspapi_client.get_odds_by_tournament(config.BOOKMAKER_PRIMARY))
     xb = _index_by_fixture(oddspapi_client.get_odds_by_tournament(config.BOOKMAKER_SECONDARY))
     logger.info("選注：Pinnacle %d 場 / 1xBet %d 場", len(pin), len(xb))
+    return market_map, pin, xb
 
+
+def _candidates_from(market_map: dict, pin: dict, xb: dict, now: datetime) -> list[dict]:
+    """由已抓好的 pin/xb 索引算 edge 候選（**edge 邏輯未變**，僅與 fetch 拆分）。"""
     candidates: list[dict] = []
     for fid, pin_f in pin.items():
         xb_f = xb.get(fid)
@@ -181,6 +183,13 @@ def find_candidates(now: Optional[datetime] = None) -> list[dict]:
 
     logger.info("選注：通過核心閘候選 %d 筆", len(candidates))
     return candidates
+
+
+def find_candidates(now: Optional[datetime] = None) -> list[dict]:
+    """抓 Pinnacle + 1xBet 當前盤，對可下注窗賽事算 edge，回通過核心閘的候選 pick。"""
+    now = now or config.now_local()
+    idx = _fetch_indices(now)
+    return _candidates_from(idx[0], idx[1], idx[2], now) if idx else []
 
 
 # =========================================================================
@@ -297,3 +306,48 @@ def select(now: Optional[datetime] = None) -> list[dict]:
         sum(1 for p in picks if p["stake_units"] == 1), len(filtered),
     )
     return picks
+
+
+def select_and_observe(now: Optional[datetime] = None) -> dict:
+    """一次 fetch 同時產 picks（同 select()）與觀察場（有走勢但無 pick）。
+
+    觀察場＝在下注窗、有走勢、但沒出 pick 的場；reason＝no_1xbet（1xBet 無盤）/ edge_below_threshold。
+    **選注唯一依據仍是 edge**；觀察場不含 pick 欄、不進 recommendations、不可當選注依據。
+    """
+    now = now or config.now_local()
+    idx = _fetch_indices(now)
+    if not idx:
+        return {"picks": [], "observations": []}
+    market_map, pin, xb = idx
+    candidates = _candidates_from(market_map, pin, xb, now)
+    picks, filtered = [], []
+    for c in candidates:
+        rec = storage.load_fixture_movement(c["fixtureId"])
+        c = _filter_and_stake(c, rec)
+        (filtered if c["filtered"] else picks).append(c)
+    pick_fids = {p["fixtureId"] for p in picks}
+
+    observations = []
+    for fid, pin_f in pin.items():
+        if fid in pick_fids:
+            continue
+        start = pin_f.get("startTime")
+        if not isinstance(start, str):
+            continue
+        try:
+            kickoff = config.to_utc(config.parse_iso(start))
+        except ValueError:
+            continue
+        if not (timedelta(0) < kickoff - now <= timedelta(hours=config.SELECT_WINDOW_HOURS)):
+            continue
+        rec = storage.load_fixture_movement(fid)
+        if not rec:  # 需有走勢才產觀察場（細節頁靠它）
+            continue
+        observations.append({
+            "fixtureId": fid, "home": rec.get("home", ""), "away": rec.get("away", ""),
+            "kickoff_utc": kickoff.isoformat(), "kickoff_local": config.to_local(kickoff).isoformat(),
+            "reason": "no_1xbet" if xb.get(fid) is None else "edge_below_threshold",
+            "trajectory": rec.get("trajectory"),  # 供 analyzer 解讀（存檔時剝除、不重複存）
+        })
+    logger.info("選注完成：picks %d / 觀察場 %d", len(picks), len(observations))
+    return {"picks": picks, "observations": observations}

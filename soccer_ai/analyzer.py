@@ -166,3 +166,75 @@ def analyze(pick: dict, record: dict, prior_ai: "dict | None" = None) -> dict:
         return {"available": False, "reason": "parse_error", **base}
     return {"available": True, "reason": None, "tag": config.AI_TAG, "is_inference": True,
             "model": config.GEMINI_MODEL, **base, **fields}
+
+
+# =========================================================================
+# 觀察場 AI 解讀（唯讀加法；**不改 analyze()**）。無 pick → 只出盤口解讀兩欄，不評信心。
+# =========================================================================
+OBS_FIELDS = ["injury_news_inference", "market_reading"]  # 無 pick 故不出 confidence_reasoning
+
+
+def _obs_hash(record: dict) -> str:
+    payload = {"fixtureId": record.get("fixtureId"), "trajectory": record.get("trajectory")}
+    return hashlib.sha1(json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
+
+
+def _obs_insufficient(record: dict) -> bool:
+    """所有 book/market 決策窗 shape 皆 insufficient/None → 不打 Gemini。"""
+    tj = record.get("trajectory", {}) if isinstance(record, dict) else {}
+    for bt in tj.values() if isinstance(tj, dict) else []:
+        if not isinstance(bt, dict):
+            continue
+        for mt in ("handicap", "over_under"):
+            su = (bt.get(mt) or {}).get("summary", {}) if isinstance(bt.get(mt), dict) else {}
+            if su.get("shape") not in (None, "insufficient"):
+                return False
+    return True
+
+
+def _build_observation_user(record: dict) -> str:
+    lines = [
+        f"對戰：{record.get('home','?')} vs {record.get('away','?')}（開賽 {str(record.get('kickoff_local',''))[:16]}）",
+        "性質：**觀察場**（無 edge 對手盤、系統不下注）。請只解讀盤口為何這樣動，**不要建議下注、不要給選邊**。",
+    ]
+    for book in config.MOVEMENT_BOOKMAKERS:
+        for market in ("handicap", "over_under"):
+            txt = _render_trajectory(record, book, market)
+            if txt:
+                lines.append(f"【{book} {market} 軌跡】\n{txt}")
+    return "\n".join(lines)
+
+
+def analyze_observation(record: dict, prior_ai: "dict | None" = None) -> dict:
+    """觀察場解讀：回 ai{}（含 observation:True），只出 injury_news_inference + market_reading。不拋例外。"""
+    h = _obs_hash(record)
+    if isinstance(prior_ai, dict) and prior_ai.get("summary_hash") == h:
+        return prior_ai  # 軌跡未變 → 沿用快取
+    base = {"produced_at": config.now_local().isoformat(), "summary_hash": h, "observation": True}
+
+    if config.is_test_mode():
+        fields = {f: _truncate(f"🧪 mock {f}（觀察場·測試模式）", config.WORD_BUDGET[f]) for f in OBS_FIELDS}
+        return {"available": True, "reason": None, "tag": config.AI_TAG, "is_inference": True,
+                "model": "mock", **base, **fields}
+    if _obs_insufficient(record):
+        return {"available": False, "reason": "insufficient_window", **base}
+    if not config.GEMINI_API_KEY:
+        return {"available": False, "reason": "missing_key", **base}
+
+    try:
+        data = _gemini_call(_build_observation_user(record))
+    except json.JSONDecodeError:
+        return {"available": False, "reason": "parse_error", **base}
+    except Exception as e:
+        nm = type(e).__name__.lower()
+        reason = "timeout" if ("timeout" in nm or "deadline" in nm) else "api_error"
+        logger.warning("Gemini 觀察場失敗 fixture=%s reason=%s：%s", record.get("fixtureId"), reason, e)
+        return {"available": False, "reason": reason, **base}
+
+    if not isinstance(data, dict):
+        return {"available": False, "reason": "parse_error", **base}
+    fields = {f: _truncate(str(data.get(f, "")), config.WORD_BUDGET[f]) for f in OBS_FIELDS}
+    if not any(fields.values()):
+        return {"available": False, "reason": "parse_error", **base}
+    return {"available": True, "reason": None, "tag": config.AI_TAG, "is_inference": True,
+            "model": config.GEMINI_MODEL, **base, **fields}

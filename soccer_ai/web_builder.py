@@ -169,7 +169,40 @@ def _all_recommendations() -> list[dict]:
     return out
 
 
-def render_index(recs: list[dict], have_fixture: set) -> str:
+def _all_observations() -> list[dict]:
+    out = []
+    for p in sorted(glob.glob(str(config.data_dir() / "observations" / "*.json"))):
+        data = storage._read_json(Path(p))
+        if isinstance(data, list):
+            out.extend(x for x in data if isinstance(x, dict))
+    return out
+
+
+_OBS_REASON_ZH = {"no_1xbet": "無 1xBet 盤（無 edge 對手盤）", "edge_below_threshold": "edge 未達門檻"}
+
+
+def _render_observations(obs: list[dict], have_fixture: set) -> str:
+    """觀察場區塊：有走勢但無 pick（無下注結論）。只顯示走勢入口 + 🤖 盤口解讀。"""
+    if not obs:
+        return ""
+    rows = []
+    for r in sorted(obs, key=lambda x: str(x.get("kickoff_utc", "")), reverse=True):
+        ai = r.get("ai", {})
+        reading = ai.get("market_reading") if ai.get("available") else "🤖 暫無"
+        match = f"{r.get('home','?')} vs {r.get('away','?')}"
+        fid = r.get("fixtureId")
+        match_html = f"<a href='fixtures/{_esc(fid)}.html'>{_esc(match)}</a>" if fid in have_fixture else _esc(match)
+        rows.append(
+            f"<tr><td>{_esc(str(r.get('kickoff_local',''))[:16])}</td><td>{match_html}</td>"
+            f"<td>{_esc(_OBS_REASON_ZH.get(r.get('reason'), r.get('reason')))}</td>"
+            f"<td style='text-align:left'>{_esc(reading)}</td></tr>")
+    return (f"<h2>👁 觀察場（無 edge 對手盤·系統不下注）</h2>"
+            f"<div class='muted'>有 Pinnacle/皇冠走勢可看、Gemini 解讀盤口為何這樣動，但缺 1xBet 對手盤或 edge 未達門檻 → "
+            f"<b>不產生下注推薦</b>。點對戰看八錨點走勢。</div>"
+            f"<table><tr><th>開賽</th><th>對戰</th><th>原因</th><th>🤖 盤口解讀</th></tr>{''.join(rows)}</table>")
+
+
+def render_index(recs: list[dict], have_fixture: set, observations: "list[dict] | None" = None) -> str:
     rows = []
     for r in sorted(recs, key=lambda x: str(x.get("kickoff_utc", "")), reverse=True):
         ai = r.get("ai", {})
@@ -192,7 +225,8 @@ def render_index(recs: list[dict], have_fixture: set) -> str:
             f"<td style='text-align:left'>{_esc(why)}</td></tr>")
     table = (f"<table><tr><th>開賽</th><th>對戰</th><th>選注</th><th>賠率</th><th>單位</th><th>形狀</th><th>賽果</th><th>🤖 信心理由</th></tr>"
              f"{''.join(rows) or '<tr><td colspan=8 class=muted>目前無推薦（賽前無場在選注窗內屬正常）</td></tr>'}</table>")
-    return _page("推薦單", f"<h1>📋 推薦單</h1><div class='muted'><a href='backtest.html'>📊 回測戰報</a></div>{table}")
+    obs_section = _render_observations(observations or [], have_fixture)
+    return _page("推薦單", f"<h1>📋 推薦單</h1><div class='muted'><a href='backtest.html'>📊 回測戰報</a></div>{table}{obs_section}")
 
 
 def render_backtest(recs: list[dict]) -> str:
@@ -574,11 +608,13 @@ def build(out_dir: str = "site") -> dict:
             stats["failed"] += 1
 
     recs = _all_recommendations()
+    obs = _all_observations()
     stats["recommendations"] = len(recs)
-    (out / "index.html").write_text(render_index(recs, have_fixture), encoding="utf-8")
+    stats["observations"] = len(obs)
+    (out / "index.html").write_text(render_index(recs, have_fixture, obs), encoding="utf-8")
     (out / "backtest.html").write_text(render_backtest(recs), encoding="utf-8")
-    logger.info("web_builder 完成：推薦 %d / 單場頁 %d / 失敗 %d → %s",
-                stats["recommendations"], stats["fixtures"], stats["failed"], out.resolve())
+    logger.info("web_builder 完成：推薦 %d / 觀察場 %d / 單場頁 %d / 失敗 %d → %s",
+                stats["recommendations"], stats["observations"], stats["fixtures"], stats["failed"], out.resolve())
     return stats
 
 

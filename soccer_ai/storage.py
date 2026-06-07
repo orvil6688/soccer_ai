@@ -146,3 +146,43 @@ def save_recommendations(items: list[dict], date_local: str) -> Path:
     path = _recommendations_path(date_local)
     _atomic_write_json(path, items)
     return path
+
+
+# =========================================================================
+# 觀察場（有走勢但無 pick：無 1xbet 或 edge 不足）。獨立檔，零污染 recommendations 格式。
+# 鍵＝fixtureId（無 pick 故無 market/side 複合鍵）；backtest/notifier 不讀此檔。
+# =========================================================================
+def _observations_dir() -> Path:
+    p = config.data_dir() / "observations"
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+
+
+def _observations_path(date_local: Optional[str] = None) -> Path:
+    if date_local is None:
+        date_local = config.now_local().strftime("%Y-%m-%d")
+    return _observations_dir() / f"{date_local}.json"
+
+
+def append_observation(record: dict, date_local: Optional[str] = None) -> Path:
+    """以 fixtureId upsert 一筆觀察場（無 pick）。"""
+    path = _observations_path(date_local)
+    existing = _read_json(path)
+    items: list[dict] = existing if isinstance(existing, list) else []
+    fid = record.get("fixtureId")
+    items = [it for it in items if it.get("fixtureId") != fid]
+    items.append(record)
+    _atomic_write_json(path, items)
+    return path
+
+
+def find_observation(date_local: str, fixture_id: str) -> Optional[dict]:
+    for it in load_observations(date_local):
+        if it.get("fixtureId") == fixture_id:
+            return it
+    return None
+
+
+def load_observations(date_local: str) -> list[dict]:
+    data = _read_json(_observations_path(date_local))
+    return data if isinstance(data, list) else []
