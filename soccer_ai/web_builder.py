@@ -127,7 +127,10 @@ def _market_block(traj_market: dict, market: str) -> str:
         if not a:
             rows.append(f"<tr><td>{name}</td><td class='muted'>{role}</td><td colspan='3' class='muted'>—（缺/未到）</td></tr>")
             continue
-        rows.append(f"<tr{cls}><td>{name}{mark}</td><td class='muted'>{role}</td><td>{_esc(a.get('line'))}</td>"
+        off = a.get("offset_sec")  # catch-up：captured 距 target 過遠 → 標補抓·偏收盤（#3，顯示層判讀）
+        late = (f"<span class='muted' title='captured 距 target {off}s'> 補抓·偏收盤</span>"
+                if isinstance(off, (int, float)) and off > config.OFFSET_LATE_SEC else "")
+        rows.append(f"<tr{cls}><td>{name}{mark}{late}</td><td class='muted'>{role}</td><td>{_esc(a.get('line'))}</td>"
                     f"<td>{_esc(_odds(a.get(o1)))}</td><td>{_esc(_odds(a.get(o2)))}</td></tr>")
         labels.append(name)
         line_s.append(a.get("line"))

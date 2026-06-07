@@ -121,6 +121,10 @@ MAX_RETRY_ON_429 = len(BACKOFF_SCHEDULE)  # 超過即標該場抓取失敗、跳
 MOVEMENT_WINDOW = timedelta(hours=80)  # 只對 80h 內開賽者拉取（涵蓋 t72h 決策錨點）
 SETTLE_GRACE = timedelta(hours=3)      # 賽後 3h 內允許一次「收盤定版」拉取
 
+# tick（逐場事件驅動排程；event_pipeline.yml，與 main_pipeline 並行）
+FIXTURES_CACHE_TTL_H = 24              # fixtures 準靜態 → 快取每日刷一次，免每輪打 get_world_cup_fixtures（省額度）
+OFFSET_LATE_SEC = 600                  # 顯示層：錨點 captured_ts 距 target > 此值（10 分）→ 標「補抓·偏收盤」
+
 # =========================================================================
 # 五、八錨點 + 盤口軌跡（schema v2；不存原始/降採樣序列）
 # =========================================================================

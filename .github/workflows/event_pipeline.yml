@@ -1,0 +1,54 @@
+name: event_pipeline
+
+# 逐場事件驅動排程（tick）：每 30 分跑一次，但**只處理「落在自己錨點窗內」的場**（非全掃 104 場）。
+# 每場在自己 t30m（開賽前 30 分）那輪觸發 movement 抓取 + select；GH 延遲/跳過時下一輪 catch-up（historical 回整條序列）。
+#
+# ⚠️ 與 main_pipeline.yml（每小時全掃）**並行、不取代**：揭幕戰前驗收（t30m 模擬 + 回退測試）通過後，
+#    總司令才決定是否把 main_pipeline 的 cron 停掉、正式切到本工作。在那之前 main_pipeline 是安全網。
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write          # 寫回 data/prod（走勢/錨點 + tick_state/fixtures_cache）
+
+concurrency:
+  group: event_pipeline    # 與 main_pipeline 不同 group → 兩者可並行
+  cancel-in-progress: false
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    env:
+      ODDSPAPI_API_KEY: ${{ secrets.ODDSPAPI_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      DISCORD_ALERT_WEBHOOK_URL: ${{ secrets.DISCORD_ALERT_WEBHOOK_URL }}
+      TEST_MODE: "false"   # 正式環境，寫 data/prod/
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6   # node24
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Run tick（逐場事件驅動：t30m 觸發 movement+select）
+        run: python -m soccer_ai.main --mode tick
+
+      - name: Commit & push（含 tick_state / fixtures_cache）
+        run: |
+          git config user.name  "soccer-ai-bot"
+          git config user.email "soccer-ai-bot@users.noreply.github.com"
+          git add data/prod/
+          if git diff --cached --quiet; then
+            echo "無變更，略過 commit"
+          else
+            git commit -m "data(tick): event-driven capture $(date -u +'%Y-%m-%dT%H:%MZ')"
+            git push
+          fi

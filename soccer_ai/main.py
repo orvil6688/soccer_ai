@@ -13,7 +13,7 @@ import argparse
 import logging
 import sys
 
-from . import analyzer, backtest, config, movement, notifier, oddspapi_client, selector, storage
+from . import analyzer, backtest, config, movement, notifier, oddspapi_client, scheduler, selector, storage
 
 
 def _setup_logging() -> None:
@@ -29,8 +29,9 @@ def _parse_args(argv=None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="世界盃盤口分析系統 主流程（OddsPapi）")
     parser.add_argument("--test", action="store_true", help="測試模式：讀寫 data/test/、產出壓 🧪")
     parser.add_argument(
-        "--mode", choices=["movement", "backtest", "select"], default="movement",
-        help="movement=走勢+軌跡；backtest=賽果回填+CLV；select=選注→analyzer→存推薦（閉環）",
+        "--mode", choices=["movement", "backtest", "select", "tick"], default="movement",
+        help="movement=全掃走勢(每小時)；backtest=賽果回填+CLV；select=選注→analyzer→存推薦；"
+             "tick=逐場事件驅動(每場 t30m 觸發 movement+select，event_pipeline 用、與 movement 並行)",
     )
     parser.add_argument(
         "--bookmaker", default=config.BOOKMAKER_PRIMARY,
@@ -76,6 +77,9 @@ def main(argv=None) -> int:
         log.info("回測完成：%s", {k: v for k, v in m.items() if k != "breakdown"})
     elif args.mode == "select":
         _run_select(log)
+    elif args.mode == "tick":
+        stats = scheduler.run_tick(select_fn=lambda: _run_select(log))   # 逐場事件驅動；select 流程注入避循環匯入
+        log.info("tick 完成：%s", stats)
 
     return 0
 
