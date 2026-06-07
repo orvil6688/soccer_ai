@@ -20,6 +20,6 @@ site/
 
 # === titan007 一次性採集（爬來的第三方資料，本機離線回測用、不公開上 repo）===
 data/titan007_2022/
-_t007*.html
+_t007*
 # titan007 本機離線回測頁（local-only，不上 GitHub Pages）
 site_titan007/

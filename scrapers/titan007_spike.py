@@ -25,7 +25,8 @@ _BASE = "https://vip.titan007.com/changeDetail"
 _UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
 _TZ_CN = timezone(timedelta(hours=8))   # titan007 北京時間
 _COMPANY = {"pinnacle": 47, "singbet": 3}  # 平博 / 皇冠
-_POLITE_SEC = 2.5                          # 低頻禮貌間隔
+_POLITE_SEC = 3.5                          # 低頻禮貌間隔（3-5s 區間）
+_BACKOFF = [3, 6, 12]                       # 429/錯誤指數退避（耗盡 → 拋出，由上層標該場跳過）
 
 # 中文讓盤 → 數值（主隊視角）。受让X=主受讓(+)；無受让=主讓(-)。
 _HCAP = {
@@ -60,7 +61,8 @@ def _total_to_num(s: str):
 
 
 def _parse_ts(s: str, year: int = 2022):
-    m = re.match(r"(\d{2})-(\d{2})\s+(\d{2}):(\d{2})", (s or "").strip())
+    # titan007 月/日/時不補零（如 '12-9 9:05'），故 1-2 位數都要吃，否則單位數日期(1-9)全被丟
+    m = re.match(r"(\d{1,2})-(\d{1,2})\s+(\d{1,2}):(\d{2})", (s or "").strip())
     if not m:
         return None
     mo, d, h, mi = map(int, m.groups())
@@ -69,11 +71,24 @@ def _parse_ts(s: str, year: int = 2022):
 
 def _fetch_odds2_rows(page: str, mid: int, company_id: int) -> list[list[str]]:
     url = f"{_BASE}/{page}?id={mid}&companyID={company_id}"
-    r = requests.get(url, headers={"User-Agent": _UA, "Referer": "https://www.titan007.com/"}, timeout=20)
-    r.encoding = "gb2312"
-    t = r.text
+    t = None
+    for attempt, wait in enumerate([0, *_BACKOFF]):
+        if wait:
+            time.sleep(wait)
+        try:
+            r = requests.get(url, headers={"User-Agent": _UA, "Referer": "https://www.titan007.com/"}, timeout=20)
+            if r.status_code == 429 or r.status_code >= 500:
+                continue  # 退避重試
+            r.raise_for_status()
+            r.encoding = "gb2312"
+            t = r.text
+            break
+        except requests.RequestException:
+            if attempt == len(_BACKOFF):
+                raise  # 退避耗盡 → 拋出，上層標該場跳過
     i = t.find('id="odds2"')
     if i < 0:
+        time.sleep(_POLITE_SEC)
         return []
     seg = t[i:t.find("</TABLE>", i) + 8]
     rows = []
