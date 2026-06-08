@@ -151,9 +151,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": 0.0,
-            "home_odd": 1.89,
-            "away_odd": 1.99,
-            "captured_ts": "2026-06-08T19:05:20.883Z"
+            "home_odd": 1.88,
+            "away_odd": 2.0,
+            "captured_ts": "2026-06-08T21:46:27.345Z"
           }
         },
         "segments": [
@@ -250,5 +250,5 @@
     }
   },
   "closing_settled": false,
-  "pulled_at_local": "2026-06-09T04:18:51.110283+08:00"
+  "pulled_at_local": "2026-06-09T06:27:15.711316+08:00"
 }
