@@ -23,7 +23,14 @@
             "away_odd": 1.8,
             "captured_ts": "2026-05-12T00:35:08.539Z"
           },
-          "t72h": null,
+          "t72h": {
+            "target_ts": "2026-06-10T19:00:00+00:00",
+            "offset_sec": -2467,
+            "line": 1.75,
+            "home_odd": 2.009,
+            "away_odd": 1.9,
+            "captured_ts": "2026-06-10T18:18:52.903Z"
+          },
           "t24h": null,
           "t12h": null,
           "t6h": null,
@@ -35,7 +42,7 @@
             "line": 1.75,
             "home_odd": 2.009,
             "away_odd": 1.9,
-            "captured_ts": "2026-06-10T18:18:52.903Z"
+            "captured_ts": "2026-06-10T22:20:18.893Z"
           }
         },
         "segments": [
@@ -66,7 +73,7 @@
           }
         ],
         "summary": {
-          "present_anchors": 0,
+          "present_anchors": 1,
           "shape": "insufficient",
           "tag": null
         }
@@ -81,7 +88,14 @@
             "under_odd": 2.02,
             "captured_ts": "2026-05-12T00:35:08.539Z"
           },
-          "t72h": null,
+          "t72h": {
+            "target_ts": "2026-06-10T19:00:00+00:00",
+            "offset_sec": -2467,
+            "line": 2.75,
+            "over_odd": 1.9,
+            "under_odd": 1.99,
+            "captured_ts": "2026-06-10T18:18:52.903Z"
+          },
           "t24h": null,
           "t12h": null,
           "t6h": null,
@@ -93,7 +107,7 @@
             "line": 2.75,
             "over_odd": 1.9,
             "under_odd": 1.99,
-            "captured_ts": "2026-06-10T18:18:52.903Z"
+            "captured_ts": "2026-06-10T22:20:18.893Z"
           }
         },
         "segments": [
@@ -124,7 +138,7 @@
           }
         ],
         "summary": {
-          "present_anchors": 0,
+          "present_anchors": 1,
           "shape": "insufficient",
           "tag": null
         }
@@ -250,5 +264,5 @@
     }
   },
   "closing_settled": false,
-  "pulled_at_local": "2026-06-11T04:41:03.350345+08:00"
+  "pulled_at_local": "2026-06-11T06:51:47.013064+08:00"
 }
