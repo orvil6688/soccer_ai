@@ -23,7 +23,14 @@
             "away_odd": 1.84,
             "captured_ts": "2026-04-01T10:32:03.860Z"
           },
-          "t72h": null,
+          "t72h": {
+            "target_ts": "2026-06-11T04:00:00+00:00",
+            "offset_sec": 5578,
+            "line": 0.75,
+            "home_odd": 1.99,
+            "away_odd": 1.917,
+            "captured_ts": "2026-06-11T05:32:58.858Z"
+          },
           "t24h": null,
           "t12h": null,
           "t6h": null,
@@ -33,9 +40,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": 0.75,
-            "home_odd": 2.0,
-            "away_odd": 1.909,
-            "captured_ts": "2026-06-10T20:18:23.079Z"
+            "home_odd": 1.99,
+            "away_odd": 1.917,
+            "captured_ts": "2026-06-11T05:32:58.858Z"
           }
         },
         "segments": [
@@ -66,7 +73,7 @@
           }
         ],
         "summary": {
-          "present_anchors": 0,
+          "present_anchors": 1,
           "shape": "insufficient",
           "tag": null
         }
@@ -81,7 +88,14 @@
             "under_odd": 2.0,
             "captured_ts": "2026-04-01T10:32:03.860Z"
           },
-          "t72h": null,
+          "t72h": {
+            "target_ts": "2026-06-11T04:00:00+00:00",
+            "offset_sec": 5578,
+            "line": 2.5,
+            "over_odd": 2.029,
+            "under_odd": 1.862,
+            "captured_ts": "2026-06-11T05:32:58.858Z"
+          },
           "t24h": null,
           "t12h": null,
           "t6h": null,
@@ -93,7 +107,7 @@
             "line": 2.5,
             "over_odd": 2.029,
             "under_odd": 1.862,
-            "captured_ts": "2026-06-10T20:18:23.079Z"
+            "captured_ts": "2026-06-11T05:32:58.858Z"
           }
         },
         "segments": [
@@ -124,7 +138,7 @@
           }
         ],
         "summary": {
-          "present_anchors": 0,
+          "present_anchors": 1,
           "shape": "insufficient",
           "tag": null
         }
@@ -141,7 +155,14 @@
             "away_odd": 1.96,
             "captured_ts": "2026-04-01T11:15:02.988Z"
           },
-          "t72h": null,
+          "t72h": {
+            "target_ts": "2026-06-11T04:00:00+00:00",
+            "offset_sec": -51084,
+            "line": 0.75,
+            "home_odd": 1.95,
+            "away_odd": 1.93,
+            "captured_ts": "2026-06-10T13:48:35.713Z"
+          },
           "t24h": null,
           "t12h": null,
           "t6h": null,
@@ -184,7 +205,7 @@
           }
         ],
         "summary": {
-          "present_anchors": 0,
+          "present_anchors": 1,
           "shape": "insufficient",
           "tag": null
         }
@@ -250,5 +271,5 @@
     }
   },
   "closing_settled": false,
-  "pulled_at_local": "2026-06-11T08:16:04.733826+08:00"
+  "pulled_at_local": "2026-06-11T13:48:50.481928+08:00"
 }
