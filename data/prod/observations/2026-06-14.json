@@ -1,0 +1,81 @@
+[
+  {
+    "fixtureId": "id1000001666456918",
+    "home": "Qatar",
+    "away": "Switzerland",
+    "kickoff_utc": "2026-06-13T19:00:00+00:00",
+    "kickoff_local": "2026-06-14T03:00:00+08:00",
+    "reason": "edge_below_threshold",
+    "produced_at_local": "2026-06-13T13:48:27.460335+08:00",
+    "ai": {
+      "available": true,
+      "reason": null,
+      "tag": "🤖 AI 推論",
+      "is_inference": true,
+      "model": "gemini-2.5-flash",
+      "produced_at": "2026-06-13T13:48:24.040963+08:00",
+      "summary_hash": "e30dee7e2cd2048c22aedba814c660e4177bad86",
+      "observation": true,
+      "injury_news_inference": "讓分盤主隊水位先降後升，大小球大分水位持續上升並升盤。推測瑞士隊可能有主力傷病或戰術調整導致進攻效率存疑，或卡達隊防守能力被高估。",
+      "market_reading": "莊家在t72h至t24h期間，讓分盤對主隊（卡達）進行『fav_swap』的降水洗盤，試圖吸引散戶資金流向主隊。同時，大小球盤面『odds_drift』大分水位持續上升，並在收盤前升盤至3球，這可能是莊家預期會有更多進球，但又想透過升盤來平衡大分注碼，避免大分過熱。此舉也可能暗示莊家後場有shar…"
+    }
+  },
+  {
+    "fixtureId": "id1000001666456928",
+    "home": "Brazil",
+    "away": "Morocco",
+    "kickoff_utc": "2026-06-13T22:00:00+00:00",
+    "kickoff_local": "2026-06-14T06:00:00+08:00",
+    "reason": "edge_below_threshold",
+    "produced_at_local": "2026-06-13T13:48:29.430113+08:00",
+    "ai": {
+      "available": true,
+      "reason": null,
+      "tag": "🤖 AI 推論",
+      "is_inference": true,
+      "model": "gemini-2.5-flash",
+      "produced_at": "2026-06-13T13:48:27.460997+08:00",
+      "summary_hash": "017b284adc9d3612979f5ffb7eba5e13cf51d8d2",
+      "observation": true,
+      "injury_news_inference": "盤口無劇烈異動，難以反推出明確的傷病或陣容消息。若有重磅消息，通常會反映在賠率或盤口級別的顯著調整上。",
+      "market_reading": "讓分盤從初盤-1降至-0.75後鎖定，且水位在最後24小時內有輕微調整，客隊水位略有下降，這可能暗示市場對摩洛哥的信心略有增加，莊家順勢調整以平衡資金。大小球盤從+2.5降至+2.25，且大球水位上升，小球水位下降，這明確顯示市場普遍預期本場比賽進球數不會太多，莊家可能在誘大或真實看小。"
+    }
+  },
+  {
+    "fixtureId": "id1000001666456930",
+    "home": "Haiti",
+    "away": "Scotland",
+    "kickoff_utc": "2026-06-14T01:00:00+00:00",
+    "kickoff_local": "2026-06-14T09:00:00+08:00",
+    "reason": "edge_below_threshold",
+    "produced_at_local": "2026-06-13T13:48:31.477212+08:00",
+    "ai": {
+      "available": true,
+      "reason": null,
+      "tag": "🤖 AI 推論",
+      "is_inference": true,
+      "model": "gemini-2.5-flash",
+      "produced_at": "2026-06-13T13:48:29.430881+08:00",
+      "summary_hash": "c7014c1fdfa295828af9444fbb62eac896a5c2cc",
+      "observation": true,
+      "injury_news_inference": "大小球盤口在t72h至t24h期間，大球水位持續下降，小球水位上升，暗示可能有利於進攻端的傷病恢復或防守端的主力缺陣消息，但沒有明確證據。",
+      "market_reading": "莊家在讓分盤上從+1.25降至+1後，一直維持在+1，且水位相對平衡，顯示對蘇格蘭贏球穿盤信心不大。大小球盤從2.75降至2.5後又回到2.75，並在t72h至t24h期間大球水位持續下壓，小球水位拉升，這可能是莊家在試探市場對進球數的預期，誘使資金流向大球，或是有後場sharp money流入大…"
+    }
+  },
+  {
+    "fixtureId": "id1000001666456942",
+    "home": "Australia",
+    "away": "Turkiye",
+    "kickoff_utc": "2026-06-14T04:00:00+00:00",
+    "kickoff_local": "2026-06-14T12:00:00+08:00",
+    "reason": "edge_below_threshold",
+    "produced_at_local": "2026-06-13T13:48:32.573283+08:00",
+    "ai": {
+      "available": false,
+      "reason": "api_error",
+      "produced_at": "2026-06-13T13:48:31.478078+08:00",
+      "summary_hash": "277b95ab76d33d3d7acc14028459cd815937d6c2",
+      "observation": true
+    }
+  }
+]

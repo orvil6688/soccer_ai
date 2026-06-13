@@ -47,9 +47,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": 1.75,
-            "home_odd": 2.009,
-            "away_odd": 1.9,
-            "captured_ts": "2026-06-13T03:42:11.063Z"
+            "home_odd": 2.04,
+            "away_odd": 1.869,
+            "captured_ts": "2026-06-13T05:38:24.787Z"
           }
         },
         "segments": [
@@ -106,7 +106,11 @@
           "side2_odd_net": "up",
           "side2_prob_net": "down",
           "shape": "fav_swap",
-          "tag": "平盤·水互換·主降客升"
+          "tag": "平盤·水互換·主降客升",
+          "trigger_anchors": [
+            "t72h",
+            "t24h"
+          ]
         }
       },
       "over_under": {
@@ -142,10 +146,10 @@
           "closing": {
             "target_ts": null,
             "offset_sec": null,
-            "line": 2.75,
-            "over_odd": 1.877,
-            "under_odd": 2.02,
-            "captured_ts": "2026-06-13T03:42:11.063Z"
+            "line": 3.0,
+            "over_odd": 1.961,
+            "under_odd": 1.925,
+            "captured_ts": "2026-06-13T05:38:24.787Z"
           }
         },
         "segments": [
@@ -202,7 +206,11 @@
           "side2_odd_net": "down",
           "side2_prob_net": "up",
           "shape": "odds_drift",
-          "tag": "平盤·大升小降"
+          "tag": "平盤·大升小降",
+          "trigger_anchors": [
+            "t72h",
+            "t24h"
+          ]
         }
       }
     },
@@ -241,9 +249,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": 1.75,
-            "home_odd": 2.031,
-            "away_odd": 1.87,
-            "captured_ts": "2026-06-13T03:34:54.770Z"
+            "home_odd": 2.053,
+            "away_odd": 1.85,
+            "captured_ts": "2026-06-13T05:44:05.338Z"
           }
         },
         "segments": [
@@ -300,7 +308,11 @@
           "side2_odd_net": "up",
           "side2_prob_net": "down",
           "shape": "fav_swap",
-          "tag": "平盤·水互換·主降客升"
+          "tag": "平盤·水互換·主降客升",
+          "trigger_anchors": [
+            "t72h",
+            "t24h"
+          ]
         }
       },
       "over_under": {
@@ -336,10 +348,10 @@
           "closing": {
             "target_ts": null,
             "offset_sec": null,
-            "line": 2.75,
-            "over_odd": 1.88,
-            "under_odd": 2.009,
-            "captured_ts": "2026-06-13T03:48:04.034Z"
+            "line": 3.0,
+            "over_odd": 1.96,
+            "under_odd": 1.93,
+            "captured_ts": "2026-06-13T05:29:35.650Z"
           }
         },
         "segments": [
@@ -396,11 +408,15 @@
           "side2_odd_net": "down",
           "side2_prob_net": "up",
           "shape": "odds_drift",
-          "tag": "平盤·大升小降"
+          "tag": "平盤·大升小降",
+          "trigger_anchors": [
+            "t72h",
+            "t24h"
+          ]
         }
       }
     }
   },
   "closing_settled": false,
-  "pulled_at_local": "2026-06-13T11:51:03.232112+08:00"
+  "pulled_at_local": "2026-06-13T13:44:31.262448+08:00"
 }
