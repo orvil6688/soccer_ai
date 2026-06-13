@@ -6,8 +6,11 @@ name: event_pipeline
 # ⚠️ 與 main_pipeline.yml（每小時全掃）**並行、不取代**：揭幕戰前驗收（t30m 模擬 + 回退測試）通過後，
 #    總司令才決定是否把 main_pipeline 的 cron 停掉、正式切到本工作。在那之前 main_pipeline 是安全網。
 on:
-  schedule:
-    - cron: "*/30 * * * *"
+  # ⚠️ 逐場 t30m 驅動「尚未啟用」：真實環境零驗證，總司令決定揭幕戰後才切（見上方說明）。
+  #    在那之前只保留手動觸發（workflow_dispatch）供驗收，**不掛 cron 自動跑**，避免與 main_pipeline
+  #    並行 push data/prod 競態、且不讓未驗證路徑自動跑正式環境。正式切換時再解開下面 schedule。
+  # schedule:
+  #   - cron: "*/30 * * * *"
   workflow_dispatch: {}
 
 permissions:

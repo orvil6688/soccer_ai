@@ -21,6 +21,7 @@ jobs:
     env:
       # 雙軌金鑰：CI 讀 GitHub Secrets（命名與本機 .env 同名）
       ODDSPAPI_API_KEY: ${{ secrets.ODDSPAPI_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}   # analyzer 用；缺則 ai.available=False（不阻斷）
       DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
       TEST_MODE: "false"   # CI 為正式環境，寫 data/prod/
     steps:
@@ -38,14 +39,28 @@ jobs:
       - name: Run movement scan
         run: python -m soccer_ai.main --mode movement
 
-      - name: Commit & push movements
+      - name: Run select (選注→analyzer→存推薦→Discord + 觀察場)
+        run: python -m soccer_ai.main --mode select
+
+      # backtest 隔日回填本質一天一次；每小時跑會把昨天的場重複結算、空燒額度。
+      # → 只在固定 UTC 06:00（=UTC+8 14:00，昨天賽事早已結算、流量低）跑；手動觸發時一律跑（供驗收）。
+      - name: Run backtest backfill (隔日賽果回填 + CLV，一天一次)
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$(date -u +%H)" = "06" ]; then
+            python -m soccer_ai.main --mode backtest
+          else
+            echo "非回測時段（$(date -u +%H):00 UTC），略過 backtest（每日 06:00 UTC 跑）"
+          fi
+
+      - name: Commit & push data
+        if: always()   # select 中途失敗時，已原子落地的 data/prod 仍 push、不丟資料
         run: |
           git config user.name  "soccer-ai-bot"
           git config user.email "soccer-ai-bot@users.noreply.github.com"
           git add data/prod/
           if git diff --cached --quiet; then
-            echo "無走勢變更，略過 commit"
+            echo "無資料變更，略過 commit"
           else
-            git commit -m "data(movement): auto-capture $(date -u +'%Y-%m-%dT%H:%MZ')"
+            git commit -m "data(pipeline): movement+select+backtest $(date -u +'%Y-%m-%dT%H:%MZ')"
             git push
           fi
