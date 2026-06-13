@@ -42,7 +42,7 @@
             "line": -0.5,
             "home_odd": 2.029,
             "away_odd": 1.884,
-            "captured_ts": "2026-06-13T12:11:38.908Z"
+            "captured_ts": "2026-06-13T13:45:37.758Z"
           }
         },
         "segments": [
@@ -108,7 +108,7 @@
             "line": 2.5,
             "over_odd": 1.97,
             "under_odd": 1.917,
-            "captured_ts": "2026-06-13T12:11:38.908Z"
+            "captured_ts": "2026-06-13T13:45:37.758Z"
           }
         },
         "segments": [
@@ -174,9 +174,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": -0.5,
-            "home_odd": 2.009,
+            "home_odd": 2.02,
             "away_odd": 1.88,
-            "captured_ts": "2026-06-12T15:16:59.062Z"
+            "captured_ts": "2026-06-13T14:28:30.545Z"
           }
         },
         "segments": [
@@ -240,9 +240,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": 2.5,
-            "over_odd": 1.95,
-            "under_odd": 1.93,
-            "captured_ts": "2026-06-13T11:39:55.233Z"
+            "over_odd": 1.93,
+            "under_odd": 1.96,
+            "captured_ts": "2026-06-13T14:28:30.545Z"
           }
         },
         "segments": [
@@ -282,5 +282,5 @@
     }
   },
   "closing_settled": false,
-  "pulled_at_local": "2026-06-13T21:28:00.644869+08:00"
+  "pulled_at_local": "2026-06-14T00:09:08.592857+08:00"
 }
