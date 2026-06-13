@@ -8,8 +8,7 @@
   "kickoff_utc": "2026-06-15T16:00:00+00:00",
   "kickoff_local": "2026-06-16T00:00:00+08:00",
   "books": [
-    "pinnacle",
-    "singbet"
+    "pinnacle"
   ],
   "trajectory": {
     "pinnacle": {
@@ -145,142 +144,8 @@
           "trigger_anchors": []
         }
       }
-    },
-    "singbet": {
-      "handicap": {
-        "anchors": {
-          "initial": {
-            "target_ts": null,
-            "offset_sec": null,
-            "line": -2.75,
-            "home_odd": 1.89,
-            "away_odd": 1.95,
-            "captured_ts": "2026-03-08T19:57:22.636Z"
-          },
-          "t72h": {
-            "target_ts": "2026-06-12T16:00:00+00:00",
-            "offset_sec": -3298,
-            "line": -2.5,
-            "home_odd": 1.89,
-            "away_odd": 1.99,
-            "captured_ts": "2026-06-12T15:05:01.625Z"
-          },
-          "t24h": null,
-          "t12h": null,
-          "t6h": null,
-          "t1h": null,
-          "t30m": null,
-          "closing": {
-            "target_ts": null,
-            "offset_sec": null,
-            "line": -2.5,
-            "home_odd": 1.87,
-            "away_odd": 2.009,
-            "captured_ts": "2026-06-12T22:15:48.573Z"
-          }
-        },
-        "segments": [
-          {
-            "from": "t72h",
-            "to": "t24h",
-            "present": false
-          },
-          {
-            "from": "t24h",
-            "to": "t12h",
-            "present": false
-          },
-          {
-            "from": "t12h",
-            "to": "t6h",
-            "present": false
-          },
-          {
-            "from": "t6h",
-            "to": "t1h",
-            "present": false
-          },
-          {
-            "from": "t1h",
-            "to": "t30m",
-            "present": false
-          }
-        ],
-        "summary": {
-          "present_anchors": 1,
-          "shape": "insufficient",
-          "tag": null,
-          "trigger_anchors": []
-        }
-      },
-      "over_under": {
-        "anchors": {
-          "initial": {
-            "target_ts": null,
-            "offset_sec": null,
-            "line": 3.5,
-            "over_odd": 1.86,
-            "under_odd": 1.96,
-            "captured_ts": "2026-03-08T19:57:22.635Z"
-          },
-          "t72h": {
-            "target_ts": "2026-06-12T16:00:00+00:00",
-            "offset_sec": 17694,
-            "line": 3.5,
-            "over_odd": 1.9,
-            "under_odd": 1.96,
-            "captured_ts": "2026-06-12T20:54:54.352Z"
-          },
-          "t24h": null,
-          "t12h": null,
-          "t6h": null,
-          "t1h": null,
-          "t30m": null,
-          "closing": {
-            "target_ts": null,
-            "offset_sec": null,
-            "line": 3.5,
-            "over_odd": 1.9,
-            "under_odd": 1.96,
-            "captured_ts": "2026-06-12T20:55:36.995Z"
-          }
-        },
-        "segments": [
-          {
-            "from": "t72h",
-            "to": "t24h",
-            "present": false
-          },
-          {
-            "from": "t24h",
-            "to": "t12h",
-            "present": false
-          },
-          {
-            "from": "t12h",
-            "to": "t6h",
-            "present": false
-          },
-          {
-            "from": "t6h",
-            "to": "t1h",
-            "present": false
-          },
-          {
-            "from": "t1h",
-            "to": "t30m",
-            "present": false
-          }
-        ],
-        "summary": {
-          "present_anchors": 1,
-          "shape": "insufficient",
-          "tag": null,
-          "trigger_anchors": []
-        }
-      }
     }
   },
   "closing_settled": false,
-  "pulled_at_local": "2026-06-13T13:44:31.262448+08:00"
+  "pulled_at_local": "2026-06-13T14:17:44.494783+08:00"
 }
