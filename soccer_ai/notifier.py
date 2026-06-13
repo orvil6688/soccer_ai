@@ -83,10 +83,15 @@ def _format_embed(rec: dict) -> dict:
         fields.append({"name": "🏁 賽果", "value": val, "inline": False})
     ai = rec.get("ai", {})
     if ai.get("available"):
+        # Gemini 解讀已不限字數；但 Discord embed field value 硬上限 1024 字元，
+        # 超出會被 API 退件。故此處截到 ~1000 + 指向網頁看完整（analyzer/網頁存完整不受影響）。
+        def _dc(v):
+            v = (v or "—").strip() or "—"
+            return v if len(v) <= 1000 else v[:1000].rstrip() + "…（完整解讀見網頁）"
         fields += [
-            {"name": "🤖 信心理由", "value": ai.get("confidence_reasoning") or "—", "inline": False},
-            {"name": "🤖 消息面推測（盤口反推）", "value": ai.get("injury_news_inference") or "—", "inline": False},
-            {"name": "🤖 盤口解讀", "value": ai.get("market_reading") or "—", "inline": False},
+            {"name": "🤖 信心理由", "value": _dc(ai.get("confidence_reasoning")), "inline": False},
+            {"name": "🤖 消息面推測（盤口反推）", "value": _dc(ai.get("injury_news_inference")), "inline": False},
+            {"name": "🤖 盤口解讀", "value": _dc(ai.get("market_reading")), "inline": False},
         ]
     else:
         fields.append({"name": "🤖 AI 推論", "value": f"暫無（{ai.get('reason')}）", "inline": False})

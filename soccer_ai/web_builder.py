@@ -183,6 +183,35 @@ def _all_observations() -> list[dict]:
 
 _OBS_REASON_ZH = {"no_1xbet": "無 1xBet 盤（無 edge 對手盤）", "edge_below_threshold": "edge 未達門檻"}
 
+_AI_LABELS = {
+    "confidence_reasoning": "信心理由",
+    "injury_news_inference": "消息面推測（盤口反推）",
+    "market_reading": "盤口解讀",
+}
+
+
+def _ai_cell(ai: dict, primary: str, preview: int = 90) -> str:
+    """🤖 AI 解讀格：不限字數。短的直接顯示；長的（或多欄）以 <details> 摘要+可展開完整解讀。
+
+    summary 顯示 primary 欄前 preview 字當預覽；展開後列出所有可用欄位（完整、不截斷）。
+    回傳已含 HTML，呼叫端勿再 _esc。
+    """
+    if not isinstance(ai, dict) or not ai.get("available"):
+        r = ai.get("reason") if isinstance(ai, dict) else None
+        return f"🤖 暫無（{_esc(r)}）" if r else "🤖 暫無"
+    full = "<br>".join(f"<b>{lab}</b>：{_esc((ai.get(k) or '').strip())}"
+                       for k, lab in _AI_LABELS.items() if (ai.get(k) or "").strip())
+    if not full:
+        return "🤖 暫無"
+    prim = (ai.get(primary) or "").strip()
+    n_fields = sum(1 for k in _AI_LABELS if (ai.get(k) or "").strip())
+    if n_fields == 1 and len(prim) <= preview:        # 短且單欄 → 直接顯示，免展開
+        return _esc(prim)
+    head = _esc(prim[:preview].rstrip()) or "🤖 解讀"
+    return (f"<details><summary style='cursor:pointer;color:#9fd0ff'>{head}… "
+            f"<span class='muted'>(展開完整解讀)</span></summary>"
+            f"<div style='margin-top:6px;white-space:pre-wrap;line-height:1.55'>{full}</div></details>")
+
 
 def _render_observations(obs: list[dict], have_fixture: set) -> str:
     """觀察場區塊：有走勢但無 pick（無下注結論）。只顯示走勢入口 + 🤖 盤口解讀。"""
@@ -191,14 +220,13 @@ def _render_observations(obs: list[dict], have_fixture: set) -> str:
     rows = []
     for r in sorted(obs, key=lambda x: str(x.get("kickoff_utc", "")), reverse=True):
         ai = r.get("ai", {})
-        reading = ai.get("market_reading") if ai.get("available") else "🤖 暫無"
         match = f"{r.get('home','?')} vs {r.get('away','?')}"
         fid = r.get("fixtureId")
         match_html = f"<a href='fixtures/{_esc(fid)}.html'>{_esc(match)}</a>" if fid in have_fixture else _esc(match)
         rows.append(
             f"<tr><td>{_esc(str(r.get('kickoff_local',''))[:16])}</td><td>{match_html}</td>"
             f"<td>{_esc(_OBS_REASON_ZH.get(r.get('reason'), r.get('reason')))}</td>"
-            f"<td style='text-align:left'>{_esc(reading)}</td></tr>")
+            f"<td style='text-align:left'>{_ai_cell(ai, 'market_reading')}</td></tr>")
     return (f"<h2>👁 觀察場（無 edge 對手盤·系統不下注）</h2>"
             f"<div class='muted'>有 Pinnacle/皇冠走勢可看、Gemini 解讀盤口為何這樣動，但缺 1xBet 對手盤或 edge 未達門檻 → "
             f"<b>不產生下注推薦</b>。點對戰看八錨點走勢。</div>"
@@ -209,7 +237,6 @@ def render_index(recs: list[dict], have_fixture: set, observations: "list[dict] 
     rows = []
     for r in sorted(recs, key=lambda x: str(x.get("kickoff_utc", "")), reverse=True):
         ai = r.get("ai", {})
-        why = ai.get("confidence_reasoning") if ai.get("available") else f"🤖 暫無"
         ucls = "u2" if r.get("stake_units") == 2 else "u1"
         match = f"{r.get('home','?')} vs {r.get('away','?')}"
         fid = r.get("fixtureId")
@@ -225,7 +252,7 @@ def render_index(recs: list[dict], have_fixture: set, observations: "list[dict] 
             f"<td>{_MARKET_ZH.get(r.get('market'),r.get('market'))} {_SIDE_ZH.get(r.get('side'),r.get('side'))} {_esc(r.get('line'))}</td>"
             f"<td>{_esc(_odds(r.get('odds')))}</td><td class='{ucls}'>{_esc(r.get('stake_units'))}</td>"
             f"<td>{_esc(_zh(r.get('signals',{}).get('shape')))}</td><td>{result}</td>"
-            f"<td style='text-align:left'>{_esc(why)}</td></tr>")
+            f"<td style='text-align:left'>{_ai_cell(ai, 'confidence_reasoning')}</td></tr>")
     table = (f"<table><tr><th>開賽</th><th>對戰</th><th>選注</th><th>賠率</th><th>單位</th><th>形狀</th><th>賽果</th><th>🤖 信心理由</th></tr>"
              f"{''.join(rows) or '<tr><td colspan=8 class=muted>目前無推薦（賽前無場在選注窗內屬正常）</td></tr>'}</table>")
     obs_section = _render_observations(observations or [], have_fixture)

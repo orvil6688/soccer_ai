@@ -26,9 +26,11 @@ PERSONA = (
     "你的任務：以開盤手視角推論莊家意圖與市場心理。只解讀，不得修改任何數據、不得重命名軌跡形狀、不參與選注決策。\n"
     "所有判斷皆為推論；務必講具體、避免空話套話。\n"
     "嚴格只輸出 JSON 物件，三個鍵：\n"
-    "- confidence_reasoning（≤50字）：對此注的信心理由（基於盤口軌跡與 edge）。\n"
-    "- injury_news_inference（≤100字）：由盤口異動反推的傷病/陣容消息推測；僅盤口反推，不得宣稱已證實傷情。\n"
-    "- market_reading（≤150字）：莊家意圖與市場心理推論（如疑似洗盤/誘盤/消息走漏/後場 sharp 錢）。\n"
+    "- confidence_reasoning：對此注的信心理由（基於盤口軌跡與 edge）。\n"
+    "- injury_news_inference：由盤口異動反推的傷病/陣容消息推測；僅盤口反推，不得宣稱已證實傷情。\n"
+    "- market_reading：莊家意圖與市場心理推論（如疑似洗盤/誘盤/消息走漏/後場 sharp 錢）。\n"
+    "**不限字數**：把推論講完整、具體、有層次（盤口怎麼動→可能意圖→對散戶心理的作用）；"
+    "但只講盤口能支撐的推論，避免空話套話與無資訊的湊字。\n"
     "一律繁體中文。不要輸出 JSON 以外的任何文字。"
 )
 
@@ -161,7 +163,7 @@ def analyze(pick: dict, record: dict, prior_ai: "dict | None" = None) -> dict:
 
     if not isinstance(data, dict):
         return {"available": False, "reason": "parse_error", **base}
-    fields = {f: _truncate(str(data.get(f, "")), config.WORD_BUDGET[f]) for f in AI_FIELDS}
+    fields = {f: str(data.get(f, "")).strip() for f in AI_FIELDS}  # 不截斷：存完整解讀（顯示層負責可展開）
     if not any(fields.values()):
         return {"available": False, "reason": "parse_error", **base}
     return {"available": True, "reason": None, "tag": config.AI_TAG, "is_inference": True,
@@ -233,7 +235,7 @@ def analyze_observation(record: dict, prior_ai: "dict | None" = None) -> dict:
 
     if not isinstance(data, dict):
         return {"available": False, "reason": "parse_error", **base}
-    fields = {f: _truncate(str(data.get(f, "")), config.WORD_BUDGET[f]) for f in OBS_FIELDS}
+    fields = {f: str(data.get(f, "")).strip() for f in OBS_FIELDS}  # 不截斷：存完整解讀
     if not any(fields.values()):
         return {"available": False, "reason": "parse_error", **base}
     return {"available": True, "reason": None, "tag": config.AI_TAG, "is_inference": True,
