@@ -185,9 +185,32 @@ def _candidates_from(market_map: dict, pin: dict, xb: dict, now: datetime) -> li
     return candidates
 
 
+def _any_fixture_in_select_window(now: datetime) -> bool:
+    """止血守衛（零 API）：本地走勢檔是否有任一場落在選注窗 (0, SELECT_WINDOW_HOURS]。
+
+    沒有任何場在窗內 → select 整輪跳過、**不打 odds-by-tournament**（每輪省 2 計額度請求）。
+    movement 於 select 前先跑、涵蓋 MOVEMENT_WINDOW(80h) ⊃ 24h 選注窗，故本地檔足以判斷、不漏場。
+    """
+    win = timedelta(hours=config.SELECT_WINDOW_HOURS)
+    for rec in storage.list_movements():
+        ko = rec.get("kickoff_utc")
+        if not isinstance(ko, str):
+            continue
+        try:
+            kickoff = config.to_utc(config.parse_iso(ko))
+        except ValueError:
+            continue
+        if timedelta(0) < kickoff - now <= win:
+            return True
+    return False
+
+
 def find_candidates(now: Optional[datetime] = None) -> list[dict]:
     """抓 Pinnacle + 1xBet 當前盤，對可下注窗賽事算 edge，回通過核心閘的候選 pick。"""
     now = now or config.now_local()
+    if not _any_fixture_in_select_window(now):
+        logger.info("選注：無場次在選注窗（%dh 內），跳過 fetch（省額度）", config.SELECT_WINDOW_HOURS)
+        return []
     idx = _fetch_indices(now)
     return _candidates_from(idx[0], idx[1], idx[2], now) if idx else []
 
@@ -315,6 +338,9 @@ def select_and_observe(now: Optional[datetime] = None) -> dict:
     **選注唯一依據仍是 edge**；觀察場不含 pick 欄、不進 recommendations、不可當選注依據。
     """
     now = now or config.now_local()
+    if not _any_fixture_in_select_window(now):
+        logger.info("選注：無場次在選注窗（%dh 內），跳過 fetch（省額度）", config.SELECT_WINDOW_HOURS)
+        return {"picks": [], "observations": []}
     idx = _fetch_indices(now)
     if not idx:
         return {"picks": [], "observations": []}
