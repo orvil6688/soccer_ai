@@ -45,6 +45,7 @@ jobs:
         run: python -m soccer_ai.main --mode tick
 
       - name: Commit & push（含 tick_state / fixtures_cache）
+        if: always()   # tick 中途失敗時，已落地的 data/prod（含 tick_state）仍持久化
         run: |
           git config user.name  "soccer-ai-bot"
           git config user.email "soccer-ai-bot@users.noreply.github.com"
@@ -53,5 +54,13 @@ jobs:
             echo "無變更，略過 commit"
           else
             git commit -m "data(tick): event-driven capture $(date -u +'%Y-%m-%dT%H:%MZ')"
-            git push
+            # P1：與 main_pipeline 並行時 push 會撞 race；pull --rebase 後重試，
+            #     否則 push 失敗 → tick_state 不持久化 → select_done 丟失 → 下輪重複 select 爆額度。
+            #     data 檔與 main 多為不相交（各寫各的），rebase 通常無衝突。
+            ok=0
+            for i in 1 2 3; do
+              git pull --rebase origin main && git push && { ok=1; break; }
+              echo "push 第 $i 次失敗（疑與 main_pipeline 撞），3s 後重試"; sleep 3
+            done
+            [ "$ok" = "1" ] || { echo "::error::push 連 3 次失敗，tick_state 未持久化"; exit 1; }
           fi

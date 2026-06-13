@@ -63,5 +63,11 @@ jobs:
             echo "無資料變更，略過 commit"
           else
             git commit -m "data(pipeline): movement+select+backtest $(date -u +'%Y-%m-%dT%H:%MZ')"
-            git push
+            # P1：驗證期間與 event_pipeline 並行 push 會撞 race；pull --rebase 後重試（雙向防護）。
+            ok=0
+            for i in 1 2 3; do
+              git pull --rebase origin main && git push && { ok=1; break; }
+              echo "push 第 $i 次失敗（疑與 event_pipeline 撞），3s 後重試"; sleep 3
+            done
+            [ "$ok" = "1" ] || { echo "::error::push 連 3 次失敗"; exit 1; }
           fi
