@@ -35,7 +35,7 @@
             "line": -1.25,
             "home_odd": 1.943,
             "away_odd": 1.961,
-            "captured_ts": "2026-06-04T18:57:23.047Z"
+            "captured_ts": "2026-06-13T09:18:23.377Z"
           }
         },
         "segments": [
@@ -68,7 +68,8 @@
         "summary": {
           "present_anchors": 0,
           "shape": "insufficient",
-          "tag": null
+          "tag": null,
+          "trigger_anchors": []
         }
       },
       "over_under": {
@@ -93,7 +94,7 @@
             "line": 2.5,
             "over_odd": 1.97,
             "under_odd": 1.917,
-            "captured_ts": "2026-06-04T18:57:23.047Z"
+            "captured_ts": "2026-06-13T09:18:23.377Z"
           }
         },
         "segments": [
@@ -126,7 +127,8 @@
         "summary": {
           "present_anchors": 0,
           "shape": "insufficient",
-          "tag": null
+          "tag": null,
+          "trigger_anchors": []
         }
       }
     },
@@ -153,7 +155,7 @@
             "line": -1.25,
             "home_odd": 1.93,
             "away_odd": 1.95,
-            "captured_ts": "2026-06-04T17:37:42.446Z"
+            "captured_ts": "2026-06-10T13:48:35.717Z"
           }
         },
         "segments": [
@@ -186,7 +188,8 @@
         "summary": {
           "present_anchors": 0,
           "shape": "insufficient",
-          "tag": null
+          "tag": null,
+          "trigger_anchors": []
         }
       },
       "over_under": {
@@ -211,7 +214,7 @@
             "line": 2.5,
             "over_odd": 1.95,
             "under_odd": 1.91,
-            "captured_ts": "2026-06-04T17:37:42.446Z"
+            "captured_ts": "2026-06-10T13:48:35.717Z"
           }
         },
         "segments": [
@@ -244,11 +247,12 @@
         "summary": {
           "present_anchors": 0,
           "shape": "insufficient",
-          "tag": null
+          "tag": null,
+          "trigger_anchors": []
         }
       }
     }
   },
   "closing_settled": false,
-  "pulled_at_local": "2026-06-05T04:07:13.083831+08:00"
+  "pulled_at_local": "2026-06-14T03:09:52.299149+08:00"
 }

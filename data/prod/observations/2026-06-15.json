@@ -1,0 +1,23 @@
+[
+  {
+    "fixtureId": "id1000001666457070",
+    "home": "Germany",
+    "away": "Curacao",
+    "kickoff_utc": "2026-06-14T17:00:00+00:00",
+    "kickoff_local": "2026-06-15T01:00:00+08:00",
+    "reason": "edge_below_threshold",
+    "produced_at_local": "2026-06-14T03:14:42.447455+08:00",
+    "ai": {
+      "available": true,
+      "reason": null,
+      "tag": "🤖 AI 推論",
+      "is_inference": true,
+      "model": "gemini-2.5-flash",
+      "produced_at": "2026-06-14T03:14:40.226988+08:00",
+      "summary_hash": "059a8a0e613c4bc24b967efb4844f61a8bd8e6d6",
+      "observation": true,
+      "injury_news_inference": "Pinnacle 讓分盤從 -3.75 降到 -3.25 又升回 -3.5，可能暗示德國隊有主力球員輕微傷病或陣容調整，導致莊家一度降低讓分，但隨後確認影響不大。",
+      "market_reading": "Pinnacle 讓分盤在 t72h 降盤後又在 t24h 升盤，並將德國賠率推高至 2.0，這是一個典型的洗盤操作。莊家先降低讓分引誘看好德國的散戶下注，製造熱度後再升盤，將德國賠率拉高，誘使部分資金轉向客隊或觀望，以平衡兩邊注碼。Singbet 的讓分盤相對穩定，但德國賠率也略有上升，顯示莊家…"
+    }
+  }
+]
