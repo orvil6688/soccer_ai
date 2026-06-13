@@ -176,7 +176,7 @@
             "line": -0.5,
             "home_odd": 1.81,
             "away_odd": 2.087,
-            "captured_ts": "2026-06-13T14:35:23.863Z"
+            "captured_ts": "2026-06-13T21:56:55.588Z"
           }
         },
         "segments": [
@@ -282,5 +282,5 @@
     }
   },
   "closing_settled": false,
-  "pulled_at_local": "2026-06-14T03:09:52.299149+08:00"
+  "pulled_at_local": "2026-06-14T05:57:14.611884+08:00"
 }

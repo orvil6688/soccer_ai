@@ -1,0 +1,58 @@
+[
+  {
+    "fixtureId": "id1000001666456968",
+    "home": "Netherlands",
+    "away": "Japan",
+    "kickoff_utc": "2026-06-14T20:00:00+00:00",
+    "kickoff_local": "2026-06-15T04:00:00+08:00",
+    "xbet_active": false,
+    "xbet_suspended": false,
+    "market": "handicap",
+    "side": "home",
+    "line": -0.25,
+    "odds": 1.691,
+    "fair_prob": 0.4781,
+    "pinnacle_line": -0.5,
+    "xbet_line": -0.25,
+    "edge_goals": 0.25,
+    "edge_pct": null,
+    "edge_source": "line",
+    "signals": {
+      "signal": "flat",
+      "reverse_against": false,
+      "key_number_cross": false,
+      "shape": "odds_drift",
+      "tag": "平盤·主降客升"
+    },
+    "trajectory": {
+      "pinnacle": {
+        "shape": "odds_drift",
+        "tag": "平盤·主降客升",
+        "net_line_steps": 0,
+        "fav_swap_count": 0
+      },
+      "singbet": {
+        "shape": "insufficient",
+        "tag": null,
+        "net_line_steps": null,
+        "fav_swap_count": null
+      }
+    },
+    "filtered": false,
+    "filter_reason": null,
+    "stake_units": 1,
+    "produced_at_local": "2026-06-14T06:01:55.396384+08:00",
+    "ai": {
+      "available": true,
+      "reason": null,
+      "tag": "🤖 AI 推論",
+      "is_inference": true,
+      "model": "gemini-2.5-flash",
+      "produced_at": "2026-06-14T06:01:55.396450+08:00",
+      "summary_hash": "5053eee522d2be21407f4bd879d99c3a96238637",
+      "confidence_reasoning": "Pinnacle 主隊賠率在平盤微調後仍維持高位，Singbet 變化不足，信心度中等偏低。",
+      "injury_news_inference": "盤口軌跡中未見明顯突變或大幅度調整，難以反推出具體的傷病或陣容變動消息。市場可能缺乏關鍵內部資訊。",
+      "market_reading": "Pinnacle 在72小時至24小時內，主隊從-0.5球2.05賠率輕微下降至2.02，客隊賠率上升，呈現『平盤·主降客升』。這可能是莊家在開賽前嘗試吸引部分看好主隊的閒家資金，但賠率變化幅度不大，顯示市場對主隊的信心並非壓倒性強。Singbet 軌跡變化不顯著，未能提供更多市場洞察。整體看來，…"
+    }
+  }
+]
