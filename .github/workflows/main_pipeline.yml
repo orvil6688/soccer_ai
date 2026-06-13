@@ -1,11 +1,12 @@
 name: main_pipeline
 
 # 架構 A（OddsPapi）：historical 為賽前即時走勢，不需 15 分搶窗。
-# Cron 每小時（接受 GitHub 延遲）；內部 UTC，程式邏輯轉 UTC+8。
-# 跑完將 data/prod/ 變更 commit & push 回 Repo（狀態持久化）。
+# Cron 每 3h（止血：select 每輪燒 2 計額度，免費層 250/月扛不住每小時；時段守衛在密集小組賽
+#   幾乎不跳，故降頻買時間。代價＝推薦新鮮度降，暫時接受。正解待 event_pipeline 真實驗證後切換）。
+# 內部 UTC，程式邏輯轉 UTC+8。跑完將 data/prod/ 變更 commit & push 回 Repo（狀態持久化）。
 on:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "0 */3 * * *"
   workflow_dispatch: {}   # 允許手動觸發
 
 permissions:
