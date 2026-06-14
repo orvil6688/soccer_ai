@@ -71,16 +71,11 @@
     "reason": "edge_below_threshold",
     "produced_at_local": "2026-06-13T13:48:32.573283+08:00",
     "ai": {
-      "available": true,
-      "reason": null,
-      "tag": "🤖 AI 推論",
-      "is_inference": true,
-      "model": "gemini-2.5-flash",
-      "produced_at": "2026-06-14T06:02:00.993749+08:00",
-      "summary_hash": "67190f1f19ce0114c5d1aaee5106fdbd1723f901",
-      "observation": true,
-      "injury_news_inference": "盤口無顯著異動，難以推斷有重大傷病或陣容調整。若有，莊家會更早且更大幅度地調整盤口。",
-      "market_reading": "Pinnacle 讓分盤澳洲水位持續上升，土耳其水位下降，顯示市場資金逐漸傾向土耳其。大小盤水位變化顯示莊家可能在誘大，但整體波動不大。Singbet 讓分盤水位頻繁互換，可能是莊家在洗盤，試圖平衡兩邊資金，同時也反映市場對兩隊實力判斷的不確定性。"
+      "available": false,
+      "reason": "api_error",
+      "produced_at": "2026-06-14T10:50:35.991402+08:00",
+      "summary_hash": "956c067ad259c579a6b2332cfc41d9c6897f2121",
+      "observation": true
     }
   }
 ]
