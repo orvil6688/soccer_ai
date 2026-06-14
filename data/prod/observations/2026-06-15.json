@@ -9,9 +9,9 @@
     "produced_at_local": "2026-06-14T03:14:42.447455+08:00",
     "ai": {
       "available": false,
-      "reason": "parse_error",
-      "produced_at": "2026-06-14T10:50:54.805520+08:00",
-      "summary_hash": "49ae454d77d989226e4c998694ea7d5ddbece571",
+      "reason": "api_error",
+      "produced_at": "2026-06-14T15:21:15.147671+08:00",
+      "summary_hash": "bc0b41741ec7d0d0ea0c9eafbca3fc9b55707ff4",
       "observation": true
     }
   },
@@ -25,9 +25,9 @@
     "produced_at_local": "2026-06-14T10:51:07.250370+08:00",
     "ai": {
       "available": false,
-      "reason": "parse_error",
-      "produced_at": "2026-06-14T10:51:01.033829+08:00",
-      "summary_hash": "a8b4fdbaf14bcc28a754d72afc5ec28bbba0cdc8",
+      "reason": "api_error",
+      "produced_at": "2026-06-14T15:21:17.013384+08:00",
+      "summary_hash": "e7b6ea3b0d60beea40cf5ce5c9daa9f9da843eb6",
       "observation": true
     }
   }
