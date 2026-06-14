@@ -10,8 +10,8 @@
     "ai": {
       "available": false,
       "reason": "api_error",
-      "produced_at": "2026-06-14T15:21:15.147671+08:00",
-      "summary_hash": "bc0b41741ec7d0d0ea0c9eafbca3fc9b55707ff4",
+      "produced_at": "2026-06-14T22:02:59.693647+08:00",
+      "summary_hash": "27c08c4ffec90f077bb2b88b4bf6ee9a6b8ff87f",
       "observation": true
     }
   },
@@ -25,9 +25,9 @@
     "produced_at_local": "2026-06-14T10:51:07.250370+08:00",
     "ai": {
       "available": false,
-      "reason": "api_error",
-      "produced_at": "2026-06-14T15:21:17.013384+08:00",
-      "summary_hash": "e7b6ea3b0d60beea40cf5ce5c9daa9f9da843eb6",
+      "reason": "parse_error",
+      "produced_at": "2026-06-14T22:03:03.907745+08:00",
+      "summary_hash": "b79027599946112fa61f996c06913d7cfd8db58f",
       "observation": true
     }
   }
