@@ -90,8 +90,18 @@ movement/selector/storage/trajectory 全程不動，純排程層切換。
 1. `main_pipeline.yml`：cron → `0 1 * * *`；（六月可選）暫移除 backtest step。
 2. `event_pipeline.yml`：重新註解 `*/30`（退 dispatch-only）。
 3. 新增 `refresh_now.yml`（或重用 event 手動）：workflow_dispatch，movement+select，不填參數、刷全盤。
+   - 🔴 **必須連帶觸發 gh_pages 重建**，否則按鈕抓到新盤但公開頁仍舊數字＝白按。做法：把 refresh_now 加進 `gh_pages.yml` 的 `workflow_run.workflows` 清單（與 main_pipeline 並列），或 refresh_now 自己 build+deploy site。**每日篩選（main_pipeline）已會觸發 gh_pages，按鈕也要比照。**
 4. （第二期）watchlist 檔 + scheduler 過濾。
 5. 同步 `CLAUDE.md` §5/§9 + 協作簡報。
+
+## 10. 驗證發現（2026-06-14 event 真實環境，Germany keystone）
+
+- **機制 PASS**：run #5（16:58 UTC）`select_due=1` → select 跑、picks 3/觀察 2；tick_state Germany `select_done=True`、captured 含 t30m；movement t30m 錨點 pinnacle **offset_sec=-11s**（series 取點近乎正中 16:30 目標），singbet +316s。t30m 觸發 + select_done 去重 + catch-up 取點 全對。
+- **Germany observation→pick**：早上篩選 edge 不足→觀察場；t30m 線移動（pinnacle 日內 -3.25→-3.75）edge 出現→**變 pick**。**證明「早上候選清單會變、下注前必須 t30m 再刷」是對的**（提案核心假設成立）。
+- 🔴 **cron 不可靠（公開 repo、非額度問題）**：`*/30` 實際只在 07:53/10:51/13:01/15:26/16:58 跑（~每 2–2.5h，非 30 分）。**public repo Actions 分鐘無限**，throttle 是 GitHub schedule 觸發本質的 best-effort 延遲/丟棄。Germany select 落在 [16:30,17:00) **靠 #5 剛好 16:58（離 kickoff 僅 2 分）撞上**＝運氣。→ **靠 cron 命中 30 分 t30m 窗 來出 pick 不可靠**；走勢/錨點靠 historical catch-up 沒事（offset 證明），但 **pick（用即時盤、只在 [t30m,kickoff) 觸發）會漏**。**這強化轉向結論**：on-demand 按鈕（dispatch 立即觸發、你控制時點）才能保證打到你要那場的 t30m pick。
+- 🐛 **observation→pick 殘留 bug**：fixture 由觀察場升為 pick 時，舊 observation 條目沒被移除 → Germany 同時在 `recommendations`(pick) 與 `observations`(舊 edge_below_threshold+api_error)。公開頁會重複顯示、且殘留舊 api_error。**轉向施工時要處理**：select 升 pick 時刪該場 observation 條目，或 web_builder 顯示層「在 recommendations 的場不再列 observation」。
+- **閒輪 0 API ✓**：#5 `fixtures_refetched=False`（快取命中）；select_due=0 的輪只走 historical（免費）。
+- **private repo 分鐘 ✓ 無慮**：repo 為 public，Actions 免費無限。
 
 ## 9. 待總司令決策（施工前）
 
