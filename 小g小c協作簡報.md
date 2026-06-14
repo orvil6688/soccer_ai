@@ -103,7 +103,7 @@ trajectory 訊號：線動以線為主、線不動看 de-vig 機率位移(濾水
 - CLV 自算（v4 無 /clv）：收盤錨點 vs 推薦產出線；產出時間≥收盤抓取→無 CLV（現用 pinnacle 收盤＝跨莊，同上待評估）
 - **推薦記錄**：`recommendations/{date}.json`，date＝`config.local_date(kickoff_utc)`(UTC+8 歸檔、存撈共用)；以 **`(fixtureId,market,side)` 複合鍵** upsert(一場兩注不互蓋)。schema＝selector 數學 + `produced_at_local`(首見凍,CLV基準) + `ai{}`(analyzer)；backtest 消費回填 result/pnl/clv
 - **兩個 produced_at**：`produced_at_local`(CLV基準,首見凍) ／ `ai.produced_at`(推論對應哪軌跡快照,隨 hash 更新)，各管各
-- 字數預算：confidence_reasoning 50／injury_news_inference 100／market_reading 150（各自獨立截斷，包進 ai{} 區塊壓🤖）。injury_news_inference＝盤口反推消息面（無傷停源、不宣稱已證實傷情）
+- **Gemini 解讀不限字數**（2026-06-14，8c6ed78；廢除 50/100/150 硬限）：三欄寫完整、analyzer 不截斷存全文，`max_output_tokens=4096`(防長回答被截成 parse_error)。網頁 `<details>` 可展開看完整、Discord 受 1024 硬限截+指向網頁。analyzer **只快取成功**(失敗下輪重試，不卡死公開頁)。injury_news_inference＝盤口反推消息面（無傷停源、不宣稱已證實傷情）
 - **Discord 推播(notifier)**：四把 webhook env(📋推薦單/🧪測試/📊回測/⚠️告警，值總司令自填)；#4 實作前兩把；整輪彙總多 embed、去重 `notified_*`(下注關鍵變 OR ai 由無轉有才重推)、shape/signal 顯示層英譯中(內部 key 不動)、TEST→test/略過壓🧪、失敗不阻斷
 - 防呆：讀外部陣列/字典前 isinstance；賠率/線回傳固定 float
 

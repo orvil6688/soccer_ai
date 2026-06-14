@@ -134,7 +134,8 @@
   - 舊「GEM 開盤手一條龍（AI 自己掃描+評分+選注+凱利）」＝Colab 時代玩法，**已被現架構取代，不走回頭路**。
   - 數據面（xG/傷兵）餵進 analyzer prompt＝**Phase 5 接 xG 後才做**；現在 analyzer 只吃盤口軌跡。
   - **`GEMINI_MODEL` 鎖 `gemini-2.5-flash`**（2026-06-06 拍板）：pro 為 flash 約 23× 價但純盤口反推品質差距邊際；Phase 5 多維推理後再評估升 pro。
-- **Gemini 字數預算（各自獨立截斷，超出以 `...` 替換）**：`confidence_reasoning` 50 / `injury_news_inference` 100 / `market_reading` 150 字。所有產出包進 `ai{}` 區塊強制壓 `🤖 AI 推論`（區塊層 tag，不佔字數）。`injury_news_inference`＝由盤口反推的傷病/陣容消息推測（無真實傷停源，僅盤口反推、不宣稱已證實傷情）。
+- **Gemini 解讀不限字數**（2026-06-14 修訂，commit 8c6ed78；廢除原 50/100/150 字硬限）：三欄（`confidence_reasoning`/`injury_news_inference`/`market_reading`）由 Gemini 寫完整、有層次,analyzer **不截斷、存全文**。`max_output_tokens=4096`（配合長回答，否則 1024 會把 JSON 截斷成 parse_error）。顯示層各自處理：**網頁**用 `<details>` 摘要+可展開看完整（`web_builder._ai_cell`）;**Discord** 受平台 embed field 1024 字元硬限 → 截 ~1000 + 「完整解讀見網頁」指向（非設計選擇,API 限制）。所有產出包進 `ai{}` 區塊強制壓 `🤖 AI 推論`（區塊層 tag）。`injury_news_inference`＝由盤口反推的傷病/陣容消息推測（無真實傷停源,僅盤口反推、不宣稱已證實傷情）。
+- **analyzer 只快取成功**（2026-06-14 修訂）：summary_hash 快取僅沿用 `available=True` 的舊結果;失敗（api_error/parse_error/timeout）**不快取、下輪一定重試**,避免 transient 錯誤被快取進 hash 永遠卡在公開頁不自癒。
 - 函式實際呼叫點：
   - `--mode movement` → `movement.scan()` →（逐場、逐 book）`process_fixture()` → `oddspapi_client.get_historical_odds()` → `trajectory.build()` → `storage.save_fixture_movement()`。
   - `--mode select` → `selector.select()` →（逐 pick）載軌跡記錄 + `storage.find_recommendation`(prior) → 蓋 `produced_at_local`(首見凍) → `analyzer.analyze(pick,record,prior_ai)` → `storage.append_recommendation`(date=`config.local_date(kickoff_utc)`) → 收集 `notifier.should_notify` 為真者 → 整輪 `notifier.notify_batch()`（Discord 推播）。逐 pick 隔離、部分失敗不阻斷。

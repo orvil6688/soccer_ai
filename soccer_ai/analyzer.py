@@ -120,7 +120,8 @@ def _gemini_call(user: str) -> dict:
             system_instruction=PERSONA,
             response_mime_type="application/json",
             temperature=0.7,
-            max_output_tokens=1024,
+            # 解讀已不限字數（8c6ed78）→ 提高 output 上限，否則長回答會在 1024 token 被截成無效 JSON→parse_error。
+            max_output_tokens=4096,
             # 關 thinking：2.5-flash 預設 thinking 會佔光 output token 把回答截成無效 JSON
             thinking_config=types.ThinkingConfig(thinking_budget=config.GEMINI_THINKING_BUDGET),
         ),
@@ -140,8 +141,11 @@ def _mock_ai(base: dict) -> dict:
 def analyze(pick: dict, record: dict, prior_ai: "dict | None" = None) -> dict:
     """回 ai{} 區塊（成功/失敗兩式，見 docs/analyzer_proposal.md §3）。不拋例外。"""
     h = _summary_hash(pick)
-    if isinstance(prior_ai, dict) and prior_ai.get("summary_hash") == h:
-        return prior_ai  # C：軌跡摘要未變 → 沿用，不重打 Gemini
+    # C：軌跡摘要未變且**上次成功** → 沿用，不重打 Gemini。
+    # 只快取成功：失敗(available=False)不沿用 → 下輪一定重試，避免 transient api_error/parse_error
+    # 被快取進 summary_hash 永遠卡在公開頁不自癒。
+    if isinstance(prior_ai, dict) and prior_ai.get("summary_hash") == h and prior_ai.get("available"):
+        return prior_ai
     base = {"produced_at": config.now_local().isoformat(), "summary_hash": h}
 
     if config.is_test_mode():                       # TEST_MODE：一律 mock
@@ -210,8 +214,8 @@ def _build_observation_user(record: dict) -> str:
 def analyze_observation(record: dict, prior_ai: "dict | None" = None) -> dict:
     """觀察場解讀：回 ai{}（含 observation:True），只出 injury_news_inference + market_reading。不拋例外。"""
     h = _obs_hash(record)
-    if isinstance(prior_ai, dict) and prior_ai.get("summary_hash") == h:
-        return prior_ai  # 軌跡未變 → 沿用快取
+    if isinstance(prior_ai, dict) and prior_ai.get("summary_hash") == h and prior_ai.get("available"):
+        return prior_ai  # 軌跡未變且上次成功 → 沿用；失敗不沿用 → 下輪重試（不讓 error 卡死公開頁）
     base = {"produced_at": config.now_local().isoformat(), "summary_hash": h, "observation": True}
 
     if config.is_test_mode():
