@@ -255,7 +255,10 @@ def render_index(recs: list[dict], have_fixture: set, observations: "list[dict] 
             f"<td style='text-align:left'>{_ai_cell(ai, 'confidence_reasoning')}</td></tr>")
     table = (f"<table><tr><th>開賽</th><th>對戰</th><th>選注</th><th>賠率</th><th>單位</th><th>形狀</th><th>賽果</th><th>🤖 信心理由</th></tr>"
              f"{''.join(rows) or '<tr><td colspan=8 class=muted>目前無推薦（賽前無場在選注窗內屬正常）</td></tr>'}</table>")
-    obs_section = _render_observations(observations or [], have_fixture)
+    # observation→pick 去重（顯示層）：已是 pick 的場不再列觀察場（含清掉舊殘留條目）
+    rec_fids = {r.get("fixtureId") for r in recs}
+    obs_filtered = [o for o in (observations or []) if o.get("fixtureId") not in rec_fids]
+    obs_section = _render_observations(obs_filtered, have_fixture)
     return _page("推薦單", f"<h1>📋 推薦單</h1><div class='muted'><a href='backtest.html'>📊 回測戰報</a></div>{table}{obs_section}")
 
 

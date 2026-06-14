@@ -1,11 +1,12 @@
 name: gh_pages
 
-# main_pipeline（每小時 movement/select + commit data/）完成後觸發 → web_builder 產 site/ → 部署 Pages。
-# 部署鐵律3：main_pipeline 先把 data/ commit&push 回 repo，本工作 checkout ref=main 取「含該 commit 的最新」，
+# main_pipeline（每日篩選）或 refresh_now（現在刷新按鈕）完成後觸發 → web_builder 產 site/ → 部署 Pages。
+# 部署鐵律3：上游先把 data/ commit&push 回 repo，本工作 checkout ref=main 取「含該 commit 的最新」，
 # 故網頁讀到的是最新資料、不慢一輪。
+# ⚠️ refresh_now 必須在此清單內，否則按鈕抓到新盤但頁面不重建＝白按（見 docs/on_demand_proposal.md §8）。
 on:
   workflow_run:
-    workflows: ["main_pipeline"]
+    workflows: ["main_pipeline", "refresh_now"]
     types: [completed]
   workflow_dispatch: {}
 

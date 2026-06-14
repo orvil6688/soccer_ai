@@ -132,6 +132,7 @@ def _run_select(log) -> None:
                 if k in prior:
                     pick[k] = prior[k]
             storage.append_recommendation(pick, date_local=date)   # (fixtureId,market,side) upsert
+            storage.remove_observation(date, fid)   # 升 pick → 清掉該場殘留觀察場條目（否則同場同時在兩檔、頁面重複+殘留舊 api_error）
             stored += 1
             if pick["ai"].get("available"):
                 ai_ok += 1

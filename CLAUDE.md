@@ -291,6 +291,7 @@
 
 ## 九、目前狀態
 
+- **🔄 額度轉向（2026-06-14 拍板施工，見 `docs/on_demand_proposal.md`）**：免費層 250/月扛不住每小時/每3h 全掃 select。轉成 **movement 廣掃(免費) + 每日篩選(main_pipeline 改 cron `0 1 * * *`＝台灣09:00，僅產候選清單、不跑 backtest 省額度) + 「現在刷新」按鈕(`refresh_now.yml` workflow_dispatch，movement+select 刷全盤、連帶觸發 gh_pages 重建)**。額度關鍵事實：**按呼叫次數算非場數**（odds-by-tournament 一次回全部 104 場，刷 1 場=刷全盤=2 計額度）→ 省的是 select 跑幾次。**event_pipeline keystone 驗證 PASS**（Germany t30m offset -11/select 真跑/select_done 去重）**但 cron */30 被 GitHub throttle 成 ~2.5h 不可靠**（public repo 非額度問題）→ 不靠 cron 自動 t30m，改按鈕(總司令自控時點)。event_pipeline 退回 dispatch-only。**修 observation→pick 殘留**（`storage.remove_observation` + main 升 pick 時清 + web_builder 顯示層去重）。**Billing 週期未明**（`/account` 無 reset 欄、`auto_renew=false`/`valid_until=null` → 250 可能一次性不重置，總司令查證中；決定第二把 key vs 認賠斷糧）。一鍵回退：main cron 改回 `0 */6 * * *`。
 - **最新版本**：v2.0-titan（2026-06-07，**Phase 3 全完成**：閉環 + 公開網頁全線上線；**titan007 全量 64 場 2022 離線校準素材完成**，0 跳過/0 旗標、commit 5524c46）
 - **公開網址**：`https://orvil6688.github.io/soccer_ai/`（GH Pages，gh_pages.yml 部署）。
 - **核心架構**：OddsPapi v4 主源；`historical-odds` 賽前即時走勢 → **八錨點 + 軌跡分類(§5.6)** → `selector` 選注(de-vig vs 1xBet + trajectory 訊號) → `analyzer` 🤖 推論(Gemini 2.5-flash) → 存推薦 → `backtest` settlement 回測(含 by_trajectory)；CROWN 雙記 Pinnacle + singbet。

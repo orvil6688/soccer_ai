@@ -150,6 +150,7 @@ trajectory 訊號：線動以線為主、線不動看 de-vig 機率位移(濾水
 
 ## 十、目前狀態
 
+- **🔄 額度轉向（2026-06-14 施工，`docs/on_demand_proposal.md`）**：免費層 250/月扛不住全掃 select。轉成 **movement 廣掃(免費) + 每日篩選(main cron `0 1 * * *`=台灣09:00、只候選清單、不跑 backtest) + 「現在刷新」按鈕(`refresh_now.yml` dispatch，刷全盤+觸發 gh_pages 重建)**。關鍵：**額度按呼叫次數非場數**（一次 odds-by-tournament 回全部場，刷1場=刷全盤=2額度）。event_pipeline keystone PASS 但 cron */30 被 GitHub throttle~2.5h 不可靠 → 不靠 cron 自動 t30m、改按鈕自控；event 退 dispatch-only。修 observation→pick 殘留(storage.remove_observation+顯示層去重)。**Billing 週期未明**(/account 無 reset 欄、auto_renew=false → 250 恐一次性，查證中→決定第二把key)。回退：main cron 改回 `0 */6 * * *`。
 - **最新版本**：v2.0-titan（2026-06-07，**Phase 3 全完成**：閉環 + 公開網頁全線上線；**titan007 全量 64 場 2022 離線校準素材完成**，0 跳過/0 旗標、commit 5524c46）
 - **公開網址**：https://orvil6688.github.io/soccer_ai/
 - **核心架構**：OddsPapi v4，historical → 八錨點軌跡 → selector(純數學 edge) → analyzer 🤖(2.5-flash) → 存推薦 → notifier(Discord) ／ backtest(settlements 回填+CLV+by_trajectory+derive_score 比分) ／ web_builder(公開網頁)；CROWN 雙記 pinnacle+singbet

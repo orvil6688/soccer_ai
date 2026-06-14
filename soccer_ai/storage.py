@@ -186,3 +186,16 @@ def find_observation(date_local: str, fixture_id: str) -> Optional[dict]:
 def load_observations(date_local: str) -> list[dict]:
     data = _read_json(_observations_path(date_local))
     return data if isinstance(data, list) else []
+
+
+def remove_observation(date_local: str, fixture_id: str) -> bool:
+    """刪除某場觀察場條目（用於 observation→pick 升級時清殘留）。回是否有刪到。"""
+    path = _observations_path(date_local)
+    existing = _read_json(path)
+    if not isinstance(existing, list):
+        return False
+    kept = [it for it in existing if it.get("fixtureId") != fixture_id]
+    if len(kept) == len(existing):
+        return False
+    _atomic_write_json(path, kept)
+    return True

@@ -1,0 +1,61 @@
+name: refresh_now
+
+# 「現在刷新」按鈕（轉向後，見 docs/on_demand_proposal.md §2/§3）：
+# 總司令要玩某場、下注前在 GitHub Actions 頁手動點 Run workflow（零輸入）→ 立即 movement + select
+# 重抓全盤現價、重算 edge、出 pick/觀察場、推 Discord。**因 odds-by-tournament 一次回全部場，刷 1 場
+# 與刷全盤同價（2 計額度），故不需填 fixtureId**。每按一次 ＝ 2 計額度。
+# 比 cron 自動 t30m 可靠：dispatch 立即觸發、總司令自控時點，不靠 GitHub schedule 的 best-effort 延遲。
+# ⚠️ 完成後由 gh_pages.yml 的 workflow_run 連帶重建公開頁（否則抓到新盤但頁面舊＝白按）。
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh_now
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    env:
+      ODDSPAPI_API_KEY: ${{ secrets.ODDSPAPI_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      TEST_MODE: "false"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Run movement scan (刷新全盤走勢)
+        run: python -m soccer_ai.main --mode movement
+
+      - name: Run select (重算 edge → pick/觀察場 → Discord)
+        run: python -m soccer_ai.main --mode select
+
+      - name: Commit & push data
+        if: always()
+        run: |
+          git config user.name  "soccer-ai-bot"
+          git config user.email "soccer-ai-bot@users.noreply.github.com"
+          git add data/prod/
+          if git diff --cached --quiet; then
+            echo "無資料變更，略過 commit"
+          else
+            git commit -m "data(refresh): on-demand $(date -u +'%Y-%m-%dT%H:%MZ')"
+            ok=0
+            for i in 1 2 3; do
+              git pull --rebase origin main && git push && { ok=1; break; }
+              echo "push 第 $i 次失敗，3s 後重試"; sleep 3
+            done
+            [ "$ok" = "1" ] || { echo "::error::push 連 3 次失敗"; exit 1; }
+          fi
