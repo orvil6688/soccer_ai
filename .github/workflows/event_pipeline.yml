@@ -6,10 +6,12 @@ name: event_pipeline
 # ⚠️ 與 main_pipeline.yml（每小時全掃）**並行、不取代**：揭幕戰前驗收（t30m 模擬 + 回退測試）通過後，
 #    總司令才決定是否把 main_pipeline 的 cron 停掉、正式切到本工作。在那之前 main_pipeline 是安全網。
 on:
-  # 🧪 真實環境驗證窗（2026-06-14 開，限約 1 天）：與 main_pipeline（每 6h 安全網）並行跑，
-  #    收 tick_state/movement/額度證據出報告;報告通過才正式切（停 main cron）、沒過就重新註解掉此 schedule 回現狀。
-  schedule:
-    - cron: "*/30 * * * *"
+  # 🧪 keystone 驗證已達標（2026-06-14 Germany t30m，run #5）：機制 PASS（t30m offset -11、select 真跑、
+  #    select_done 去重、閒輪 0 額度）；但 cron */30 被 GitHub throttle 成 ~2.5h、t30m 30 分窗靠運氣才命中
+  #    → 不靠 cron 自動 t30m，轉「每日篩選 + 按需按鈕」（見 docs/on_demand_proposal.md）。
+  #    驗證窗已收：schedule 重新註解、回 dispatch-only（省額度）。轉向施工待 billing 週期查清後放行。
+  # schedule:
+  #   - cron: "*/30 * * * *"
   workflow_dispatch: {}
 
 permissions:
