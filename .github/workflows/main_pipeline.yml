@@ -6,7 +6,7 @@ name: main_pipeline
 # 內部 UTC，程式邏輯轉 UTC+8。跑完將 data/prod/ 變更 commit & push 回 Repo（狀態持久化）。
 on:
   schedule:
-    - cron: "0 */3 * * *"
+    - cron: "0 */6 * * *"   # 驗證期間降到每 6h（event_pipeline 並行驗證，main 當安全網，省六月額度；驗證後再評估）
   workflow_dispatch: {}   # 允許手動觸發
 
 permissions:
