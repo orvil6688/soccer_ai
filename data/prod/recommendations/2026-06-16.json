@@ -1,0 +1,52 @@
+[
+  {
+    "fixtureId": "id1000001666456984",
+    "home": "IR Iran",
+    "away": "New Zealand",
+    "kickoff_utc": "2026-06-16T01:00:00+00:00",
+    "kickoff_local": "2026-06-16T09:00:00+08:00",
+    "xbet_active": false,
+    "xbet_suspended": false,
+    "market": "handicap",
+    "side": "away",
+    "line": -0.75,
+    "odds": 1.68,
+    "fair_prob": 0.5,
+    "pinnacle_line": -0.5,
+    "xbet_line": -0.75,
+    "edge_goals": 0.25,
+    "edge_pct": null,
+    "edge_source": "line",
+    "signals": {
+      "signal": "confirm",
+      "reverse_against": false,
+      "key_number_cross": false,
+      "shape": "odds_drift",
+      "tag": "平盤·主升客降"
+    },
+    "trajectory": {
+      "pinnacle": {
+        "shape": "odds_drift",
+        "tag": "平盤·主升客降",
+        "net_line_steps": 0,
+        "fav_swap_count": 0
+      },
+      "singbet": {
+        "shape": "odds_drift",
+        "tag": "平盤·主升客降",
+        "net_line_steps": 0,
+        "fav_swap_count": 0
+      }
+    },
+    "filtered": false,
+    "filter_reason": null,
+    "stake_units": 1,
+    "produced_at_local": "2026-06-15T14:25:33.050040+08:00",
+    "ai": {
+      "available": false,
+      "reason": "api_error",
+      "produced_at": "2026-06-15T14:25:33.050128+08:00",
+      "summary_hash": "1f68f1ccaff4071b04622b0869d81d27bf866623"
+    }
+  }
+]
