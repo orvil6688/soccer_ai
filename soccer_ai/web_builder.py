@@ -17,7 +17,7 @@ import logging
 import os
 from pathlib import Path
 
-from . import backtest, config, storage
+from . import backtest, config, storage, trajectory
 from .notifier import _MARKET_ZH, _SIDE_ZH, _odds, _zh  # 顯示層對照（內部 key 不動）
 
 logger = logging.getLogger(__name__)
@@ -342,6 +342,29 @@ def _closing_favored_side(traj_market: dict, market: str):
     return s1 if od1 < od2 else s2
 
 
+def _t24h_closing_tag(anchors: dict, market_type: str) -> str:
+    """只比 [t24h, closing] 兩錨點 → 重用 trajectory.build_segments/build_summary 產**同格式**中文 tag。
+
+    手法：把 t24h/closing 塞進兩個相鄰 ANCHOR_DECISION 槽當單一 segment 餵進既有邏輯（不手刻新算法、
+    與頁上其他形狀 tag 同一套 4 維：①線升降級 ②我方賠率向 ③對方賠率向 ④低水方水互換）。
+    任一錨點缺（null/場開太晚/區間外）→ '—'，不 crash。純本機 titan007 頁用、零額度、不碰 live。
+    """
+    if not isinstance(anchors, dict):
+        return "—"
+    a24, acl = anchors.get("t24h"), anchors.get("closing")
+    if not a24 or not acl:
+        return "—"
+    dec = config.ANCHOR_DECISION
+    synth = {n: None for n in dec}
+    synth[dec[0]], synth[dec[1]] = a24, acl   # 兩相鄰 decision 槽 → 視為單一 [t24h→closing] segment
+    try:
+        segs = trajectory.build_segments(synth, market_type)
+        summ = trajectory.build_summary(synth, segs, market_type)
+        return summ.get("tag") or "—"
+    except Exception:
+        return "—"
+
+
 def _titan_records(mv: dict) -> list[dict]:
     """單場 → 每 (market, book) 一筆：shape + 收盤低水方 + 過盤 result。"""
     out = []
@@ -360,6 +383,7 @@ def _titan_records(mv: dict) -> list[dict]:
                 "fixtureId": mv.get("fixtureId"), "home": mv.get("home"), "away": mv.get("away"),
                 "kickoff_local": mv.get("kickoff_local"), "market": market, "book": book,
                 "shape": su.get("shape"), "tag": su.get("tag"),
+                "tc_tag": _t24h_closing_tag(tm.get("anchors", {}), market),  # 另增：t24h→收盤 兩錨點形狀 tag
                 "fav": fav, "line": line, "result": result, "score": score,
             })
     return out
@@ -539,6 +563,7 @@ def render_titan_index(records: list[dict], movements: list[dict]) -> str:
         sub = "".join(
             f"<tr data-shape='{_esc(r['shape'])}'><td>{_MARKET_ZH.get(r['market'], r['market'])}</td><td>{_esc(r['book'])}</td>"
             f"<td>{_esc(_zh(r['shape']))}　<span class='tag'>{_esc(r['tag'])}</span></td>"
+            f"<td><span class='tag'>{_esc(r.get('tc_tag') or '—')}</span></td>"
             f"<td>{_SIDE_ZH.get(r['fav'], '平水·不計') if r['fav'] else '平水·不計'}</td>"
             f"<td>{_esc(r['line'])}</td>"
             f"<td>{_RESULT_ZH.get(r['result'], '—') if r['result'] else '—'}</td></tr>"
@@ -547,7 +572,7 @@ def render_titan_index(records: list[dict], movements: list[dict]) -> str:
         det.append(
             f"<div class='card matchcard' data-shapes='{_esc(card_shapes)}'>"
             f"<h3>{link}　<span class='muted'>{_esc(str(mv.get('kickoff_local',''))[:16])}　🏁 {sc_txt}（90 分鐘）</span></h3>"
-            f"<table><tr><th>盤口</th><th>莊</th><th>形狀</th><th>收盤低水方</th><th>收盤線</th><th>過盤</th></tr>{sub}</table></div>"
+            f"<table><tr><th>盤口</th><th>莊</th><th>形狀（全軌跡）</th><th>t24h→收盤</th><th>收盤低水方</th><th>收盤線</th><th>過盤</th></tr>{sub}</table></div>"
         )
     # #4 2022 主動查詢工具：內嵌白名單 records JSON + zh 對照（純查歷史、不接 2026）
     qdata = [{
