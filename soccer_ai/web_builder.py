@@ -342,12 +342,17 @@ def _closing_favored_side(traj_market: dict, market: str):
     return s1 if od1 < od2 else s2
 
 
-def _t24h_closing_tag(anchors: dict, market_type: str) -> str:
-    """只比 [t24h, closing] 兩錨點 → 重用 trajectory.build_segments/build_summary 產**同格式**中文 tag。
+_LEAN_DMAP = {"up": "升", "down": "降", "flat": "平"}   # 賠率方向中文（本機讓/受 tag 用）
 
-    手法：把 t24h/closing 塞進兩個相鄰 ANCHOR_DECISION 槽當單一 segment 餵進既有邏輯（不手刻新算法、
-    與頁上其他形狀 tag 同一套 4 維：①線升降級 ②我方賠率向 ③對方賠率向 ④低水方水互換）。
-    任一錨點缺（null/場開太晚/區間外）→ '—'，不 crash。純本機 titan007 頁用、零額度、不碰 live。
+
+def _t24h_closing_tag(anchors: dict, market_type: str) -> str:
+    """只比 [t24h, closing] 兩錨點 → 重用 trajectory.build_segments/build_summary 產同格式中文 tag。
+
+    手法：把 t24h/closing 塞進兩個相鄰 ANCHOR_DECISION 槽當單一 segment 餵既有邏輯（不手刻新算法、
+    同一套 4 維）。**讓分**：賠率升降以「讓/受」表示（不用主/客）——讓方＝**收盤讓方**（收盤線<0主讓、
+    >0客讓，與過盤率同基準），讓方賠率向→讓升/讓降、受讓方→受升/受降；收盤平手盤(line==0,無讓方)
+    →標「平手盤無讓受」。**大小**：沿用大/小不變。任一錨點缺→'—'，不 crash。
+    純本機 titan007 頁用、零額度、**不碰 live（trajectory._build_tag 公開頁主/客契約原樣不動）**。
     """
     if not isinstance(anchors, dict):
         return "—"
@@ -360,9 +365,22 @@ def _t24h_closing_tag(anchors: dict, market_type: str) -> str:
     try:
         segs = trajectory.build_segments(synth, market_type)
         summ = trajectory.build_summary(synth, segs, market_type)
-        return summ.get("tag") or "—"
     except Exception:
         return "—"
+    full = summ.get("tag") or "—"
+    if market_type != "handicap":          # 大小球：沿用 大/小 tag，不動
+        return full
+    # 讓分：把「·主X客Y」suffix 換成「·讓?受?」(讓方由收盤線正負定，與過盤率同源)。
+    # lvl(平盤/升N盤)+swap(·水互換) 沿用 build_summary 既算的 prefix，只重組賠率向那段。
+    idx = full.rfind("·主")
+    prefix = full[:idx] if idx >= 0 else full
+    cl = acl.get("line") if isinstance(acl, dict) else None
+    if not isinstance(cl, (int, float)) or cl == 0:
+        return prefix + "·平手盤無讓受"        # 收盤平手盤：無讓方（亦排除於讓方過盤率分母外）
+    s1 = _LEAN_DMAP.get(summ.get("side1_odd_net"), "平")   # 主(home) 賠率向
+    s2 = _LEAN_DMAP.get(summ.get("side2_odd_net"), "平")   # 客(away) 賠率向
+    give, recv = (s1, s2) if cl < 0 else (s2, s1)          # 線<0主讓→讓=主向; 線>0客讓→讓=客向
+    return prefix + f"·讓{give}受{recv}"
 
 
 def _titan_records(mv: dict) -> list[dict]:
@@ -411,6 +429,102 @@ def _titan_by_trajectory(records: list[dict]) -> dict:
             "fixtures": len({r["fixtureId"] for r in decided}),
         }
     return out
+
+
+_BUCKET_LABEL = {
+    ("pinnacle", "handicap"): "pinnacle 讓分", ("pinnacle", "over_under"): "pinnacle 大小",
+    ("singbet", "handicap"): "singbet 讓分", ("singbet", "over_under"): "singbet 大小",
+}
+
+
+def _lean_side(market: str, line) -> "str | None":
+    """固定視角判定邊：handicap→**收盤讓方**（收盤線<0=主讓/>0=客讓）、over_under→**大球方(over)**。
+    handicap 收盤 line==0（平手盤）→ None（無讓方，排除另計，不混進讓方過盤率）。
+    """
+    if market == "over_under":
+        return "over"
+    if not isinstance(line, (int, float)) or line == 0:
+        return None
+    return "home" if line < 0 else "away"
+
+
+def _titan_tag_lean(records: list[dict]) -> dict:
+    """4 桶（book×market，各 64）× 完整 t24h→收盤 tag → 讓方/大球方過盤率（固定視角）。
+
+    分組鍵＝`tc_tag`（t24h→收盤完整 4 維 tag）。過盤基準固定：handicap 看收盤讓方、OU 看大球方。
+    收盤平手盤（handicap line==0）排除另計（excluded）、不進任何 tag 分母。PUSH 不計分母、半過/半輸 0.5。
+    """
+    buckets: dict = {}
+    for r in records:
+        key = (r["book"], r["market"])
+        b = buckets.setdefault(key, {"tags": {}, "excluded": 0})
+        side = _lean_side(r["market"], r.get("line"))
+        if side is None and r["market"] == "handicap" and r.get("line") == 0:
+            b["excluded"] += 1
+            continue
+        res = _cover_result(r.get("score"), r["market"], r.get("line"), side) if side else None
+        b["tags"].setdefault(r.get("tc_tag") or "—", []).append(res)
+    out = {}
+    for key, b in buckets.items():
+        tagstats = {}
+        for tag, results in b["tags"].items():
+            decided = [x for x in results if x in _WIN_W or x in _LOSE_W]
+            w = sum(_WIN_W.get(x, 0.0) for x in decided)
+            l = sum(_LOSE_W.get(x, 0.0) for x in decided)
+            tagstats[tag] = {
+                "n": len(decided),
+                "push": sum(1 for x in results if x == "PUSH"),
+                "hit_rate": round(w / (w + l), 4) if (w + l) > 0 else None,
+            }
+        out[key] = {"tags": tagstats, "excluded": b["excluded"]}
+    return out
+
+
+def _render_titan_lean(records: list[dict]) -> str:
+    """完整 tag → 讓方過盤率 彙總（4 桶分開、與 shape 彙總並存、不取代）。"""
+    lean = _titan_tag_lean(records)
+
+    def _pct(hr):
+        return "—" if hr is None else f"{hr:.0%}"
+
+    sections = []
+    for key in (("pinnacle", "handicap"), ("pinnacle", "over_under"),
+                ("singbet", "handicap"), ("singbet", "over_under")):
+        book, market = key
+        b = lean.get(key, {"tags": {}, "excluded": 0})
+        rows = []
+        for tag, v in sorted(b["tags"].items(), key=lambda kv: -kv[1]["n"]):
+            weak = v["n"] < 10
+            style = " style='opacity:.45'" if weak else ""
+            warn = " ⚠️不可信" if weak else ""
+            token = f"{book}|{market}|{tag}"          # 精準對應「該桶該盤該莊」那一格（點選高亮用）
+            label = f"{_BUCKET_LABEL[key]}·{tag}"
+            rows.append(
+                f"<tr class='leanrow'{style} data-lean='{_esc(token)}' data-leanlabel='{_esc(label)}'>"
+                f"<td style='text-align:left'>{_esc(tag)}</td>"
+                f"<td><b>{v['n']}</b>{warn}</td><td><b>{_pct(v['hit_rate'])}</b>"
+                f"{('　<span class=muted>走盤'+str(v['push'])+'</span>') if v['push'] else ''}</td></tr>"
+            )
+        excl = b["excluded"]
+        excl_note = (f"<div class='muted'>收盤平手盤（line==0，無讓方）排除：{excl} 筆</div>"
+                     if (market == "handicap" and excl) else "")
+        ngood = sum(1 for v in b["tags"].values() if v["n"] >= 10)
+        rate_head = "讓方過盤率" if market == "handicap" else "大球方過盤率"
+        sections.append(
+            f"<details open style='display:inline-block;vertical-align:top;margin:0 18px 12px 0;min-width:330px'>"
+            f"<summary style='cursor:pointer;color:#9fd0ff;font-weight:700'>{_BUCKET_LABEL[key]}"
+            f"　<span class='muted' style='font-weight:400;font-size:13px'>（n≥10 的 tag：{ngood} 個）</span></summary>"
+            f"<table><tr><th>t24h→收盤 完整 tag</th><th>n</th><th>{rate_head}</th></tr>"
+            f"{''.join(rows) or '<tr><td colspan=3 class=muted>無資料</td></tr>'}</table>{excl_note}</details>"
+        )
+    return (
+        f"<details style='margin-top:22px'>"
+        f"<summary style='cursor:pointer;font-size:1.3em;font-weight:700'>完整 tag → 讓方過盤率（固定視角）<span class='muted' style='font-size:13px;font-weight:400'>　▸ 點開（預設收起）</span></summary>"
+        f"<div class='muted'>口徑：<b>t24h→收盤完整 tag</b>分組 · <b>固定讓方/大球方基準</b>（讓分=收盤讓方[線&lt;0主/&gt;0客]、"
+        f"大小=大球方;收盤平手盤 line==0 排除另計）· 2022 titan007 歷史 · <b>樣本薄、多數 tag 樣本不足</b>（n&lt;10 灰掉⚠️）· "
+        f"<b>僅供觀察盤口行為、不可作 2026 下注依據</b> · PUSH 不計分母、半過/半輸 0.5。<br>點某列 → 下方逐場明細篩出該幾場、並精準高亮各場該盤該莊那一格（再點一次/清除還原）。</div>"
+        f"<div>{''.join(sections)}</div></details>"
+    )
 
 
 def _load_titan_movements() -> list[dict]:
@@ -469,38 +583,47 @@ def _titan_shape_legend(records: list[dict]) -> str:
 
 
 # 純前端 inline 篩選（不依賴 CDN / localStorage）：點彙總表某 shape →
-# 卡片層依 data-shapes 顯隱（任一列命中保留），列層依 data-shape 高亮（同場多列命中多列高亮）。
+# 統一篩選引擎（同一套機制供兩張彙總用，避免衝突）：
+#   shape 彙總列(tr.shaperow) → 卡片 data-shapes 顯隱、列 data-shape 高亮（同場多列命中多列高亮）。
+#   讓方過盤率列(tr.leanrow) → 卡片 data-leans 顯隱、列 data-lean 高亮（精準到「該盤該莊」單格）。
+#   以 element 身分 toggle：點同列/清除 → 還原。兩表互斥（點一表自動取消另一表）。
 _TITAN_FILTER_JS = """<script>
 (function(){
-  var sel=null;
-  var sumrows=[].slice.call(document.querySelectorAll('#sumtbl tr.shaperow'));
+  var selEl=null;
+  var triggers=[].slice.call(document.querySelectorAll('#sumtbl tr.shaperow, tr.leanrow'));
   var cards=[].slice.call(document.querySelectorAll('#cards .matchcard'));
   var fstatus=document.getElementById('fstatus');
   var shown=document.getElementById('shown');
   var clearbtn=document.getElementById('clearbtn');
-  function apply(shape, zh){
-    sel=shape; var n=0;
+  function reset(){
+    cards.forEach(function(c){ c.style.display='';
+      [].slice.call(c.querySelectorAll('tr[data-shape],tr[data-lean]')).forEach(function(tr){ tr.classList.remove('hl'); });
+    });
+    triggers.forEach(function(t){ t.classList.remove('selrow'); });
+    selEl=null; shown.textContent=cards.length; fstatus.textContent=''; clearbtn.style.display='none';
+  }
+  function apply(r){
+    if(!r){ reset(); return; }
+    var lean=r.classList.contains('leanrow');
+    var cardAttr=lean?'data-leans':'data-shapes', rowAttr=lean?'data-lean':'data-shape';
+    var val=r.getAttribute(rowAttr), label=r.getAttribute(lean?'data-leanlabel':'data-zh');
+    var n=0;
     cards.forEach(function(c){
-      var set=(' '+(c.getAttribute('data-shapes')||'')+' ');
-      var has=!shape || set.indexOf(' '+shape+' ')>=0;
+      var set=(' '+(c.getAttribute(cardAttr)||'')+' ');
+      var has=set.indexOf(' '+val+' ')>=0;
       c.style.display=has?'':'none'; if(has) n++;
-      [].slice.call(c.querySelectorAll('tr[data-shape]')).forEach(function(tr){
-        if(shape && tr.getAttribute('data-shape')===shape) tr.classList.add('hl');
-        else tr.classList.remove('hl');
+      [].slice.call(c.querySelectorAll('tr[data-shape],tr[data-lean]')).forEach(function(tr){
+        tr.classList.toggle('hl', has && tr.getAttribute(rowAttr)===val);
       });
     });
-    sumrows.forEach(function(r){ r.classList.toggle('selrow', !!shape && r.getAttribute('data-shape')===shape); });
-    shown.textContent=n;
-    if(shape){ fstatus.textContent='　篩選：'+zh+' · '+n+' 場'; clearbtn.style.display=''; }
-    else { fstatus.textContent=''; clearbtn.style.display='none'; }
+    triggers.forEach(function(t){ t.classList.toggle('selrow', t===r); });
+    selEl=r; shown.textContent=n;
+    fstatus.textContent='　篩選：'+label+' · '+n+' 場'; clearbtn.style.display='';
   }
-  sumrows.forEach(function(r){
-    r.addEventListener('click', function(){
-      var s=r.getAttribute('data-shape');
-      if(s===sel) apply(null,null); else apply(s, r.getAttribute('data-zh'));
-    });
+  triggers.forEach(function(r){
+    r.addEventListener('click', function(){ apply(r===selEl?null:r); });
   });
-  clearbtn.addEventListener('click', function(){ apply(null,null); });
+  clearbtn.addEventListener('click', function(){ apply(null); });
 })();
 </script>"""
 
@@ -560,8 +683,10 @@ def render_titan_index(records: list[dict], movements: list[dict]) -> str:
         link = f"<a href='fixtures/{_esc(storage._safe_name(fid))}.html'>{_esc(match)}</a>"
         recs = [r for r in records if r["fixtureId"] == fid]
         card_shapes = " ".join(sorted({str(r["shape"]) for r in recs if r.get("shape")}))
+        card_leans = " ".join(sorted({f"{r['book']}|{r['market']}|{r.get('tc_tag') or '—'}" for r in recs}))
         sub = "".join(
-            f"<tr data-shape='{_esc(r['shape'])}'><td>{_MARKET_ZH.get(r['market'], r['market'])}</td><td>{_esc(r['book'])}</td>"
+            f"<tr data-shape='{_esc(r['shape'])}' data-lean='{_esc(r['book']+'|'+r['market']+'|'+(r.get('tc_tag') or '—'))}'>"
+            f"<td>{_MARKET_ZH.get(r['market'], r['market'])}</td><td>{_esc(r['book'])}</td>"
             f"<td>{_esc(_zh(r['shape']))}　<span class='tag'>{_esc(r['tag'])}</span></td>"
             f"<td><span class='tag'>{_esc(r.get('tc_tag') or '—')}</span></td>"
             f"<td>{_SIDE_ZH.get(r['fav'], '平水·不計') if r['fav'] else '平水·不計'}</td>"
@@ -570,7 +695,7 @@ def render_titan_index(records: list[dict], movements: list[dict]) -> str:
             for r in recs
         )
         det.append(
-            f"<div class='card matchcard' data-shapes='{_esc(card_shapes)}'>"
+            f"<div class='card matchcard' data-shapes='{_esc(card_shapes)}' data-leans='{_esc(card_leans)}'>"
             f"<h3>{link}　<span class='muted'>{_esc(str(mv.get('kickoff_local',''))[:16])}　🏁 {sc_txt}（90 分鐘）</span></h3>"
             f"<table><tr><th>盤口</th><th>莊</th><th>形狀（全軌跡）</th><th>t24h→收盤</th><th>收盤低水方</th><th>收盤線</th><th>過盤</th></tr>{sub}</table></div>"
         )
@@ -600,8 +725,8 @@ def render_titan_index(records: list[dict], movements: list[dict]) -> str:
         "</div>"
     )
     body = (
-        f"<style>.shaperow{{cursor:pointer}}.shaperow:hover td{{background:#222b38}}"
-        f".shaperow.selrow td{{background:#2d3f55;color:#fff}}tr.hl td{{background:#2d3f55}}"
+        f"<style>.shaperow,.leanrow{{cursor:pointer}}.shaperow:hover td,.leanrow:hover td{{background:#222b38}}"
+        f".shaperow.selrow td,.leanrow.selrow td{{background:#2d3f55;color:#fff}}tr.hl td{{background:#2d3f55}}"
         f"#querytool select{{background:#0c0f14;color:#e6e6e6;border:1px solid #3a4252;border-radius:4px;padding:2px 4px}}"
         f"#clearbtn,#q_run{{background:#222b38;color:#9fd0ff;border:1px solid #3a4252;border-radius:4px;padding:3px 10px;cursor:pointer;margin-left:8px}}</style>"
         f"<h1>🔬 titan007 2022 世界盃 · 本機離線回測</h1>"
@@ -609,6 +734,7 @@ def render_titan_index(records: list[dict], movements: list[dict]) -> str:
         f"<h3>各軌跡形狀 → 過盤率（走盤 PUSH 完全不計分母、半過/半輸計 0.5）　<span class='muted'>（點某列篩選場次）</span></h3>"
         f"<table id='sumtbl'><tr><th>形狀</th><th>有效判定筆數</th><th>過盤率</th><th>走盤(不計)</th><th>樣本場次</th></tr>"
         f"{bt or '<tr><td colspan=5 class=muted>尚無可判定資料</td></tr>'}</table>"
+        f"{_render_titan_lean(records)}"
         f"{query_panel}"
         f"<h2>逐場明細（<span id='shown'>{len(movements)}</span>/{len(movements)} 場）"
         f"<span id='fstatus' class='muted' style='font-size:14px'></span>"
