@@ -39,7 +39,14 @@
             "away_odd": 1.934,
             "captured_ts": "2026-06-16T00:49:43.193Z"
           },
-          "t12h": null,
+          "t12h": {
+            "target_ts": "2026-06-16T13:00:00+00:00",
+            "offset_sec": 171,
+            "line": -1.25,
+            "home_odd": 2.08,
+            "away_odd": 1.854,
+            "captured_ts": "2026-06-16T13:02:51.688Z"
+          },
           "t6h": null,
           "t1h": null,
           "t30m": null,
@@ -47,9 +54,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": -1.25,
-            "home_odd": 2.04,
+            "home_odd": 2.06,
             "away_odd": 1.877,
-            "captured_ts": "2026-06-16T05:48:03.366Z"
+            "captured_ts": "2026-06-16T14:13:11.227Z"
           }
         },
         "segments": [
@@ -71,7 +78,17 @@
           {
             "from": "t24h",
             "to": "t12h",
-            "present": false
+            "present": true,
+            "line_steps": 0,
+            "side1": "home",
+            "side1_odd_delta": 0.11,
+            "side1_dir": "up",
+            "side2": "away",
+            "side2_odd_delta": -0.08,
+            "side2_dir": "down",
+            "fav_from": "away",
+            "fav_to": "away",
+            "fav_swap": false
           },
           {
             "from": "t12h",
@@ -90,7 +107,7 @@
           }
         ],
         "summary": {
-          "present_anchors": 2,
+          "present_anchors": 3,
           "net_line_steps": 0,
           "abs_path_steps": 0,
           "max_excursion_steps": 0,
@@ -101,10 +118,10 @@
           "fav_final": "away",
           "side1": "home",
           "side1_odd_net": "up",
-          "side1_prob_net": "flat",
+          "side1_prob_net": "down",
           "side2": "away",
           "side2_odd_net": "down",
-          "side2_prob_net": "flat",
+          "side2_prob_net": "up",
           "shape": "fav_swap",
           "tag": "平盤·水互換·主升客降",
           "trigger_anchors": [
@@ -139,7 +156,14 @@
             "under_odd": 1.877,
             "captured_ts": "2026-06-16T00:49:43.192Z"
           },
-          "t12h": null,
+          "t12h": {
+            "target_ts": "2026-06-16T13:00:00+00:00",
+            "offset_sec": 298,
+            "line": 2.5,
+            "over_odd": 1.98,
+            "under_odd": 1.925,
+            "captured_ts": "2026-06-16T13:04:58.480Z"
+          },
           "t6h": null,
           "t1h": null,
           "t30m": null,
@@ -147,9 +171,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": 2.5,
-            "over_odd": 2.05,
-            "under_odd": 1.847,
-            "captured_ts": "2026-06-16T05:48:03.366Z"
+            "over_odd": 2.0,
+            "under_odd": 1.9,
+            "captured_ts": "2026-06-16T14:07:44.622Z"
           }
         },
         "segments": [
@@ -171,7 +195,17 @@
           {
             "from": "t24h",
             "to": "t12h",
-            "present": false
+            "present": true,
+            "line_steps": 0,
+            "side1": "over",
+            "side1_odd_delta": -0.04,
+            "side1_dir": "down",
+            "side2": "under",
+            "side2_odd_delta": 0.048,
+            "side2_dir": "up",
+            "fav_from": "under",
+            "fav_to": "under",
+            "fav_swap": false
           },
           {
             "from": "t12h",
@@ -190,7 +224,7 @@
           }
         ],
         "summary": {
-          "present_anchors": 2,
+          "present_anchors": 3,
           "net_line_steps": 0,
           "abs_path_steps": 0,
           "max_excursion_steps": 0,
@@ -200,14 +234,17 @@
           "fav_swap_count": 0,
           "fav_final": "under",
           "side1": "over",
-          "side1_odd_net": "flat",
+          "side1_odd_net": "down",
           "side1_prob_net": "flat",
           "side2": "under",
-          "side2_odd_net": "flat",
+          "side2_odd_net": "up",
           "side2_prob_net": "flat",
-          "shape": "flat",
-          "tag": "平盤·大平小平",
-          "trigger_anchors": []
+          "shape": "odds_drift",
+          "tag": "平盤·大降小升",
+          "trigger_anchors": [
+            "t24h",
+            "t12h"
+          ]
         }
       }
     },
@@ -238,7 +275,14 @@
             "away_odd": 1.93,
             "captured_ts": "2026-06-16T01:40:12.500Z"
           },
-          "t12h": null,
+          "t12h": {
+            "target_ts": "2026-06-16T13:00:00+00:00",
+            "offset_sec": -509,
+            "line": -1.25,
+            "home_odd": 2.075,
+            "away_odd": 1.84,
+            "captured_ts": "2026-06-16T12:51:30.256Z"
+          },
           "t6h": null,
           "t1h": null,
           "t30m": null,
@@ -246,9 +290,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": -1.25,
-            "home_odd": 1.97,
-            "away_odd": 1.93,
-            "captured_ts": "2026-06-16T04:31:16.305Z"
+            "home_odd": 2.064,
+            "away_odd": 1.85,
+            "captured_ts": "2026-06-16T14:15:05.704Z"
           }
         },
         "segments": [
@@ -270,7 +314,17 @@
           {
             "from": "t24h",
             "to": "t12h",
-            "present": false
+            "present": true,
+            "line_steps": 0,
+            "side1": "home",
+            "side1_odd_delta": 0.105,
+            "side1_dir": "up",
+            "side2": "away",
+            "side2_odd_delta": -0.09,
+            "side2_dir": "down",
+            "fav_from": "away",
+            "fav_to": "away",
+            "fav_swap": false
           },
           {
             "from": "t12h",
@@ -289,7 +343,7 @@
           }
         ],
         "summary": {
-          "present_anchors": 2,
+          "present_anchors": 3,
           "net_line_steps": 0,
           "abs_path_steps": 0,
           "max_excursion_steps": 0,
@@ -300,10 +354,10 @@
           "fav_final": "away",
           "side1": "home",
           "side1_odd_net": "up",
-          "side1_prob_net": "flat",
+          "side1_prob_net": "down",
           "side2": "away",
           "side2_odd_net": "down",
-          "side2_prob_net": "flat",
+          "side2_prob_net": "up",
           "shape": "fav_swap",
           "tag": "平盤·水互換·主升客降",
           "trigger_anchors": [
@@ -338,7 +392,14 @@
             "under_odd": 1.87,
             "captured_ts": "2026-06-15T23:53:46.708Z"
           },
-          "t12h": null,
+          "t12h": {
+            "target_ts": "2026-06-16T13:00:00+00:00",
+            "offset_sec": 264,
+            "line": 2.5,
+            "over_odd": 1.96,
+            "under_odd": 1.94,
+            "captured_ts": "2026-06-16T13:04:24.349Z"
+          },
           "t6h": null,
           "t1h": null,
           "t30m": null,
@@ -346,9 +407,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": 2.5,
-            "over_odd": 2.02,
-            "under_odd": 1.87,
-            "captured_ts": "2026-06-16T04:31:16.305Z"
+            "over_odd": 1.99,
+            "under_odd": 1.91,
+            "captured_ts": "2026-06-16T14:14:55.657Z"
           }
         },
         "segments": [
@@ -370,7 +431,17 @@
           {
             "from": "t24h",
             "to": "t12h",
-            "present": false
+            "present": true,
+            "line_steps": 0,
+            "side1": "over",
+            "side1_odd_delta": -0.06,
+            "side1_dir": "down",
+            "side2": "under",
+            "side2_odd_delta": 0.07,
+            "side2_dir": "up",
+            "fav_from": "under",
+            "fav_to": "under",
+            "fav_swap": false
           },
           {
             "from": "t12h",
@@ -389,7 +460,7 @@
           }
         ],
         "summary": {
-          "present_anchors": 2,
+          "present_anchors": 3,
           "net_line_steps": 0,
           "abs_path_steps": 0,
           "max_excursion_steps": 0,
@@ -399,21 +470,22 @@
           "fav_swap_count": 0,
           "fav_final": "under",
           "side1": "over",
-          "side1_odd_net": "up",
-          "side1_prob_net": "down",
+          "side1_odd_net": "flat",
+          "side1_prob_net": "flat",
           "side2": "under",
-          "side2_odd_net": "down",
-          "side2_prob_net": "up",
+          "side2_odd_net": "up",
+          "side2_prob_net": "flat",
           "shape": "odds_drift",
-          "tag": "平盤·大升小降",
+          "tag": "平盤·大平小升",
           "trigger_anchors": [
             "t72h",
-            "t24h"
+            "t24h",
+            "t12h"
           ]
         }
       }
     }
   },
   "closing_settled": false,
-  "pulled_at_local": "2026-06-16T14:31:41.306926+08:00"
+  "pulled_at_local": "2026-06-16T22:16:55.281394+08:00"
 }
