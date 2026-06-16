@@ -42,7 +42,7 @@
             "line": -0.75,
             "home_odd": 1.98,
             "away_odd": 1.925,
-            "captured_ts": "2026-06-14T20:42:07.610Z"
+            "captured_ts": "2026-06-15T21:32:26.147Z"
           }
         },
         "segments": [
@@ -106,9 +106,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": 2.25,
-            "over_odd": 1.925,
-            "under_odd": 1.961,
-            "captured_ts": "2026-06-14T20:42:07.610Z"
+            "over_odd": 1.943,
+            "under_odd": 1.943,
+            "captured_ts": "2026-06-15T21:32:26.147Z"
           }
         },
         "segments": [
@@ -175,8 +175,8 @@
             "offset_sec": null,
             "line": -0.75,
             "home_odd": 1.95,
-            "away_odd": 1.93,
-            "captured_ts": "2026-06-15T03:07:46.196Z"
+            "away_odd": 1.94,
+            "captured_ts": "2026-06-16T00:42:51.936Z"
           }
         },
         "segments": [
@@ -223,7 +223,14 @@
             "under_odd": 1.98,
             "captured_ts": "2026-03-10T02:59:34.811Z"
           },
-          "t72h": null,
+          "t72h": {
+            "target_ts": "2026-06-14T20:00:00+00:00",
+            "offset_sec": -21193,
+            "line": 2.25,
+            "over_odd": 1.91,
+            "under_odd": 1.95,
+            "captured_ts": "2026-06-14T14:06:46.856Z"
+          },
           "t24h": null,
           "t12h": null,
           "t6h": null,
@@ -233,9 +240,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": 2.25,
-            "over_odd": 1.91,
-            "under_odd": 1.95,
-            "captured_ts": "2026-06-14T14:06:46.856Z"
+            "over_odd": 1.92,
+            "under_odd": 1.96,
+            "captured_ts": "2026-06-15T14:19:13.157Z"
           }
         },
         "segments": [
@@ -266,7 +273,7 @@
           }
         ],
         "summary": {
-          "present_anchors": 0,
+          "present_anchors": 1,
           "shape": "insufficient",
           "tag": null,
           "trigger_anchors": []
@@ -275,5 +282,5 @@
     }
   },
   "closing_settled": false,
-  "pulled_at_local": "2026-06-15T14:21:40.323203+08:00"
+  "pulled_at_local": "2026-06-16T14:31:41.306926+08:00"
 }

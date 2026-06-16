@@ -8,7 +8,8 @@
   "kickoff_utc": "2026-06-18T16:00:00+00:00",
   "kickoff_local": "2026-06-19T00:00:00+08:00",
   "books": [
-    "pinnacle"
+    "pinnacle",
+    "singbet"
   ],
   "trajectory": {
     "pinnacle": {
@@ -22,7 +23,14 @@
             "away_odd": 1.781,
             "captured_ts": "2026-05-11T05:40:55.227Z"
           },
-          "t72h": null,
+          "t72h": {
+            "target_ts": "2026-06-15T16:00:00+00:00",
+            "offset_sec": -1629,
+            "line": -0.75,
+            "home_odd": 2.05,
+            "away_odd": 1.862,
+            "captured_ts": "2026-06-15T15:32:50.613Z"
+          },
           "t24h": null,
           "t12h": null,
           "t6h": null,
@@ -31,10 +39,10 @@
           "closing": {
             "target_ts": null,
             "offset_sec": null,
-            "line": -0.5,
-            "home_odd": 1.952,
-            "away_odd": 1.847,
-            "captured_ts": "2026-06-04T15:49:55.943Z"
+            "line": -0.75,
+            "home_odd": 2.05,
+            "away_odd": 1.862,
+            "captured_ts": "2026-06-15T22:13:33.548Z"
           }
         },
         "segments": [
@@ -65,9 +73,10 @@
           }
         ],
         "summary": {
-          "present_anchors": 0,
+          "present_anchors": 1,
           "shape": "insufficient",
-          "tag": null
+          "tag": null,
+          "trigger_anchors": []
         }
       },
       "over_under": {
@@ -80,7 +89,14 @@
             "under_odd": 1.8,
             "captured_ts": "2026-05-11T05:40:55.227Z"
           },
-          "t72h": null,
+          "t72h": {
+            "target_ts": "2026-06-15T16:00:00+00:00",
+            "offset_sec": -1629,
+            "line": 2.25,
+            "over_odd": 1.84,
+            "under_odd": 2.06,
+            "captured_ts": "2026-06-15T15:32:50.613Z"
+          },
           "t24h": null,
           "t12h": null,
           "t6h": null,
@@ -90,9 +106,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": 2.25,
-            "over_odd": 1.99,
-            "under_odd": 1.806,
-            "captured_ts": "2026-06-04T15:49:55.943Z"
+            "over_odd": 1.84,
+            "under_odd": 2.06,
+            "captured_ts": "2026-06-15T22:13:33.548Z"
           }
         },
         "segments": [
@@ -123,13 +139,148 @@
           }
         ],
         "summary": {
-          "present_anchors": 0,
+          "present_anchors": 1,
           "shape": "insufficient",
-          "tag": null
+          "tag": null,
+          "trigger_anchors": []
+        }
+      }
+    },
+    "singbet": {
+      "handicap": {
+        "anchors": {
+          "initial": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": -0.75,
+            "home_odd": 2.02,
+            "away_odd": 1.86,
+            "captured_ts": "2026-06-14T17:21:17.095Z"
+          },
+          "t72h": {
+            "target_ts": "2026-06-15T16:00:00+00:00",
+            "offset_sec": 36801,
+            "line": -0.75,
+            "home_odd": 2.031,
+            "away_odd": 1.85,
+            "captured_ts": "2026-06-16T02:13:21.934Z"
+          },
+          "t24h": null,
+          "t12h": null,
+          "t6h": null,
+          "t1h": null,
+          "t30m": null,
+          "closing": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": -0.75,
+            "home_odd": 2.041,
+            "away_odd": 1.84,
+            "captured_ts": "2026-06-16T03:22:21.859Z"
+          }
+        },
+        "segments": [
+          {
+            "from": "t72h",
+            "to": "t24h",
+            "present": false
+          },
+          {
+            "from": "t24h",
+            "to": "t12h",
+            "present": false
+          },
+          {
+            "from": "t12h",
+            "to": "t6h",
+            "present": false
+          },
+          {
+            "from": "t6h",
+            "to": "t1h",
+            "present": false
+          },
+          {
+            "from": "t1h",
+            "to": "t30m",
+            "present": false
+          }
+        ],
+        "summary": {
+          "present_anchors": 1,
+          "shape": "insufficient",
+          "tag": null,
+          "trigger_anchors": []
+        }
+      },
+      "over_under": {
+        "anchors": {
+          "initial": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": 2.25,
+            "over_odd": 1.86,
+            "under_odd": 2.0,
+            "captured_ts": "2026-06-14T17:21:17.095Z"
+          },
+          "t72h": {
+            "target_ts": "2026-06-15T16:00:00+00:00",
+            "offset_sec": -81522,
+            "line": 2.25,
+            "over_odd": 1.86,
+            "under_odd": 2.0,
+            "captured_ts": "2026-06-14T17:21:17.095Z"
+          },
+          "t24h": null,
+          "t12h": null,
+          "t6h": null,
+          "t1h": null,
+          "t30m": null,
+          "closing": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": 2.25,
+            "over_odd": 1.86,
+            "under_odd": 2.0,
+            "captured_ts": "2026-06-14T17:21:17.095Z"
+          }
+        },
+        "segments": [
+          {
+            "from": "t72h",
+            "to": "t24h",
+            "present": false
+          },
+          {
+            "from": "t24h",
+            "to": "t12h",
+            "present": false
+          },
+          {
+            "from": "t12h",
+            "to": "t6h",
+            "present": false
+          },
+          {
+            "from": "t6h",
+            "to": "t1h",
+            "present": false
+          },
+          {
+            "from": "t1h",
+            "to": "t30m",
+            "present": false
+          }
+        ],
+        "summary": {
+          "present_anchors": 1,
+          "shape": "insufficient",
+          "tag": null,
+          "trigger_anchors": []
         }
       }
     }
   },
   "closing_settled": false,
-  "pulled_at_local": "2026-06-05T04:07:13.083831+08:00"
+  "pulled_at_local": "2026-06-16T14:31:41.306926+08:00"
 }
