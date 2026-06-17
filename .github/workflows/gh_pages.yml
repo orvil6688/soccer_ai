@@ -6,7 +6,7 @@ name: gh_pages
 # ⚠️ refresh_now 必須在此清單內，否則按鈕抓到新盤但頁面不重建＝白按（見 docs/on_demand_proposal.md §8）。
 on:
   workflow_run:
-    workflows: ["main_pipeline", "refresh_now"]
+    workflows: ["main_pipeline", "refresh_now", "backtest"]
     types: [completed]
   workflow_dispatch: {}
 

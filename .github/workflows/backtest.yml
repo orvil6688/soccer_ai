@@ -1,0 +1,65 @@
+name: backtest
+
+# 賽後賽果回填（手動）：與 select（賽前抓盤）分離——backtest 是賽後 settlement 回填，時機不同。
+# workflow_dispatch + 可選 date 輸入 → --mode backtest [--date YYYY-MM-DD]（UTC+8 歸檔日；留空=前一日）。
+# 額度：每筆該日 recommendation 打 1 次 settlements（計額度）；CLV 用 historical（假設免費）。
+# 完成後由 gh_pages.yml 的 workflow_run 連帶重建公開頁（戰報出數字）。
+# 以後每天賽後總司令自行 dispatch 回填當天。
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "回填日期 YYYY-MM-DD（UTC+8 歸檔日；留空=前一日）"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: backtest
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    env:
+      ODDSPAPI_API_KEY: ${{ secrets.ODDSPAPI_API_KEY }}
+      TEST_MODE: "false"   # 正式環境，寫 data/prod/
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Run backtest backfill
+        run: |
+          if [ -n "${{ github.event.inputs.date }}" ]; then
+            python -m soccer_ai.main --mode backtest --date "${{ github.event.inputs.date }}"
+          else
+            python -m soccer_ai.main --mode backtest
+          fi
+
+      - name: Commit & push data
+        if: always()
+        run: |
+          git config user.name  "soccer-ai-bot"
+          git config user.email "soccer-ai-bot@users.noreply.github.com"
+          git add data/prod/
+          if git diff --cached --quiet; then
+            echo "無結算變更，略過 commit"
+          else
+            git commit -m "data(backtest): backfill ${{ github.event.inputs.date }} $(date -u +'%Y-%m-%dT%H:%MZ')"
+            ok=0
+            for i in 1 2 3; do
+              git pull --rebase origin main && git push && { ok=1; break; }
+              echo "push 第 $i 次失敗，3s 後重試"; sleep 3
+            done
+            [ "$ok" = "1" ] || { echo "::error::push 連 3 次失敗"; exit 1; }
+          fi
