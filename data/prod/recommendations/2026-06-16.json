@@ -47,6 +47,22 @@
       "reason": "api_error",
       "produced_at": "2026-06-15T14:25:33.050128+08:00",
       "summary_hash": "1f68f1ccaff4071b04622b0869d81d27bf866623"
+    },
+    "result": "WIN",
+    "pnl_units": 0.6799999999999999,
+    "settled": true,
+    "score": {
+      "home": 2,
+      "away": 2,
+      "total": 4,
+      "margin": 0
+    },
+    "clv": {
+      "closing_odds": 1.735,
+      "closing_ts": "2026-06-16T00:59:39.944000+00:00",
+      "production_odds": 1.68,
+      "clv_pct": -0.0317,
+      "no_clv": false
     }
   }
 ]
