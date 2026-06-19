@@ -1,0 +1,18 @@
+[
+  {
+    "fixtureId": "id1000001666456972",
+    "home": "Netherlands",
+    "away": "Sweden",
+    "kickoff_utc": "2026-06-20T17:00:00+00:00",
+    "kickoff_local": "2026-06-21T01:00:00+08:00",
+    "reason": "edge_below_threshold",
+    "produced_at_local": "2026-06-20T02:18:24.889569+08:00",
+    "ai": {
+      "available": false,
+      "reason": "parse_error",
+      "produced_at": "2026-06-20T02:18:14.611114+08:00",
+      "summary_hash": "235fbacb7630e6d0a88f26291dee66b74617fad9",
+      "observation": true
+    }
+  }
+]

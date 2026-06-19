@@ -40,9 +40,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": -2.5,
-            "home_odd": 2.0,
-            "away_odd": 1.854,
-            "captured_ts": "2026-06-19T05:54:00.670Z"
+            "home_odd": 1.98,
+            "away_odd": 1.877,
+            "captured_ts": "2026-06-19T17:43:25.219Z"
           }
         },
         "segments": [
@@ -106,9 +106,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": 3.25,
-            "over_odd": 1.97,
-            "under_odd": 1.884,
-            "captured_ts": "2026-06-19T05:54:00.670Z"
+            "over_odd": 1.952,
+            "under_odd": 1.9,
+            "captured_ts": "2026-06-19T17:43:25.219Z"
           }
         },
         "segments": [
@@ -174,9 +174,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": -2.5,
-            "home_odd": 1.99,
-            "away_odd": 1.85,
-            "captured_ts": "2026-06-19T04:20:29.323Z"
+            "home_odd": 2.009,
+            "away_odd": 1.87,
+            "captured_ts": "2026-06-19T17:59:11.558Z"
           }
         },
         "segments": [
@@ -225,11 +225,11 @@
           },
           "t72h": {
             "target_ts": "2026-06-18T16:00:00+00:00",
-            "offset_sec": -168724,
+            "offset_sec": 59124,
             "line": 3.25,
-            "over_odd": 1.96,
-            "under_odd": 1.86,
-            "captured_ts": "2026-06-16T17:07:55.650Z"
+            "over_odd": 1.93,
+            "under_odd": 1.89,
+            "captured_ts": "2026-06-19T08:25:24.272Z"
           },
           "t24h": null,
           "t12h": null,
@@ -240,9 +240,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": 3.25,
-            "over_odd": 1.96,
-            "under_odd": 1.86,
-            "captured_ts": "2026-06-16T17:07:55.650Z"
+            "over_odd": 1.97,
+            "under_odd": 1.89,
+            "captured_ts": "2026-06-19T17:59:34.901Z"
           }
         },
         "segments": [
@@ -282,5 +282,5 @@
     }
   },
   "closing_settled": false,
-  "pulled_at_local": "2026-06-19T14:15:16.561784+08:00"
+  "pulled_at_local": "2026-06-20T02:13:01.754121+08:00"
 }
