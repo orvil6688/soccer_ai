@@ -1,0 +1,52 @@
+[
+  {
+    "fixtureId": "id1000001666456946",
+    "home": "Turkiye",
+    "away": "Paraguay",
+    "kickoff_utc": "2026-06-20T03:00:00+00:00",
+    "kickoff_local": "2026-06-20T11:00:00+08:00",
+    "xbet_active": false,
+    "xbet_suspended": false,
+    "market": "handicap",
+    "side": "home",
+    "line": -0.25,
+    "odds": 1.775,
+    "fair_prob": 0.4715,
+    "pinnacle_line": -0.5,
+    "xbet_line": -0.25,
+    "edge_goals": 0.25,
+    "edge_pct": null,
+    "edge_source": "line",
+    "signals": {
+      "signal": "reverse",
+      "reverse_against": true,
+      "key_number_cross": false,
+      "shape": "odds_drift",
+      "tag": "平盤·主升客降"
+    },
+    "trajectory": {
+      "pinnacle": {
+        "shape": "odds_drift",
+        "tag": "平盤·主升客降",
+        "net_line_steps": 0,
+        "fav_swap_count": 0
+      },
+      "singbet": {
+        "shape": "flat",
+        "tag": "平盤·主平客平",
+        "net_line_steps": 0,
+        "fav_swap_count": 0
+      }
+    },
+    "filtered": false,
+    "filter_reason": null,
+    "stake_units": 1,
+    "produced_at_local": "2026-06-19T14:19:09.098330+08:00",
+    "ai": {
+      "available": false,
+      "reason": "api_error",
+      "produced_at": "2026-06-19T14:19:09.098389+08:00",
+      "summary_hash": "c5389ec17ba8adc5a91373d8f7a017b1cf60d965"
+    }
+  }
+]
