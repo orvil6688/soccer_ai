@@ -1,0 +1,108 @@
+[
+  {
+    "fixtureId": "id1000001666457010",
+    "home": "France",
+    "away": "Iraq",
+    "kickoff_utc": "2026-06-22T21:00:00+00:00",
+    "kickoff_local": "2026-06-23T05:00:00+08:00",
+    "xbet_active": true,
+    "xbet_suspended": false,
+    "market": "handicap",
+    "side": "away",
+    "line": -3.0,
+    "odds": 1.82,
+    "fair_prob": 0.4843,
+    "pinnacle_line": -2.75,
+    "xbet_line": -3.0,
+    "edge_goals": 0.25,
+    "edge_pct": null,
+    "edge_source": "line",
+    "signals": {
+      "signal": "reverse",
+      "reverse_against": true,
+      "key_number_cross": false,
+      "shape": "gradual",
+      "tag": "降1盤·水互換·主升客降"
+    },
+    "trajectory": {
+      "pinnacle": {
+        "shape": "gradual",
+        "tag": "降1盤·水互換·主升客降",
+        "net_line_steps": -1,
+        "fav_swap_count": 1
+      },
+      "singbet": {
+        "shape": "gradual",
+        "tag": "降1盤·主升客降",
+        "net_line_steps": -1,
+        "fav_swap_count": 0
+      }
+    },
+    "filtered": false,
+    "filter_reason": null,
+    "stake_units": 1,
+    "produced_at_local": "2026-06-22T14:30:58.131558+08:00",
+    "ai": {
+      "available": true,
+      "reason": null,
+      "tag": "🤖 AI 推論",
+      "is_inference": true,
+      "model": "gemini-2.5-flash",
+      "produced_at": "2026-06-22T14:30:58.131612+08:00",
+      "summary_hash": "fd1547fea9f44a6c072be68cefc3caf9a78b8c36",
+      "confidence_reasoning": "此注為讓分客隊 +3.0 @ 1.82，對應的盤口軌跡顯示讓分線從初始的 -2.25/-2.5 逐步升至 -2.75。Edge 值為 0.25 球，意味著相比於實際盤口，我們的選注多出了 0.25 球的緩衝，這是一個有利的條件。Pinnacle 和 Singbet 兩家莊家在 t72h 到 t24h 期間都將讓分線從 -2.5 提升到 -2.75，且客隊賠率在提升讓分線後（即讓分客隊賠率下降）仍然維持在合理區間。儘管收盤時 Pinnacle 的客隊賠率略有上升，但整體趨勢是莊家看好法國隊大勝，這使得客隊伊拉克 +2.75 (或 +3.0) 成為一個相對有價值的選擇。莊家持續的升盤，說明市場對法國的信心不斷增強，但升盤的幅度與賠率的變化，讓客隊在 +3.0 球的保護下，有機會達到走水或贏盤的結果，尤其是在面對強隊時，莊家有時會過度反應市場熱度。",
+      "injury_news_inference": "從盤口軌跡來看，兩家莊家在賽前 72 小時到 24 小時都將讓分盤線提升了 1 級（從 -2.5 升至 -2.75），並且相應地調降了讓分客隊的賠率。這種在賽前關鍵時間點的盤口變動，通常暗示著市場上出現了對法國隊極為有利的消息。最有可能的推測是，法國隊的核心主力陣容得到了確認，或者有此前存在疑慮的關鍵球員確認可以上場，且狀態良好。反之，伊拉克方面可能傳出了主力球員傷病或狀態不佳的消息，或者其陣容實力被市場進一步看低。這種盤口變化導致大量資金湧入法國隊，莊家為了平衡風險而被迫升盤，以提高法國隊的贏盤難度。",
+      "market_reading": "這是一個典型的莊家「順應市場熱度，並試圖誘盤」的案例。初始盤口設定在法國讓 -2.25 或 -2.5 球，這已經是相當深的盤口，表明莊家對法國實力有絕對信心。然而，在賽前 72 小時到 24 小時，兩家莊家不約而同地將讓分線提升到 -2.75。這種升盤行為，首先是反映了市場上對法國隊的極度追捧，大量散戶和部分早場資金可能在法國隊的潛在勝利上投入了重注。莊家順勢升盤，一方面是為了平衡風險，避免法國隊輕鬆打穿淺盤導致巨額虧損；另一方面，這也是一種「誘盤」的策略。將盤口抬高到 -2.75，會讓一部分追求高賠的激進玩家繼續追逐法國隊，認為法國隊能大勝三球或更多。但對於較為保守的玩家，尤其是那些看到盤口已經很深，或對法國隊能否淨勝三球以上存疑的玩家，會傾向於選擇受讓方。莊家抬高盤口，使得法國隊需要淨勝三球才能贏半或全贏，這無形中增加了法國隊打穿盤口的難度。同時，Pinnacle 在 t72h 到 t24h 期間出現了水位的互換，意味著在升盤的同時，莊家對不同結果的預期發生了調整，可能是在測試市場對新盤口的反應，並進一步引導資金流向。總之，莊家利用法國隊的強大形象和市場熱情，通過升盤來鼓勵資金繼續湧入法國隊，但實際是增加了法國隊贏盤的難度，為受讓方製造了看似不利實則可能有利的機會，尤其是當法國隊在領先兩球後可能出現鬆懈的情況。後場 sharp money 可能會考慮在客隊受讓 +2.75 或 +3.0 的位置尋找價值。"
+    }
+  },
+  {
+    "fixtureId": "id1000001666457010",
+    "home": "France",
+    "away": "Iraq",
+    "kickoff_utc": "2026-06-22T21:00:00+00:00",
+    "kickoff_local": "2026-06-23T05:00:00+08:00",
+    "xbet_active": true,
+    "xbet_suspended": false,
+    "market": "over_under",
+    "side": "under",
+    "line": 3.75,
+    "odds": 1.841,
+    "fair_prob": 0.4757,
+    "pinnacle_line": 3.5,
+    "xbet_line": 3.75,
+    "edge_goals": 0.25,
+    "edge_pct": null,
+    "edge_source": "line",
+    "signals": {
+      "signal": "reverse",
+      "reverse_against": true,
+      "key_number_cross": false,
+      "shape": "odds_drift",
+      "tag": "平盤·大降小升"
+    },
+    "trajectory": {
+      "pinnacle": {
+        "shape": "odds_drift",
+        "tag": "平盤·大降小升",
+        "net_line_steps": 0,
+        "fav_swap_count": 0
+      },
+      "singbet": {
+        "shape": "flat",
+        "tag": "平盤·大平小平",
+        "net_line_steps": 0,
+        "fav_swap_count": 0
+      }
+    },
+    "filtered": false,
+    "filter_reason": null,
+    "stake_units": 1,
+    "produced_at_local": "2026-06-22T14:31:05.859923+08:00",
+    "ai": {
+      "available": false,
+      "reason": "api_error",
+      "produced_at": "2026-06-22T14:31:05.859960+08:00",
+      "summary_hash": "266f1fdf7126bbe156f6d88c375e5e1d0bef1552"
+    }
+  }
+]

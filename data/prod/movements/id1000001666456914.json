@@ -23,7 +23,14 @@
             "away_odd": 1.943,
             "captured_ts": "2026-05-25T11:09:05.454Z"
           },
-          "t72h": null,
+          "t72h": {
+            "target_ts": "2026-06-22T01:00:00+00:00",
+            "offset_sec": -2,
+            "line": 0.75,
+            "home_odd": 2.11,
+            "away_odd": 1.8,
+            "captured_ts": "2026-06-22T00:59:57.527Z"
+          },
           "t24h": null,
           "t12h": null,
           "t6h": null,
@@ -32,10 +39,10 @@
           "closing": {
             "target_ts": null,
             "offset_sec": null,
-            "line": 0.5,
-            "home_odd": 1.884,
-            "away_odd": 1.917,
-            "captured_ts": "2026-06-04T13:13:35.538Z"
+            "line": 0.75,
+            "home_odd": 2.06,
+            "away_odd": 1.84,
+            "captured_ts": "2026-06-22T04:53:56.047Z"
           }
         },
         "segments": [
@@ -66,9 +73,10 @@
           }
         ],
         "summary": {
-          "present_anchors": 0,
+          "present_anchors": 1,
           "shape": "insufficient",
-          "tag": null
+          "tag": null,
+          "trigger_anchors": []
         }
       },
       "over_under": {
@@ -81,7 +89,14 @@
             "under_odd": 1.9,
             "captured_ts": "2026-05-25T11:09:15.113Z"
           },
-          "t72h": null,
+          "t72h": {
+            "target_ts": "2026-06-22T01:00:00+00:00",
+            "offset_sec": -2,
+            "line": 2.5,
+            "over_odd": 2.07,
+            "under_odd": 1.819,
+            "captured_ts": "2026-06-22T00:59:57.527Z"
+          },
           "t24h": null,
           "t12h": null,
           "t6h": null,
@@ -91,9 +106,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": 2.25,
-            "over_odd": 1.847,
-            "under_odd": 1.943,
-            "captured_ts": "2026-06-04T13:13:35.537Z"
+            "over_odd": 1.826,
+            "under_odd": 2.06,
+            "captured_ts": "2026-06-22T04:53:56.047Z"
           }
         },
         "segments": [
@@ -124,9 +139,10 @@
           }
         ],
         "summary": {
-          "present_anchors": 0,
+          "present_anchors": 1,
           "shape": "insufficient",
-          "tag": null
+          "tag": null,
+          "trigger_anchors": []
         }
       }
     },
@@ -136,10 +152,10 @@
           "initial": {
             "target_ts": null,
             "offset_sec": null,
-            "line": 0.5,
-            "home_odd": 1.89,
-            "away_odd": 1.95,
-            "captured_ts": "2026-06-04T15:32:45.595Z"
+            "line": 0.75,
+            "home_odd": 1.9,
+            "away_odd": 1.94,
+            "captured_ts": "2026-06-11T21:29:37.657Z"
           },
           "t72h": null,
           "t24h": null,
@@ -153,7 +169,7 @@
             "line": 0.5,
             "home_odd": 1.89,
             "away_odd": 1.95,
-            "captured_ts": "2026-06-04T17:37:42.437Z"
+            "captured_ts": "2026-06-10T13:48:35.711Z"
           }
         },
         "segments": [
@@ -186,7 +202,8 @@
         "summary": {
           "present_anchors": 0,
           "shape": "insufficient",
-          "tag": null
+          "tag": null,
+          "trigger_anchors": []
         }
       },
       "over_under": {
@@ -209,9 +226,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": 2.25,
-            "over_odd": 1.88,
-            "under_odd": 1.94,
-            "captured_ts": "2026-06-04T17:37:42.437Z"
+            "over_odd": 1.83,
+            "under_odd": 1.99,
+            "captured_ts": "2026-06-19T03:17:34.884Z"
           }
         },
         "segments": [
@@ -244,11 +261,12 @@
         "summary": {
           "present_anchors": 0,
           "shape": "insufficient",
-          "tag": null
+          "tag": null,
+          "trigger_anchors": []
         }
       }
     }
   },
   "closing_settled": false,
-  "pulled_at_local": "2026-06-05T04:07:13.083831+08:00"
+  "pulled_at_local": "2026-06-22T14:26:33.580072+08:00"
 }

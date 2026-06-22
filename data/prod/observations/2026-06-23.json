@@ -1,0 +1,50 @@
+[
+  {
+    "fixtureId": "id1000001666457022",
+    "home": "Argentina",
+    "away": "Austria",
+    "kickoff_utc": "2026-06-22T17:00:00+00:00",
+    "kickoff_local": "2026-06-23T01:00:00+08:00",
+    "reason": "edge_below_threshold",
+    "produced_at_local": "2026-06-22T14:31:17.413112+08:00",
+    "ai": {
+      "available": false,
+      "reason": "api_error",
+      "produced_at": "2026-06-22T14:31:06.569019+08:00",
+      "summary_hash": "452b7f6db1cb3952062e0c6ab86438fe7dfb52f5",
+      "observation": true
+    }
+  },
+  {
+    "fixtureId": "id1000001666457012",
+    "home": "Norway",
+    "away": "Senegal",
+    "kickoff_utc": "2026-06-23T00:00:00+00:00",
+    "kickoff_local": "2026-06-23T08:00:00+08:00",
+    "reason": "edge_below_threshold",
+    "produced_at_local": "2026-06-22T14:31:23.036934+08:00",
+    "ai": {
+      "available": false,
+      "reason": "api_error",
+      "produced_at": "2026-06-22T14:31:17.413864+08:00",
+      "summary_hash": "bb101f09fb9a778c272718027a60cd6a46a9cabd",
+      "observation": true
+    }
+  },
+  {
+    "fixtureId": "id1000001666457024",
+    "home": "Jordan",
+    "away": "Algeria",
+    "kickoff_utc": "2026-06-23T03:00:00+00:00",
+    "kickoff_local": "2026-06-23T11:00:00+08:00",
+    "reason": "edge_below_threshold",
+    "produced_at_local": "2026-06-22T14:31:29.019715+08:00",
+    "ai": {
+      "available": false,
+      "reason": "api_error",
+      "produced_at": "2026-06-22T14:31:23.037969+08:00",
+      "summary_hash": "9b9e012605c35dac78f9cc57e8cbaeeadd405d1f",
+      "observation": true
+    }
+  }
+]
