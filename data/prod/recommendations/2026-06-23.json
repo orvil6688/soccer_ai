@@ -66,8 +66,8 @@
     "market": "over_under",
     "side": "under",
     "line": 3.75,
-    "odds": 1.841,
-    "fair_prob": 0.4757,
+    "odds": 1.895,
+    "fair_prob": 0.4784,
     "pinnacle_line": 3.5,
     "xbet_line": 3.75,
     "edge_goals": 0.25,
@@ -77,18 +77,18 @@
       "signal": "reverse",
       "reverse_against": true,
       "key_number_cross": false,
-      "shape": "odds_drift",
-      "tag": "平盤·大降小升"
+      "shape": "gradual",
+      "tag": "升1盤·水互換·大升小降"
     },
     "trajectory": {
       "pinnacle": {
-        "shape": "odds_drift",
-        "tag": "平盤·大降小升",
-        "net_line_steps": 0,
-        "fav_swap_count": 0
+        "shape": "gradual",
+        "tag": "升1盤·水互換·大升小降",
+        "net_line_steps": 1,
+        "fav_swap_count": 1
       },
       "singbet": {
-        "shape": "flat",
+        "shape": "odds_drift",
         "tag": "平盤·大平小平",
         "net_line_steps": 0,
         "fav_swap_count": 0
@@ -101,8 +101,8 @@
     "ai": {
       "available": false,
       "reason": "api_error",
-      "produced_at": "2026-06-22T14:31:05.859960+08:00",
-      "summary_hash": "266f1fdf7126bbe156f6d88c375e5e1d0bef1552"
+      "produced_at": "2026-06-23T00:54:39.910858+08:00",
+      "summary_hash": "79776b46c28d1b70a2ce9d9dd2a53a4d868837b4"
     }
   }
 ]

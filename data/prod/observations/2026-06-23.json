@@ -10,8 +10,8 @@
     "ai": {
       "available": false,
       "reason": "api_error",
-      "produced_at": "2026-06-22T14:31:06.569019+08:00",
-      "summary_hash": "452b7f6db1cb3952062e0c6ab86438fe7dfb52f5",
+      "produced_at": "2026-06-23T00:54:55.841174+08:00",
+      "summary_hash": "c4f7c14c54b86e7e7e4a8af254384fd3ac90e13a",
       "observation": true
     }
   },
@@ -26,8 +26,8 @@
     "ai": {
       "available": false,
       "reason": "api_error",
-      "produced_at": "2026-06-22T14:31:17.413864+08:00",
-      "summary_hash": "bb101f09fb9a778c272718027a60cd6a46a9cabd",
+      "produced_at": "2026-06-23T00:55:11.678000+08:00",
+      "summary_hash": "839acbbaf075f8f4a5aee65530f83bbe3fdce26e",
       "observation": true
     }
   },
@@ -42,8 +42,8 @@
     "ai": {
       "available": false,
       "reason": "api_error",
-      "produced_at": "2026-06-22T14:31:23.037969+08:00",
-      "summary_hash": "9b9e012605c35dac78f9cc57e8cbaeeadd405d1f",
+      "produced_at": "2026-06-23T00:55:15.920927+08:00",
+      "summary_hash": "e9be0dd18dab1bda5e7c9f8bc21d2136175cad43",
       "observation": true
     }
   }
