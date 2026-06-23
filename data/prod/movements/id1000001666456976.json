@@ -23,7 +23,14 @@
             "away_odd": 2.0,
             "captured_ts": "2026-05-25T11:09:56.393Z"
           },
-          "t72h": null,
+          "t72h": {
+            "target_ts": "2026-06-22T23:00:00+00:00",
+            "offset_sec": -2902,
+            "line": 2.25,
+            "home_odd": 1.99,
+            "away_odd": 1.884,
+            "captured_ts": "2026-06-22T22:11:37.625Z"
+          },
           "t24h": null,
           "t12h": null,
           "t6h": null,
@@ -33,9 +40,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": 2.25,
-            "home_odd": 1.99,
-            "away_odd": 1.877,
-            "captured_ts": "2026-06-22T16:49:38.656Z"
+            "home_odd": 1.97,
+            "away_odd": 1.9,
+            "captured_ts": "2026-06-23T04:52:46.023Z"
           }
         },
         "segments": [
@@ -66,7 +73,7 @@
           }
         ],
         "summary": {
-          "present_anchors": 0,
+          "present_anchors": 1,
           "shape": "insufficient",
           "tag": null,
           "trigger_anchors": []
@@ -82,7 +89,14 @@
             "under_odd": 1.806,
             "captured_ts": "2026-05-25T11:10:03.582Z"
           },
-          "t72h": null,
+          "t72h": {
+            "target_ts": "2026-06-22T23:00:00+00:00",
+            "offset_sec": -2902,
+            "line": 3.25,
+            "over_odd": 1.943,
+            "under_odd": 1.909,
+            "captured_ts": "2026-06-22T22:11:37.624Z"
+          },
           "t24h": null,
           "t12h": null,
           "t6h": null,
@@ -92,9 +106,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": 3.25,
-            "over_odd": 1.943,
-            "under_odd": 1.909,
-            "captured_ts": "2026-06-22T16:49:38.656Z"
+            "over_odd": 1.952,
+            "under_odd": 1.9,
+            "captured_ts": "2026-06-23T04:52:46.023Z"
           }
         },
         "segments": [
@@ -125,7 +139,7 @@
           }
         ],
         "summary": {
-          "present_anchors": 0,
+          "present_anchors": 1,
           "shape": "insufficient",
           "tag": null,
           "trigger_anchors": []
@@ -254,5 +268,5 @@
     }
   },
   "closing_settled": false,
-  "pulled_at_local": "2026-06-23T00:49:11.511182+08:00"
+  "pulled_at_local": "2026-06-23T12:57:38.087892+08:00"
 }
