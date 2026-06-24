@@ -1,0 +1,108 @@
+[
+  {
+    "fixtureId": "id1000001666456936",
+    "home": "Scotland",
+    "away": "Brazil",
+    "kickoff_utc": "2026-06-24T22:00:00+00:00",
+    "kickoff_local": "2026-06-25T06:00:00+08:00",
+    "xbet_active": true,
+    "xbet_suspended": false,
+    "market": "over_under",
+    "side": "under",
+    "line": 2.75,
+    "odds": 1.798,
+    "fair_prob": 0.4737,
+    "pinnacle_line": 2.5,
+    "xbet_line": 2.75,
+    "edge_goals": 0.25,
+    "edge_pct": null,
+    "edge_source": "line",
+    "signals": {
+      "signal": "reverse",
+      "reverse_against": true,
+      "key_number_cross": false,
+      "shape": "mixed",
+      "tag": "平盤·水互換·大降小升"
+    },
+    "trajectory": {
+      "pinnacle": {
+        "shape": "mixed",
+        "tag": "平盤·水互換·大降小升",
+        "net_line_steps": 0,
+        "fav_swap_count": 2
+      },
+      "singbet": {
+        "shape": "mixed",
+        "tag": "平盤·水互換·大平小升",
+        "net_line_steps": 0,
+        "fav_swap_count": 2
+      }
+    },
+    "filtered": false,
+    "filter_reason": null,
+    "stake_units": 1,
+    "produced_at_local": "2026-06-25T05:34:02.093568+08:00",
+    "ai": {
+      "available": false,
+      "reason": "parse_error",
+      "produced_at": "2026-06-25T05:34:02.093618+08:00",
+      "summary_hash": "eb88c3c747173800ab68e5de723709e9233aefe0"
+    }
+  },
+  {
+    "fixtureId": "id1000001666456914",
+    "home": "South Africa",
+    "away": "Korea Republic",
+    "kickoff_utc": "2026-06-25T01:00:00+00:00",
+    "kickoff_local": "2026-06-25T09:00:00+08:00",
+    "xbet_active": true,
+    "xbet_suspended": false,
+    "market": "over_under",
+    "side": "under",
+    "line": 2.5,
+    "odds": 1.812,
+    "fair_prob": 0.4694,
+    "pinnacle_line": 2.25,
+    "xbet_line": 2.5,
+    "edge_goals": 0.25,
+    "edge_pct": null,
+    "edge_source": "line",
+    "signals": {
+      "signal": "confirm",
+      "reverse_against": false,
+      "key_number_cross": false,
+      "shape": "choppy",
+      "tag": "降1盤·水互換·大降小升"
+    },
+    "trajectory": {
+      "pinnacle": {
+        "shape": "choppy",
+        "tag": "降1盤·水互換·大降小升",
+        "net_line_steps": -1,
+        "fav_swap_count": 3
+      },
+      "singbet": {
+        "shape": "odds_drift",
+        "tag": "平盤·大降小升",
+        "net_line_steps": 0,
+        "fav_swap_count": 0
+      }
+    },
+    "filtered": false,
+    "filter_reason": null,
+    "stake_units": 1,
+    "produced_at_local": "2026-06-25T05:34:13.454186+08:00",
+    "ai": {
+      "available": true,
+      "reason": null,
+      "tag": "🤖 AI 推論",
+      "is_inference": true,
+      "model": "gemini-2.5-flash",
+      "produced_at": "2026-06-25T05:34:13.454224+08:00",
+      "summary_hash": "b0b9ba1a06b91858e650cc82c5c78581dece9938",
+      "confidence_reasoning": "此注的信心來自於 Pinnacle 盤口在開賽前72小時內，經歷了三次『降1級、水互換』的來回震盪，最終回歸到初始盤口2.25球線，且under賠率保持在2.08的高位。這種頻繁的盤口升降級及賠率的來回互換，強烈暗示莊家試圖擾亂市場對大小球的判斷，特別是在2.5球這個關鍵點位上。雖然最終收盤線維持在2.25，但我們選擇的2.5球under有著0.25球的edge，這意味著即便比賽進球數為2球，我們也能獲利。考慮到這種choppy的盤口形態通常伴隨著莊家對市場資金的洗盤或誘盤操作，而我們在2.5球的高水位under，顯得相對安全。Singbet雖然盤口穩定在2.25，但under賠率也呈現緩慢上升趨勢，與Pinnacle的under高水最終收盤形成一定程度的呼應，進一步支持了under的潛力。",
+      "injury_news_inference": "Pinnacle盤口在t72h到t24h之間，由2.5降至2.25，under賠率從1.819升至2.07，這可能暗示市場初期有大單資金湧入under，或是莊家釋放利好under的消息。隨後t24h到t12h又升回2.5，under賠率降至1.847，這可能是為了平衡市場對under的熱度，或者有關於進攻端核心球員受傷的傳聞出現，導致市場一度看好小球。t12h到t6h再次降回2.25，under賠率再次升高，這可能是在確認了某位關鍵進攻球員可能缺陣，或防守端球員狀況良好，導致莊家重新引導資金流向under。Singbet盤口雖未升降級，但t24h後under賠率從2.009逐步升至2.041，也暗示了市場對小球的信心有所增強。綜合來看，這種反覆的盤口調整和賠率變化，很可能是在開賽前72小時內，出現了關於雙方陣容，特別是進攻核心或防守關鍵球員的傷病或狀態不佳的傳聞，導致莊家多次調整盤口以應對這些不確定性消息。",
+      "market_reading": "從Pinnacle的『choppy』形態來看，莊家意圖非常明顯：洗盤和誘盤。初始盤口2.25，t72h拉升到2.5，同時under賠率升至2.07，這是在製造under的吸引力，誘使散戶追逐高賠率的under。但在t24h又迅速降回2.25，under賠率降至1.826，這是在打壓前期追under的資金，讓他們感到恐慌。隨後又在t12h拉回到2.5，under賠率再次升高，然後又在t6h降回2.25，under賠率再次拉高。這種來回拉扯，目的就是為了最大化莊家利潤，讓市場資金在2.25和2.5這兩個關鍵點位之間搖擺不定，無法形成一致的資金流向。尤其是在2.5這個點位，under賠率多次被推高，這是在試圖吸引更多散戶資金進入under，但同時又通過降級盤口來製造不確定性。最終收盤在2.25，under賠率2.08，這個高水位對於莊家來說，如果最終打出小球，他們可以在高水位上收割更多籌碼。Singbet的盤口雖然穩定在2.25，但under賠率的緩慢上升，顯示出市場後場資金對小球的信心在累積，但莊家並未因此調整盤口，而是通過維持高水來吸收這些資金。這種情況下，莊家可能預判這場比賽的進球數很可能就在2球左右，因此在2.25這個點位上保持穩定，並在Pinnacle上製造混亂，以達到最佳的資金分配效果。這種操作也可能是莊家嗅到後場有sharp money在持續買入under，因此通過頻繁變盤來分散風險，並嘗試將一部分資金引導到over，以平衡注碼。"
+    }
+  }
+]
