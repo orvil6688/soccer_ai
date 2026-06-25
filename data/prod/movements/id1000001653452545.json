@@ -1,0 +1,137 @@
+{
+  "schema_version": 2,
+  "fixtureId": "id1000001653452545",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "South Africa",
+  "away": "Canada",
+  "kickoff_utc": "2026-06-28T19:00:00+00:00",
+  "kickoff_local": "2026-06-29T03:00:00+08:00",
+  "books": [
+    "pinnacle"
+  ],
+  "trajectory": {
+    "pinnacle": {
+      "handicap": {
+        "anchors": {
+          "initial": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": 0.75,
+            "home_odd": 1.909,
+            "away_odd": 1.909,
+            "captured_ts": "2026-06-25T04:50:53.283Z"
+          },
+          "t72h": null,
+          "t24h": null,
+          "t12h": null,
+          "t6h": null,
+          "t1h": null,
+          "t30m": null,
+          "closing": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": 0.75,
+            "home_odd": 1.943,
+            "away_odd": 1.925,
+            "captured_ts": "2026-06-25T04:52:07.155Z"
+          }
+        },
+        "segments": [
+          {
+            "from": "t72h",
+            "to": "t24h",
+            "present": false
+          },
+          {
+            "from": "t24h",
+            "to": "t12h",
+            "present": false
+          },
+          {
+            "from": "t12h",
+            "to": "t6h",
+            "present": false
+          },
+          {
+            "from": "t6h",
+            "to": "t1h",
+            "present": false
+          },
+          {
+            "from": "t1h",
+            "to": "t30m",
+            "present": false
+          }
+        ],
+        "summary": {
+          "present_anchors": 0,
+          "shape": "insufficient",
+          "tag": null,
+          "trigger_anchors": []
+        }
+      },
+      "over_under": {
+        "anchors": {
+          "initial": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": 2.5,
+            "over_odd": 2.0,
+            "under_odd": 1.813,
+            "captured_ts": "2026-06-25T04:50:53.283Z"
+          },
+          "t72h": null,
+          "t24h": null,
+          "t12h": null,
+          "t6h": null,
+          "t1h": null,
+          "t30m": null,
+          "closing": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": 2.5,
+            "over_odd": 2.02,
+            "under_odd": 1.833,
+            "captured_ts": "2026-06-25T04:52:07.155Z"
+          }
+        },
+        "segments": [
+          {
+            "from": "t72h",
+            "to": "t24h",
+            "present": false
+          },
+          {
+            "from": "t24h",
+            "to": "t12h",
+            "present": false
+          },
+          {
+            "from": "t12h",
+            "to": "t6h",
+            "present": false
+          },
+          {
+            "from": "t6h",
+            "to": "t1h",
+            "present": false
+          },
+          {
+            "from": "t1h",
+            "to": "t30m",
+            "present": false
+          }
+        ],
+        "summary": {
+          "present_anchors": 0,
+          "shape": "insufficient",
+          "tag": null,
+          "trigger_anchors": []
+        }
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-06-25T13:02:34.515110+08:00"
+}
