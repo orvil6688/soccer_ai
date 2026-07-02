@@ -1,0 +1,108 @@
+[
+  {
+    "fixtureId": "id1000001653452549",
+    "home": "Portugal",
+    "away": "Croatia",
+    "kickoff_utc": "2026-07-02T23:00:00+00:00",
+    "kickoff_local": "2026-07-03T07:00:00+08:00",
+    "xbet_active": true,
+    "xbet_suspended": false,
+    "market": "over_under",
+    "side": "over",
+    "line": 2.5,
+    "odds": 1.839,
+    "fair_prob": 0.4718,
+    "pinnacle_line": 2.75,
+    "xbet_line": 2.5,
+    "edge_goals": 0.25,
+    "edge_pct": null,
+    "edge_source": "line",
+    "signals": {
+      "signal": "confirm",
+      "reverse_against": false,
+      "key_number_cross": false,
+      "shape": "gradual",
+      "tag": "升1盤·水互換·大升小降"
+    },
+    "trajectory": {
+      "pinnacle": {
+        "shape": "gradual",
+        "tag": "升1盤·水互換·大升小降",
+        "net_line_steps": 1,
+        "fav_swap_count": 1
+      },
+      "singbet": {
+        "shape": "gradual",
+        "tag": "升1盤·大升小降",
+        "net_line_steps": 1,
+        "fav_swap_count": 0
+      }
+    },
+    "filtered": false,
+    "filter_reason": null,
+    "stake_units": 1,
+    "produced_at_local": "2026-07-02T12:59:19.509034+08:00",
+    "ai": {
+      "available": true,
+      "reason": null,
+      "tag": "🤖 AI 推論",
+      "is_inference": true,
+      "model": "gemini-2.5-flash",
+      "produced_at": "2026-07-02T12:59:19.509086+08:00",
+      "summary_hash": "3de38e07e9d906848b3f30a37481d18566763f38",
+      "confidence_reasoning": "此注為over 2.5球，而Pinnacle與Singbet兩家莊家在臨場前都將盤口從2.25球連續提升至2.75球，且over的賠率在盤口提升的過程中，相對Under的賠率呈現出更為堅挺甚至逆勢上漲的趨勢。例如，Pinnacle在t72h到t24h之間，盤口從2.25升至2.5，over賠率從1.862升至1.99，Under賠率從2.029降至1.9。這說明即使盤口上升，市場對大球的需求依然旺盛，導致莊家不得不持續升盤以平衡注碼。最終兩家都以2.75球收盤，並給予大球較高的賠率（Pinnacle 2.06，Singbet 2.053），這表明莊家對大球的打出有較高的預期，或者說，莊家在努力讓高賠的大球吸引更多注碼以規避風險。考慮到兩家公司一致的升盤趨勢以及over賠率的堅挺表現，結合我們選注的over 2.5，這是一個有利的訊號，表示市場資金普遍看好比賽進球數會較多，且我們的選注在最終盤口2.75之下，相對安全。",
+      "injury_news_inference": "從兩家莊家一致且持續的升盤，尤其是從開盤的2.25球最終升至2.75球，並伴隨大球賠率的相對堅挺，強烈暗示了賽前可能有關於重要攻擊手歸隊、主力後衛缺陣、或是球隊戰術傾向更具攻擊性等利好大球的消息流出。如果沒有這類消息，莊家通常不會在沒有顯著市場壓力下，連續提升盤口。特別是當盤口上升時，大球賠率並未大幅下跌，反而維持在一個相對高位，這可能意味著莊家在收到某些情報後，試圖透過提升盤口來吸引小球注碼，或者引導市場關注大球，以平衡其風險敞口。這類消息很可能是在t72h到t24h之間逐漸被市場消化或莊家內部掌握，進而反映在盤口調整上。",
+      "market_reading": "此盤口軌跡顯示莊家初期開出2.25球，隨後在t72h到t24h之間，兩家莊家同步將盤口提升至2.5球，並在臨場前進一步升至2.75球。這種連續的升盤行為，首先表明莊家最初對總進球數的預期可能偏低，或者市場在開盤後對大球的熱度遠超莊家預期。從Pinnacle在t72h到t24h的『水互換』來看，over的賠率從1.862上升到1.99，Under的賠率從2.029下降到1.9，這是一個典型的『誘盤』手法。莊家在升盤的同時，提高了大球的賠率，試圖讓部分散戶覺得大球的『性價比』變低，轉而投注Under，以平衡大球方向過熱的注碼。然而，市場似乎並未完全被誘導，大球方向的資金壓力依然存在，導致莊家在closing時不得不再次升盤至2.75球。Singbet的軌跡也呈現類似的升盤趨勢，雖然沒有明顯的水互換，但其大球賠率在升盤後也保持在較高水平，同樣暗示了市場對大球的強烈預期。這種一致的升盤，且大球賠率在最終盤口處於高位，很可能是莊家在消化了後場（sharp money）的情報後，為了規避大球風險而採取的策略。莊家可能判斷大球打出的概率較高，因此透過持續升盤，一方面可以提高大球的打出難度，另一方面也可以吸引更多不明就裡的散戶去投注看似『高賠』的Under，從而分散風險。整體而言，莊家意圖是平衡大球方向的巨量資金流，並透過提高盤口和調整賠率來引導市場情緒，但市場似乎有明確的利好大球消息支撐，導致莊家最終仍需以高盤來收場。"
+    }
+  },
+  {
+    "fixtureId": "id1000001653452505",
+    "home": "Switzerland",
+    "away": "Algeria",
+    "kickoff_utc": "2026-07-03T03:00:00+00:00",
+    "kickoff_local": "2026-07-03T11:00:00+08:00",
+    "xbet_active": true,
+    "xbet_suspended": false,
+    "market": "handicap",
+    "side": "home",
+    "line": -0.25,
+    "odds": 1.78,
+    "fair_prob": 0.4672,
+    "pinnacle_line": -0.5,
+    "xbet_line": -0.25,
+    "edge_goals": 0.25,
+    "edge_pct": null,
+    "edge_source": "line",
+    "signals": {
+      "signal": "flat",
+      "reverse_against": false,
+      "key_number_cross": false,
+      "shape": "odds_drift",
+      "tag": "平盤·主降客平"
+    },
+    "trajectory": {
+      "pinnacle": {
+        "shape": "odds_drift",
+        "tag": "平盤·主降客平",
+        "net_line_steps": 0,
+        "fav_swap_count": 0
+      },
+      "singbet": {
+        "shape": "odds_drift",
+        "tag": "平盤·主升客平",
+        "net_line_steps": 0,
+        "fav_swap_count": 0
+      }
+    },
+    "filtered": false,
+    "filter_reason": null,
+    "stake_units": 1,
+    "produced_at_local": "2026-07-02T12:59:26.733075+08:00",
+    "ai": {
+      "available": false,
+      "reason": "parse_error",
+      "produced_at": "2026-07-02T12:59:26.733112+08:00",
+      "summary_hash": "b8b84c6deb297d06d66e334c9cb94f260d750051"
+    }
+  }
+]

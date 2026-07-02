@@ -40,9 +40,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": -1.0,
-            "home_odd": 1.943,
-            "away_odd": 1.961,
-            "captured_ts": "2026-07-01T04:41:59.775Z"
+            "home_odd": 1.917,
+            "away_odd": 1.99,
+            "captured_ts": "2026-07-01T22:55:17.030Z"
           }
         },
         "segments": [
@@ -89,7 +89,14 @@
             "under_odd": 1.775,
             "captured_ts": "2026-06-28T11:24:42.180Z"
           },
-          "t72h": null,
+          "t72h": {
+            "target_ts": "2026-07-01T01:30:00+00:00",
+            "offset_sec": -30349,
+            "line": 2.25,
+            "over_odd": 2.02,
+            "under_odd": 1.877,
+            "captured_ts": "2026-06-30T17:04:10.235Z"
+          },
           "t24h": null,
           "t12h": null,
           "t6h": null,
@@ -99,9 +106,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": 2.25,
-            "over_odd": 2.02,
-            "under_odd": 1.877,
-            "captured_ts": "2026-06-30T17:04:10.235Z"
+            "over_odd": 1.99,
+            "under_odd": 1.9,
+            "captured_ts": "2026-07-01T22:55:17.030Z"
           }
         },
         "segments": [
@@ -132,7 +139,7 @@
           }
         ],
         "summary": {
-          "present_anchors": 0,
+          "present_anchors": 1,
           "shape": "insufficient",
           "tag": null,
           "trigger_anchors": []
@@ -168,8 +175,8 @@
             "offset_sec": null,
             "line": -1.0,
             "home_odd": 1.92,
-            "away_odd": 1.96,
-            "captured_ts": "2026-07-01T04:51:02.301Z"
+            "away_odd": 1.97,
+            "captured_ts": "2026-07-01T16:39:31.286Z"
           }
         },
         "segments": [
@@ -234,8 +241,8 @@
             "offset_sec": null,
             "line": 2.25,
             "over_odd": 1.98,
-            "under_odd": 1.88,
-            "captured_ts": "2026-07-01T04:51:02.301Z"
+            "under_odd": 1.9,
+            "captured_ts": "2026-07-02T01:20:59.485Z"
           }
         },
         "segments": [
@@ -275,5 +282,5 @@
     }
   },
   "closing_settled": false,
-  "pulled_at_local": "2026-07-01T13:19:54.980510+08:00"
+  "pulled_at_local": "2026-07-02T12:55:59.051310+08:00"
 }
