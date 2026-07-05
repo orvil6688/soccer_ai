@@ -1,12 +1,12 @@
 {
   "schema_version": 2,
-  "fixtureId": "id1000001653452513",
+  "fixtureId": "id1000001653452525",
   "tournamentId": 16,
   "sportId": 10,
-  "home": "Portugal",
-  "away": "Spain",
-  "kickoff_utc": "2026-07-06T19:00:00+00:00",
-  "kickoff_local": "2026-07-07T03:00:00+08:00",
+  "home": "France",
+  "away": "Morocco",
+  "kickoff_utc": "2026-07-09T20:00:00+00:00",
+  "kickoff_local": "2026-07-10T04:00:00+08:00",
   "books": [
     "pinnacle",
     "singbet"
@@ -18,19 +18,12 @@
           "initial": {
             "target_ts": null,
             "offset_sec": null,
-            "line": 0.5,
-            "home_odd": 1.97,
-            "away_odd": 1.934,
-            "captured_ts": "2026-07-03T02:22:18.719Z"
+            "line": -1.0,
+            "home_odd": 2.04,
+            "away_odd": 1.869,
+            "captured_ts": "2026-07-05T00:33:56.342Z"
           },
-          "t72h": {
-            "target_ts": "2026-07-03T19:00:00+00:00",
-            "offset_sec": -865,
-            "line": 0.5,
-            "home_odd": 1.97,
-            "away_odd": 1.934,
-            "captured_ts": "2026-07-03T18:45:34.854Z"
-          },
+          "t72h": null,
           "t24h": null,
           "t12h": null,
           "t6h": null,
@@ -39,10 +32,10 @@
           "closing": {
             "target_ts": null,
             "offset_sec": null,
-            "line": 0.5,
-            "home_odd": 1.98,
-            "away_odd": 1.925,
-            "captured_ts": "2026-07-05T03:14:13.526Z"
+            "line": -1.0,
+            "home_odd": 2.029,
+            "away_odd": 1.877,
+            "captured_ts": "2026-07-05T03:08:49.663Z"
           }
         },
         "segments": [
@@ -73,7 +66,7 @@
           }
         ],
         "summary": {
-          "present_anchors": 1,
+          "present_anchors": 0,
           "shape": "insufficient",
           "tag": null,
           "trigger_anchors": []
@@ -85,18 +78,11 @@
             "target_ts": null,
             "offset_sec": null,
             "line": 2.5,
-            "over_odd": 2.009,
-            "under_odd": 1.884,
-            "captured_ts": "2026-07-03T02:22:18.719Z"
+            "over_odd": 1.99,
+            "under_odd": 1.892,
+            "captured_ts": "2026-07-05T00:33:56.342Z"
           },
-          "t72h": {
-            "target_ts": "2026-07-03T19:00:00+00:00",
-            "offset_sec": -865,
-            "line": 2.5,
-            "over_odd": 1.892,
-            "under_odd": 2.0,
-            "captured_ts": "2026-07-03T18:45:34.854Z"
-          },
+          "t72h": null,
           "t24h": null,
           "t12h": null,
           "t6h": null,
@@ -106,9 +92,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": 2.5,
-            "over_odd": 1.84,
-            "under_odd": 2.06,
-            "captured_ts": "2026-07-05T03:14:13.526Z"
+            "over_odd": 1.99,
+            "under_odd": 1.9,
+            "captured_ts": "2026-07-05T03:08:49.663Z"
           }
         },
         "segments": [
@@ -139,7 +125,7 @@
           }
         ],
         "summary": {
-          "present_anchors": 1,
+          "present_anchors": 0,
           "shape": "insufficient",
           "tag": null,
           "trigger_anchors": []
@@ -152,19 +138,12 @@
           "initial": {
             "target_ts": null,
             "offset_sec": null,
-            "line": 0.5,
-            "home_odd": 1.95,
-            "away_odd": 1.89,
-            "captured_ts": "2026-07-03T03:03:21.623Z"
+            "line": -1.0,
+            "home_odd": 2.031,
+            "away_odd": 1.81,
+            "captured_ts": "2026-07-05T00:16:48.898Z"
           },
-          "t72h": {
-            "target_ts": "2026-07-03T19:00:00+00:00",
-            "offset_sec": -3575,
-            "line": 0.5,
-            "home_odd": 1.97,
-            "away_odd": 1.91,
-            "captured_ts": "2026-07-03T18:00:24.563Z"
-          },
+          "t72h": null,
           "t24h": null,
           "t12h": null,
           "t6h": null,
@@ -173,10 +152,10 @@
           "closing": {
             "target_ts": null,
             "offset_sec": null,
-            "line": 0.5,
+            "line": -1.0,
             "home_odd": 1.98,
-            "away_odd": 1.91,
-            "captured_ts": "2026-07-05T04:41:13.804Z"
+            "away_odd": 1.86,
+            "captured_ts": "2026-07-05T04:16:47.774Z"
           }
         },
         "segments": [
@@ -207,7 +186,7 @@
           }
         ],
         "summary": {
-          "present_anchors": 1,
+          "present_anchors": 0,
           "shape": "insufficient",
           "tag": null,
           "trigger_anchors": []
@@ -219,18 +198,11 @@
             "target_ts": null,
             "offset_sec": null,
             "line": 2.5,
-            "over_odd": 1.91,
-            "under_odd": 1.91,
-            "captured_ts": "2026-07-03T03:03:21.623Z"
+            "over_odd": 2.009,
+            "under_odd": 1.81,
+            "captured_ts": "2026-07-05T00:16:48.898Z"
           },
-          "t72h": {
-            "target_ts": "2026-07-03T19:00:00+00:00",
-            "offset_sec": -8802,
-            "line": 2.5,
-            "over_odd": 1.91,
-            "under_odd": 1.95,
-            "captured_ts": "2026-07-03T16:33:17.152Z"
-          },
+          "t72h": null,
           "t24h": null,
           "t12h": null,
           "t6h": null,
@@ -240,9 +212,9 @@
             "target_ts": null,
             "offset_sec": null,
             "line": 2.5,
-            "over_odd": 1.85,
-            "under_odd": 2.031,
-            "captured_ts": "2026-07-05T04:06:51.401Z"
+            "over_odd": 2.009,
+            "under_odd": 1.81,
+            "captured_ts": "2026-07-05T00:16:48.898Z"
           }
         },
         "segments": [
@@ -273,7 +245,7 @@
           }
         ],
         "summary": {
-          "present_anchors": 1,
+          "present_anchors": 0,
           "shape": "insufficient",
           "tag": null,
           "trigger_anchors": []
