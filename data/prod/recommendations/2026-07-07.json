@@ -10,8 +10,8 @@
     "market": "handicap",
     "side": "home",
     "line": 0.75,
-    "odds": 1.753,
-    "fair_prob": 0.4872,
+    "odds": 1.732,
+    "fair_prob": 0.4904,
     "pinnacle_line": 0.5,
     "xbet_line": 0.75,
     "edge_goals": 0.25,
@@ -66,26 +66,26 @@
     "market": "handicap",
     "side": "away",
     "line": -0.25,
-    "odds": 1.69,
-    "fair_prob": 0.4849,
+    "odds": 1.774,
+    "fair_prob": 0.4606,
     "pinnacle_line": 0.0,
     "xbet_line": -0.25,
     "edge_goals": 0.25,
     "edge_pct": null,
     "edge_source": "line",
     "signals": {
-      "signal": "flat",
-      "reverse_against": false,
+      "signal": "reverse",
+      "reverse_against": true,
       "key_number_cross": false,
-      "shape": "odds_drift",
-      "tag": "平盤·主降客升"
+      "shape": "fav_swap",
+      "tag": "平盤·水互換·主降客升"
     },
     "trajectory": {
       "pinnacle": {
-        "shape": "odds_drift",
-        "tag": "平盤·主降客升",
+        "shape": "fav_swap",
+        "tag": "平盤·水互換·主降客升",
         "net_line_steps": 0,
-        "fav_swap_count": 0
+        "fav_swap_count": 1
       },
       "singbet": {
         "shape": "fav_swap",
@@ -99,10 +99,16 @@
     "stake_units": 1,
     "produced_at_local": "2026-07-06T13:10:22.381965+08:00",
     "ai": {
-      "available": false,
-      "reason": "api_error",
-      "produced_at": "2026-07-06T13:10:22.382005+08:00",
-      "summary_hash": "f00a85ac2285a9f5ed227c82f4b09c3941db5333"
+      "available": true,
+      "reason": null,
+      "tag": "🤖 AI 推論",
+      "is_inference": true,
+      "model": "gemini-2.5-flash",
+      "produced_at": "2026-07-06T21:45:01.313792+08:00",
+      "summary_hash": "581fd139c2d2a858e2b11cc0f8fe611a9f4f17ca",
+      "confidence_reasoning": "此注handicap away 線-0.25 @ 1.774，對應的是讓球方比利時（away）。從Pinnacle和Singbet兩家盤口的軌跡來看，初始盤面都是平手盤（線+0），並且在開賽前72小時內，兩家公司都出現了主隊（USA）賠率下降、客隊（Belgium）賠率上升的趨勢，這意味著市場資金正在持續湧入USA，推動其成為熱門。到開賽前12小時和關盤，USA的賠率進一步下降，而Belgium的賠率則持續上漲。雖然盤口線一直維持在平手盤，但賠率的變動實質上反映了USA從一個相對不被看好的一方，逐漸轉變為市場追捧的熱門。我方選注為away -0.25，這是一個比利時贏球全贏、平局輸一半的盤口。市場資金追捧USA，會導致大量散戶湧向USA，而莊家卻只是維持平手盤線位，僅僅通過調整賠率來吸收USA的熱度，並沒有升盤來阻擋USA的資金。這可能意味著莊家在引導市場資金流向USA，為比利時的真實實力創造更好的賠付空間。鑑於Pinnacle和Singbet兩家主流莊家都呈現出一致的'fav_swap'（主隊賠率下降，客隊賠率上升，且有水互換）軌跡，且最終USA的賠率都壓到1.8x左右，而比利時的賠率則升到2.1x，這種情況下，比利時作為讓球方-0.25，在市場熱度完全倒向USA的情況下，反而有較高的賠付價值。",
+      "injury_news_inference": "從盤口軌跡來看，USA的賠率持續下降，成為熱門，而Belgium的賠率持續上升。這種情況下，如果沒有公開的陣容或傷病消息，莊家通常不會無緣無故地讓一支隊伍的熱度持續上升。因此，強烈推測在開賽前72小時到24小時之間，市場上可能出現了對USA有利的消息，例如USA某關鍵球員傷癒復出、主力狀態良好，或Belgium有重要球員受傷、狀態不佳的傳聞。這些消息可能並未被官方證實，但已經在後場（sharp money）或小道消息中流傳，並被莊家捕捉到，進而影響了賠率走勢。莊家通過降低USA賠率來吸引更多資金，可能是為了平衡風險，也可能是為了進一步確認這些消息的真實性，並為後續操作做準備。",
+      "market_reading": "莊家在此局的意圖非常明顯，就是要'洗盤'，並且是'誘盤'USA。初始盤口雙方實力接近，但隨著時間推進，兩家莊家都一致地讓USA的賠率一路下滑，從Pinnacle的1.884到1.819，Singbet的1.86到1.79，而Belgium的賠率則一路走高。這種主隊賠率持續下降、客隊賠率持續上升，且盤口線位（平手盤）始終不變的情況，典型地反映了莊家在引導散戶資金流向USA。散戶心理往往追逐熱門、追逐賠率下降的球隊，認為莊家降低賠率是因為該隊更可能獲勝。因此，大量的散戶資金會被吸引到USA。莊家維持平手盤線位，並沒有升盤到USA讓球，這使得USA的賠率雖然下降，但對於散戶來說仍然具有吸引力，形成了'低水方熱度'的局面。如果莊家真正看好USA，在熱度如此之高的情況下，應該會升盤讓USA讓球，以限制賠付並阻擋資金。然而，莊家只是壓低USA賠率，卻不升盤，這更像是為比利時贏球創造更好的賠付空間，讓比利時成為一個被市場低估的選項。這也可能是莊家嗅到了後場Sharp錢對USA的追捧，但莊家可能並不完全認同這種追捧，而是利用這種熱度來對沖風險或為自己創造利潤。因此，這更像是一個'反向操作'的機會，莊家在利用散戶追逐熱門的心理，為自己看好的另一方（比利時）製造更高的賠付。"
     }
   }
 ]
