@@ -1,0 +1,108 @@
+[
+  {
+    "fixtureId": "id1000001653452513",
+    "home": "Portugal",
+    "away": "Spain",
+    "kickoff_utc": "2026-07-06T19:00:00+00:00",
+    "kickoff_local": "2026-07-07T03:00:00+08:00",
+    "xbet_active": true,
+    "xbet_suspended": false,
+    "market": "handicap",
+    "side": "home",
+    "line": 0.75,
+    "odds": 1.753,
+    "fair_prob": 0.4872,
+    "pinnacle_line": 0.5,
+    "xbet_line": 0.75,
+    "edge_goals": 0.25,
+    "edge_pct": null,
+    "edge_source": "line",
+    "signals": {
+      "signal": "flat",
+      "reverse_against": false,
+      "key_number_cross": false,
+      "shape": "flat",
+      "tag": "平盤·主平客平"
+    },
+    "trajectory": {
+      "pinnacle": {
+        "shape": "flat",
+        "tag": "平盤·主平客平",
+        "net_line_steps": 0,
+        "fav_swap_count": 0
+      },
+      "singbet": {
+        "shape": "odds_drift",
+        "tag": "平盤·主平客升",
+        "net_line_steps": 0,
+        "fav_swap_count": 0
+      }
+    },
+    "filtered": false,
+    "filter_reason": null,
+    "stake_units": 1,
+    "produced_at_local": "2026-07-06T13:10:13.219275+08:00",
+    "ai": {
+      "available": true,
+      "reason": null,
+      "tag": "🤖 AI 推論",
+      "is_inference": true,
+      "model": "gemini-2.5-flash",
+      "produced_at": "2026-07-06T13:10:13.219325+08:00",
+      "summary_hash": "bb01ae8081c36640abaa4f88d9804dcef3d2a831",
+      "confidence_reasoning": "此注的信心理由來自於Pinnacle和Singbet兩家盤口在臨場前24小時到關盤階段的盤口變化。Pinnacle在t24h到closing階段，主隊賠率從1.961升至2.0，客隊賠率從1.943降至1.9。雖然盤口線保持在+0.5，但主隊賠率上升而客隊賠率下降，這顯示了市場對主隊的支持度在下降，或者說，莊家在引導資金流向客隊。而Singbet在t72h到t24h階段，主隊賠率從1.97升至1.97（持平），客隊賠率從1.91升至1.93，這是一個客隊賠率上升的趨勢，但t24h到closing階段，主隊賠率從1.97升至1.98，客隊賠率從1.93持平。兩家公司在臨場前的動作看似不同，但核心都是在+0.5的盤口線上進行賠率調整。Pinnacle最終關盤時主隊賠率2.0，客隊1.9，這暗示了莊家對客隊的看好程度略高。我的選注是handicap home 線0.75 @ 1.753，edge 0.25球，這意味著我認為主隊至少能輸一球，或者打平、贏球。考慮到兩家公司在+0.5盤口上對客隊的輕微傾向，我的0.75球優勢能夠提供一定的安全邊際。如果莊家真的看好客隊，他們通常會將盤口線提升，但兩家公司都穩穩地將盤口維持在+0.5，這讓我對主隊在+0.75的盤口上至少能守住一球小敗的結果有信心。",
+      "injury_news_inference": "從Pinnacle和Singbet的盤口軌跡來看，兩家公司都將盤口線穩定在+0.5，並未出現大幅度的盤口線調整。這通常意味著在賽前72小時到關盤期間，沒有出現足以影響比賽結果的關鍵傷病或陣容變動消息。如果某隊有核心球員受傷或禁賽，莊家很可能會調整盤口線以反映實力變化。目前賠率的微調更像是市場資金流向和莊家平衡風險的結果，而非基於突發的重大傷病消息。Pinnacle在臨場前主隊賠率輕微上升，客隊賠率輕微下降，這或許反映了市場上對客隊實力或狀態的某種 '非公開' 樂觀情緒，但這種情緒尚未強烈到足以觸發盤口線變動，因此推測並無關鍵性的傷病消息洩露。",
+      "market_reading": "這場比賽的盤口軌跡顯示出莊家精妙的平衡藝術。Pinnacle從t72h到t24h保持+0.5盤口和1.97/1.934的賠率，這是一種觀望姿態，等待市場資金的初步流向。到了t24h到closing，Pinnacle將主隊賠率從1.961升至2.0，客隊賠率從1.943降至1.9。這種 '平盤·主平客平'（實際是主升客降）的變化，意圖非常明顯：莊家在引導市場資金流向客隊。通過提高主隊賠率，他們讓一些看好主隊的閒家覺得賠率更好而入場，但同時降低客隊賠率，又讓那些猶豫不決的閒家覺得客隊是更穩妥的選擇。這是一種典型的 '誘盤' 手法，讓市場資金兩邊下注，以達到自身風險平衡。Singbet的軌跡略有不同，從t72h到t24h，主隊賠率持平而客隊賠率上升（awayup），這可能反映了初期市場對客隊的支持度略有下降，或者莊家在試探市場反應。然而，從t24h到closing，Singbet主隊賠率微升，客隊賠率持平。綜合來看，兩家公司都將盤口線穩定在+0.5，這本身就說明莊家認為兩隊實力差距不大，或者說，這個盤口線是他們認為最能吸引雙向資金的平衡點。Pinnacle在臨場前將客隊賠率壓低，可能是因為有後場的 'sharp money' 流向客隊，導致莊家需要調整賠率以平衡風險，或者是莊家主動營造客隊更 '受歡迎' 的假象，以吸引更多普通散戶下注客隊。對於散戶而言，看到客隊賠率在臨場前下降，往往會產生 '莊家看好客隊' 的錯覺，從而跟隨下注。然而，如果莊家真正看好客隊，他們可能更傾向於升盤，而非僅僅降賠。因此，這更像是一次精準的洗盤和誘盤操作，讓市場資金在+0.5的盤口上充分流動，莊家從中賺取水錢。"
+    }
+  },
+  {
+    "fixtureId": "id1000001653452515",
+    "home": "USA",
+    "away": "Belgium",
+    "kickoff_utc": "2026-07-07T00:00:00+00:00",
+    "kickoff_local": "2026-07-07T08:00:00+08:00",
+    "xbet_active": true,
+    "xbet_suspended": false,
+    "market": "handicap",
+    "side": "away",
+    "line": -0.25,
+    "odds": 1.69,
+    "fair_prob": 0.4849,
+    "pinnacle_line": 0.0,
+    "xbet_line": -0.25,
+    "edge_goals": 0.25,
+    "edge_pct": null,
+    "edge_source": "line",
+    "signals": {
+      "signal": "flat",
+      "reverse_against": false,
+      "key_number_cross": false,
+      "shape": "odds_drift",
+      "tag": "平盤·主降客升"
+    },
+    "trajectory": {
+      "pinnacle": {
+        "shape": "odds_drift",
+        "tag": "平盤·主降客升",
+        "net_line_steps": 0,
+        "fav_swap_count": 0
+      },
+      "singbet": {
+        "shape": "fav_swap",
+        "tag": "平盤·水互換·主降客升",
+        "net_line_steps": 0,
+        "fav_swap_count": 1
+      }
+    },
+    "filtered": false,
+    "filter_reason": null,
+    "stake_units": 1,
+    "produced_at_local": "2026-07-06T13:10:22.381965+08:00",
+    "ai": {
+      "available": false,
+      "reason": "api_error",
+      "produced_at": "2026-07-06T13:10:22.382005+08:00",
+      "summary_hash": "f00a85ac2285a9f5ed227c82f4b09c3941db5333"
+    }
+  }
+]
