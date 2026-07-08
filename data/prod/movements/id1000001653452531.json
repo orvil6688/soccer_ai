@@ -1,12 +1,12 @@
 {
   "schema_version": 2,
-  "fixtureId": "id1000001653452525",
+  "fixtureId": "id1000001653452531",
   "tournamentId": 16,
   "sportId": 10,
-  "home": "France",
-  "away": "Morocco",
-  "kickoff_utc": "2026-07-09T20:00:00+00:00",
-  "kickoff_local": "2026-07-10T04:00:00+08:00",
+  "home": "Argentina",
+  "away": "Switzerland",
+  "kickoff_utc": "2026-07-12T01:00:00+00:00",
+  "kickoff_local": "2026-07-12T09:00:00+08:00",
   "books": [
     "pinnacle",
     "singbet"
@@ -18,19 +18,12 @@
           "initial": {
             "target_ts": null,
             "offset_sec": null,
-            "line": -1.0,
-            "home_odd": 2.04,
-            "away_odd": 1.869,
-            "captured_ts": "2026-07-05T00:33:56.342Z"
+            "line": -0.75,
+            "home_odd": 1.99,
+            "away_odd": 1.917,
+            "captured_ts": "2026-07-07T23:32:02.431Z"
           },
-          "t72h": {
-            "target_ts": "2026-07-06T20:00:00+00:00",
-            "offset_sec": -15955,
-            "line": -1.0,
-            "home_odd": 2.06,
-            "away_odd": 1.854,
-            "captured_ts": "2026-07-06T15:34:04.063Z"
-          },
+          "t72h": null,
           "t24h": null,
           "t12h": null,
           "t6h": null,
@@ -39,10 +32,10 @@
           "closing": {
             "target_ts": null,
             "offset_sec": null,
-            "line": -1.0,
-            "home_odd": 2.09,
-            "away_odd": 1.833,
-            "captured_ts": "2026-07-08T03:59:00.995Z"
+            "line": -0.75,
+            "home_odd": 1.99,
+            "away_odd": 1.917,
+            "captured_ts": "2026-07-08T01:19:35.749Z"
           }
         },
         "segments": [
@@ -73,7 +66,7 @@
           }
         ],
         "summary": {
-          "present_anchors": 1,
+          "present_anchors": 0,
           "shape": "insufficient",
           "tag": null,
           "trigger_anchors": []
@@ -84,19 +77,12 @@
           "initial": {
             "target_ts": null,
             "offset_sec": null,
-            "line": 2.5,
-            "over_odd": 1.99,
+            "line": 2.25,
+            "over_odd": 2.0,
             "under_odd": 1.892,
-            "captured_ts": "2026-07-05T00:33:56.342Z"
+            "captured_ts": "2026-07-07T23:32:02.431Z"
           },
-          "t72h": {
-            "target_ts": "2026-07-06T20:00:00+00:00",
-            "offset_sec": -32097,
-            "line": 2.5,
-            "over_odd": 2.04,
-            "under_odd": 1.854,
-            "captured_ts": "2026-07-06T11:05:02.481Z"
-          },
+          "t72h": null,
           "t24h": null,
           "t12h": null,
           "t6h": null,
@@ -105,10 +91,10 @@
           "closing": {
             "target_ts": null,
             "offset_sec": null,
-            "line": 2.5,
-            "over_odd": 2.04,
-            "under_odd": 1.862,
-            "captured_ts": "2026-07-08T03:59:00.995Z"
+            "line": 2.25,
+            "over_odd": 2.009,
+            "under_odd": 1.884,
+            "captured_ts": "2026-07-08T01:19:35.749Z"
           }
         },
         "segments": [
@@ -139,7 +125,7 @@
           }
         ],
         "summary": {
-          "present_anchors": 1,
+          "present_anchors": 0,
           "shape": "insufficient",
           "tag": null,
           "trigger_anchors": []
@@ -152,19 +138,12 @@
           "initial": {
             "target_ts": null,
             "offset_sec": null,
-            "line": -1.0,
-            "home_odd": 2.031,
-            "away_odd": 1.81,
-            "captured_ts": "2026-07-05T00:16:48.898Z"
+            "line": -0.75,
+            "home_odd": 1.98,
+            "away_odd": 1.86,
+            "captured_ts": "2026-07-07T23:34:31.387Z"
           },
-          "t72h": {
-            "target_ts": "2026-07-06T20:00:00+00:00",
-            "offset_sec": -3278,
-            "line": -1.0,
-            "home_odd": 2.031,
-            "away_odd": 1.85,
-            "captured_ts": "2026-07-06T19:05:21.185Z"
-          },
+          "t72h": null,
           "t24h": null,
           "t12h": null,
           "t6h": null,
@@ -173,10 +152,10 @@
           "closing": {
             "target_ts": null,
             "offset_sec": null,
-            "line": -1.0,
-            "home_odd": 2.02,
-            "away_odd": 1.87,
-            "captured_ts": "2026-07-08T04:12:09.265Z"
+            "line": -0.75,
+            "home_odd": 1.9,
+            "away_odd": 1.94,
+            "captured_ts": "2026-07-08T04:12:44.192Z"
           }
         },
         "segments": [
@@ -207,7 +186,7 @@
           }
         ],
         "summary": {
-          "present_anchors": 1,
+          "present_anchors": 0,
           "shape": "insufficient",
           "tag": null,
           "trigger_anchors": []
@@ -218,19 +197,12 @@
           "initial": {
             "target_ts": null,
             "offset_sec": null,
-            "line": 2.5,
-            "over_odd": 2.009,
-            "under_odd": 1.81,
-            "captured_ts": "2026-07-05T00:16:48.898Z"
-          },
-          "t72h": {
-            "target_ts": "2026-07-06T20:00:00+00:00",
-            "offset_sec": 26307,
-            "line": 2.5,
+            "line": 2.25,
             "over_odd": 1.98,
-            "under_odd": 1.88,
-            "captured_ts": "2026-07-07T03:18:27.548Z"
+            "under_odd": 1.84,
+            "captured_ts": "2026-07-07T23:34:31.387Z"
           },
+          "t72h": null,
           "t24h": null,
           "t12h": null,
           "t6h": null,
@@ -239,10 +211,10 @@
           "closing": {
             "target_ts": null,
             "offset_sec": null,
-            "line": 2.5,
-            "over_odd": 1.98,
-            "under_odd": 1.9,
-            "captured_ts": "2026-07-08T03:58:03.109Z"
+            "line": 2.25,
+            "over_odd": 1.96,
+            "under_odd": 1.86,
+            "captured_ts": "2026-07-08T04:12:44.192Z"
           }
         },
         "segments": [
@@ -273,7 +245,7 @@
           }
         ],
         "summary": {
-          "present_anchors": 1,
+          "present_anchors": 0,
           "shape": "insufficient",
           "tag": null,
           "trigger_anchors": []
