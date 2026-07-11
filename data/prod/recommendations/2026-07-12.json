@@ -1,0 +1,58 @@
+[
+  {
+    "fixtureId": "id1000001653452529",
+    "home": "Norway",
+    "away": "England",
+    "kickoff_utc": "2026-07-11T21:00:00+00:00",
+    "kickoff_local": "2026-07-12T05:00:00+08:00",
+    "xbet_active": true,
+    "xbet_suspended": false,
+    "market": "handicap",
+    "side": "home",
+    "line": 0.75,
+    "odds": 1.671,
+    "fair_prob": 0.4954,
+    "pinnacle_line": 0.5,
+    "xbet_line": 0.75,
+    "edge_goals": 0.25,
+    "edge_pct": null,
+    "edge_source": "line",
+    "signals": {
+      "signal": "flat",
+      "reverse_against": false,
+      "key_number_cross": false,
+      "shape": "flat",
+      "tag": "平盤·主平客平"
+    },
+    "trajectory": {
+      "pinnacle": {
+        "shape": "flat",
+        "tag": "平盤·主平客平",
+        "net_line_steps": 0,
+        "fav_swap_count": 0
+      },
+      "singbet": {
+        "shape": "odds_drift",
+        "tag": "平盤·主平客升",
+        "net_line_steps": 0,
+        "fav_swap_count": 0
+      }
+    },
+    "filtered": false,
+    "filter_reason": null,
+    "stake_units": 1,
+    "produced_at_local": "2026-07-11T12:11:58.112603+08:00",
+    "ai": {
+      "available": true,
+      "reason": null,
+      "tag": "🤖 AI 推論",
+      "is_inference": true,
+      "model": "gemini-2.5-flash",
+      "produced_at": "2026-07-11T12:11:58.112656+08:00",
+      "summary_hash": "47d52ac875555ab8bdb67195ca1fa7bb2d845478",
+      "confidence_reasoning": "此注的信心度偏中等。Pinnacle和Singbet在開盤時都給出挪威受讓0.5球，且賠率接近，顯示莊家初步判斷英格蘭實力佔優，但優勢並非壓倒性。Pinnacle從t72h到closing的盤口變化不大，維持在+0.5球，賠率在2.0附近徘徊，最終收在1.97/1.934。這是一個相對穩定的盤口走勢，沒有明顯的資金異動跡象。Singbet雖然在t72h到t24h顯示awayup（客隊賠率上升），但整體盤口依然是平穩的+0.5球。我的選注是handicap home線0.75 @ 1.671，這比主流莊家的+0.5線高出0.25球的緩衝，且賠率1.671相對合理。雖然盤口沒有顯示挪威有特別強勁的支撐，但平穩的0.5球盤口和我的0.75球edge，提供了相對安全的空間。莊家對英格蘭的信心並未強到升盤，這間接支持了挪威在受讓0.75球下有一定機會。若英格蘭僅小勝一球，我的注碼依然能保本或獲利。",
+      "injury_news_inference": "從Pinnacle和Singbet的盤口軌跡來看，兩家公司都維持在挪威受讓0.5球的平穩盤口，且賠率波動不大。這種穩定性暗示在賽前72小時到閉盤期間，市場上並沒有關於關鍵球員傷病或陣容變化的重大消息流出，足以影響莊家對比賽結果的判斷。如果英格蘭有主力球員受傷，預期會看到挪威受讓賠率下降，或者盤口向挪威傾斜；反之，如果挪威有重要球員缺陣，則英格蘭賠率會被壓低，甚至可能升盤。目前盤口平穩，可以推斷雙方陣容相對完整，或至少沒有足以引發盤口劇烈變動的『意外』傷病消息。",
+      "market_reading": "這場比賽的盤口顯示莊家採取了一種『穩中求勝』的策略，並試圖平衡兩邊的資金流入。Pinnacle的『flat』形狀和『平盤·主平客平』標籤，以及Singbet的『odds_drift』但仍維持『平盤·主平客升』的標籤，都指向一個相對均衡的市場。莊家開出挪威受讓0.5球，這是一個典型的『生死盤』，英格蘭小勝一球則贏全，打平或輸球則挪威贏全。這樣的盤口設計，對於看好英格蘭的玩家而言，賠率1.9左右具有吸引力，會吸引一部分資金投入英格蘭獨贏；對於認為挪威有機會爆冷或者能守住平局的玩家，受讓0.5球的挪威同樣具有吸引力。莊家透過維持盤口穩定，避免了給任何一方過高的水位，從而控制風險。Singbet在後期出現的awayup（客隊賠率上升），可能是由於初期部分資金看好英格蘭，導致英格蘭賠率短暫被壓低，莊家為了吸引更多資金到英格蘭方，略微提升了其賠率，以達到兩邊資金平衡。這並非是消息走漏，而更像是一種微調，旨在誘導部分散戶入場，同時保持自身利潤空間。整體來看，沒有明顯的洗盤或誘盤跡象，市場對英格蘭的信心略高於挪威，但並非壓倒性，因此莊家選擇了穩定的0.5球盤口來平衡市場預期和資金流量。"
+    }
+  }
+]
