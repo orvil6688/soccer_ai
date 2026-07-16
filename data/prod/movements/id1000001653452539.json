@@ -1,0 +1,258 @@
+{
+  "schema_version": 2,
+  "fixtureId": "id1000001653452539",
+  "tournamentId": 16,
+  "sportId": 10,
+  "home": "France",
+  "away": "England",
+  "kickoff_utc": "2026-07-18T21:00:00+00:00",
+  "kickoff_local": "2026-07-19T05:00:00+08:00",
+  "books": [
+    "pinnacle",
+    "singbet"
+  ],
+  "trajectory": {
+    "pinnacle": {
+      "handicap": {
+        "anchors": {
+          "initial": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": -0.5,
+            "home_odd": 2.02,
+            "away_odd": 1.869,
+            "captured_ts": "2026-07-15T22:44:27.305Z"
+          },
+          "t72h": null,
+          "t24h": null,
+          "t12h": null,
+          "t6h": null,
+          "t1h": null,
+          "t30m": null,
+          "closing": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": -0.5,
+            "home_odd": 2.0,
+            "away_odd": 1.892,
+            "captured_ts": "2026-07-16T03:55:48.645Z"
+          }
+        },
+        "segments": [
+          {
+            "from": "t72h",
+            "to": "t24h",
+            "present": false
+          },
+          {
+            "from": "t24h",
+            "to": "t12h",
+            "present": false
+          },
+          {
+            "from": "t12h",
+            "to": "t6h",
+            "present": false
+          },
+          {
+            "from": "t6h",
+            "to": "t1h",
+            "present": false
+          },
+          {
+            "from": "t1h",
+            "to": "t30m",
+            "present": false
+          }
+        ],
+        "summary": {
+          "present_anchors": 0,
+          "shape": "insufficient",
+          "tag": null,
+          "trigger_anchors": []
+        }
+      },
+      "over_under": {
+        "anchors": {
+          "initial": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": 3.0,
+            "over_odd": 1.84,
+            "under_odd": 2.04,
+            "captured_ts": "2026-07-15T22:44:27.305Z"
+          },
+          "t72h": null,
+          "t24h": null,
+          "t12h": null,
+          "t6h": null,
+          "t1h": null,
+          "t30m": null,
+          "closing": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": 3.25,
+            "over_odd": 2.05,
+            "under_odd": 1.826,
+            "captured_ts": "2026-07-16T03:55:48.645Z"
+          }
+        },
+        "segments": [
+          {
+            "from": "t72h",
+            "to": "t24h",
+            "present": false
+          },
+          {
+            "from": "t24h",
+            "to": "t12h",
+            "present": false
+          },
+          {
+            "from": "t12h",
+            "to": "t6h",
+            "present": false
+          },
+          {
+            "from": "t6h",
+            "to": "t1h",
+            "present": false
+          },
+          {
+            "from": "t1h",
+            "to": "t30m",
+            "present": false
+          }
+        ],
+        "summary": {
+          "present_anchors": 0,
+          "shape": "insufficient",
+          "tag": null,
+          "trigger_anchors": []
+        }
+      }
+    },
+    "singbet": {
+      "handicap": {
+        "anchors": {
+          "initial": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": -0.5,
+            "home_odd": 2.0,
+            "away_odd": 1.88,
+            "captured_ts": "2026-07-15T22:41:27.165Z"
+          },
+          "t72h": null,
+          "t24h": null,
+          "t12h": null,
+          "t6h": null,
+          "t1h": null,
+          "t30m": null,
+          "closing": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": -0.5,
+            "home_odd": 1.96,
+            "away_odd": 1.92,
+            "captured_ts": "2026-07-16T02:47:05.591Z"
+          }
+        },
+        "segments": [
+          {
+            "from": "t72h",
+            "to": "t24h",
+            "present": false
+          },
+          {
+            "from": "t24h",
+            "to": "t12h",
+            "present": false
+          },
+          {
+            "from": "t12h",
+            "to": "t6h",
+            "present": false
+          },
+          {
+            "from": "t6h",
+            "to": "t1h",
+            "present": false
+          },
+          {
+            "from": "t1h",
+            "to": "t30m",
+            "present": false
+          }
+        ],
+        "summary": {
+          "present_anchors": 0,
+          "shape": "insufficient",
+          "tag": null,
+          "trigger_anchors": []
+        }
+      },
+      "over_under": {
+        "anchors": {
+          "initial": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": 3.0,
+            "over_odd": 1.88,
+            "under_odd": 1.98,
+            "captured_ts": "2026-07-15T22:41:27.165Z"
+          },
+          "t72h": null,
+          "t24h": null,
+          "t12h": null,
+          "t6h": null,
+          "t1h": null,
+          "t30m": null,
+          "closing": {
+            "target_ts": null,
+            "offset_sec": null,
+            "line": 3.25,
+            "over_odd": 2.031,
+            "under_odd": 1.83,
+            "captured_ts": "2026-07-16T01:47:20.701Z"
+          }
+        },
+        "segments": [
+          {
+            "from": "t72h",
+            "to": "t24h",
+            "present": false
+          },
+          {
+            "from": "t24h",
+            "to": "t12h",
+            "present": false
+          },
+          {
+            "from": "t12h",
+            "to": "t6h",
+            "present": false
+          },
+          {
+            "from": "t6h",
+            "to": "t1h",
+            "present": false
+          },
+          {
+            "from": "t1h",
+            "to": "t30m",
+            "present": false
+          }
+        ],
+        "summary": {
+          "present_anchors": 0,
+          "shape": "insufficient",
+          "tag": null,
+          "trigger_anchors": []
+        }
+      }
+    }
+  },
+  "closing_settled": false,
+  "pulled_at_local": "2026-07-16T11:58:30.537867+08:00"
+}
