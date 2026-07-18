@@ -1,0 +1,52 @@
+[
+  {
+    "fixtureId": "id1000001653452539",
+    "home": "France",
+    "away": "England",
+    "kickoff_utc": "2026-07-18T21:00:00+00:00",
+    "kickoff_local": "2026-07-19T05:00:00+08:00",
+    "xbet_active": true,
+    "xbet_suspended": false,
+    "market": "handicap",
+    "side": "away",
+    "line": -0.75,
+    "odds": 1.7,
+    "fair_prob": 0.4907,
+    "pinnacle_line": -0.5,
+    "xbet_line": -0.75,
+    "edge_goals": 0.25,
+    "edge_pct": null,
+    "edge_source": "line",
+    "signals": {
+      "signal": "flat",
+      "reverse_against": false,
+      "key_number_cross": false,
+      "shape": "insufficient",
+      "tag": null
+    },
+    "trajectory": {
+      "pinnacle": {
+        "shape": "insufficient",
+        "tag": null,
+        "net_line_steps": null,
+        "fav_swap_count": null
+      },
+      "singbet": {
+        "shape": "insufficient",
+        "tag": null,
+        "net_line_steps": null,
+        "fav_swap_count": null
+      }
+    },
+    "filtered": false,
+    "filter_reason": null,
+    "stake_units": 1,
+    "produced_at_local": "2026-07-18T11:53:33.846308+08:00",
+    "ai": {
+      "available": false,
+      "reason": "insufficient_window",
+      "produced_at": "2026-07-18T11:53:33.846364+08:00",
+      "summary_hash": "a2a16de6bb77242e75ca11914d436b4bb644ee21"
+    }
+  }
+]
